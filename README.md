@@ -18,7 +18,7 @@ The first search found a family of width-three formulas with k independent input
 | --- | --- |
 | [Correcting repeated variables](partial-multilinearization.md) | Truncated interpolation recovers the low-degree part under a bound on repeated variables. Row filtering and a random bounded-degree restriction force many exceptional supports in any small circuit for the cycle test. |
 | [Which coordinates must repeat?](powered-coordinates.md) | Embedding a bounded-degree cycle instance in the coordinates that never repeat bounds their number across the full polynomial. |
-| [Time cuts and changes to RAM histories](dynamic-cuts.md) | An exact bound on charges across intervals, a dynamic range-parity reduction, and a lower bound on the number of trace rows changed by one sign flip. |
+| [Time cuts and changes to RAM histories](dynamic-cuts.md) | An exact bound on charges across intervals, matching certificates for the 18-position packing optimum, a dynamic range-parity reduction, and a lower bound on the number of trace rows changed by one sign flip. |
 | [Boolean threshold accelerators](boolean-accelerators.md) | Two SAT threshold queries give a diagonal contradiction if long computations have short exact queries. Balanced partitions of ordered streams encounter a quantitative obstruction. |
 | [The cost of preserving accepting-path counts](linear-encoding.md) | Exact bit budgets for splitting a path count across positive SAT counts. Signed integer computations evade that obstruction when their final values stay bounded. |
 | [Rooted constraint systems](rooted-propagation.md) | A short list of paths refutes a constant-gap instance with deterministic transports or output-unique relations. Two reverse choices per edge already allow diameter-six examples with no small inconsistent edge set. |
@@ -54,6 +54,7 @@ Use Lean 4.19.0 with its bundled Std library and Python 3.11 or later. Run from 
 lean TraceCheck.lean
 lean Adaptive.lean
 lean CutPacking.lean
+lean TimeCutPacking.lean
 lean SwapCount.lean
 lean local_summary.lean
 lean RootTransport.lean
@@ -74,6 +75,7 @@ python3 propagation_experiment.py
 python3 residual_experiment.py
 python3 repeat_experiment.py
 python3 batch_probe_experiment.py
+python3 time_cut_experiment.py
 ```
 
 The Lean files state the parts checked by the kernel. The asymptotic constructions, reductions, and complexity estimates are manuscript arguments.

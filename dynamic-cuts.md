@@ -31,6 +31,33 @@ for k in range(2, N+1):
 assert tree[N] == 35
 ```
 
+**The finite optimum is 107/3.** A matching dual certificate puts nonnegative
+mass yᵢⱼ on each pair i<j, with total mass 107/3. For every adjacent rectangle
+L=[l,c), R=[c,r), it satisfies
+
+    Σ_{i∈L, j∈R} yᵢⱼ ≥ min(c−l,r−c).
+
+For any feasible packing with weights w_C, exchanging the finite sums gives
+
+    Σ_C w_C min(|L_C|,|R_C|)
+      ≤ Σ_{i<j} yᵢⱼ Σ_{C: (i,j)∈L_C×R_C} w_C
+      ≤ Σ_{i<j} yᵢⱼ = 107/3.
+
+Together with the displayed packing this proves optimality over all adjacent
+rectangles on 18 positions, including unequal interval lengths. The advantage
+over the best interval tree is exactly 2/3.
+
+[time_cut_experiment.py](time_cut_experiment.py) stores both certificates with
+weights multiplied by three. It checks all 153 pair loads, all 969 adjacent
+rectangles, the matching objectives, and the tree recurrence using integer
+arithmetic and the Python standard library. The dual certificate was found by
+linear programming; reproducing these checks needs no solver.
+[TimeCutPacking.lean](TimeCutPacking.lean) checks the certificate domains,
+congestion, dual coverage, and objectives by kernel reduction. The finite-sum
+argument above and the tree recurrence are not formalized there. This settles
+the finite optimization at N=18; it does not improve the asymptotic ceiling or
+give a time lower bound for SAT.
+
 **Test on an actual computation.** With fair independent bits xₜ, output the XOR of xₜ₋ᵈ over power-of-two delays d with t−d≥1. For *every* boundary with adjacent lengths l,r, put h=min(l,r) and let d be the largest power of two at most h. Restrict to the last d left inputs and first d right outputs. The dependency matrix has ones on the diagonal at delay d. Below the diagonal the delays lie strictly between d and 2d, so all entries there vanish. Even after fixing all other inputs the entropy of these d outputs is d≥h/2. At every equal dyadic cut the maximum h is attained. Power-of-two kernels and information transfer are classical in online convolution. [Clifford and Jalsenius](https://arxiv.org/abs/1101.0768)
 
 This binary problem admits O(N) actual online word operations. Pack blocks of B bits, with B a power of two of order log N that fits in one word. At the start of a block XOR the already stored input blocks at delays d≥B. Each such delay is a multiple of B, so one word per delay supplies every long-delay contribution to the new block. This takes O(log N) operations per block. For delays smaller than B maintain the last B input bits in a rolling word, mask the power-of-two positions, and use a parity lookup. A table for chunks of at most half log₂ N bits takes O(√N) initialization and a constant number of lookups per word. Emit the current bit immediately and then advance the rolling word. Absent initial input blocks contribute zero. Thus even simultaneously high entropy across every adjacent cut occurs in a linear-time online computation.
