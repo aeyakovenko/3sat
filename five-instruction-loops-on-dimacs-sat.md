@@ -4,7 +4,7 @@ Fix a little-endian word RAM with $w=16\lceil\log_2(N+2)/16\rceil$ and $N$ encod
 
 **Claim.** For every program with at most five static slots, every $C>0$ and every length threshold $B$, there is a valid formula of $N\ge B$ bits on which the program gives a wrong verdict or fails to finish within $CN^{11/10}$ steps. Thus a correct five-slot solver would have an unbounded worst-case time-to-$N^{11/10}$ ratio. In fact a number of the instruction allocations below fail irrespective of their runtime. This is a statement about a particular static instruction budget and a particular encoding. A fixed compiler can change that budget. Using injective, sparse decimal variable names in the hard virtual files improves the excluded clock to $O(N^{6/5})$ and covers other fixed logarithmic-width coefficients. The public scan also admits a direct communication bound, ruling out $O(N^{3/2-\epsilon})$ for every fixed $\epsilon>0$ when combined with the other five-slot cases. [Six-fifths refinement](sparse-decimal-names-in-dimacs.md) · [Near-three-halves proof](equality-communication-for-five-slot-sat.md)
 
-The full five-slot theorem is a manuscript argument. At arbitrary running time the existence question for the entire five-slot class remains unresolved. [Results without a time bound](five-slots-without-a-running-time-bound.md)
+The deadline theorem is a manuscript argument. A subsequent case split excludes all five-slot programs at the standard width even with unlimited running time, under the stated DIMACS grammar. [Proof without a time bound](five-instructions-cannot-decide-dimacs-sat.md)
 
 ## Two properties of the encoding
 

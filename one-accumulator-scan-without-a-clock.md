@@ -2,7 +2,7 @@
 
 Consider the [separate-operation RAM](five-instruction-loops-on-dimacs-sat.md) with $w=\Theta(\log N)$-bit words, $Q=2^w$, a fixed finite program and no stores. Suppose its recurrent control path, when exits are ignored, executes one original load $x\gets M[p]$, one cursor update $p\gets p+d\pmod Q$ for a fixed program integer $d$, and one numerical instruction updating an accumulator $y$. Their order is fixed and each occurs once per iteration. The accumulator operation is at most binary, with fixed operand roles among $y,x,p$, literals and registers fixed throughout the scan. Guards can compare the actual registers with one another or with literals and exit at any of the fixed sites. A bounded acyclic prologue and bounded acyclic exit paths are allowed. **No such program decides ordinary DIMACS SAT, even with unrestricted time.**
 
-This includes the no-STORE five-slot allocation of one LOAD, two numerical instructions and two branches when the numerical sites and loop have these roles. It leaves other cursor updates and other five-slot allocations open.
+This includes the no-STORE five-slot allocation of one LOAD, two numerical instructions and two branches when the numerical sites and loop have these roles. Other cursor updates and five-slot allocations are handled in the [complete case analysis](five-instructions-cannot-decide-dimacs-sat.md).
 
 ## One lap determines all future laps
 
