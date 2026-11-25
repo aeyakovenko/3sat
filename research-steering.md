@@ -2,6 +2,16 @@
 
 **25 November 2026.** An unconditional exclusion of deterministic linear time for ordinary explicit SAT on a logarithmic-word RAM with unrestricted workspace is the first milestone. The full objective requires a quadratic- or cubic-time exclusion. The project has no proof of any of those exclusions.
 
+The restricted result to referee first is the planar-tape bound. With a single unlimited nearest-neighbor planar work tape, random access to the read-only input and at most $T^{1/4+o(1)}$ writable random-access words, the journal excludes $O(n^{1.082})$ SAT time. The shorter chart iteration reaches $(1+\sqrt{43})/7\simeq1.07963$. The $1.082$ claim uses the longer schedule. Both arguments use the locally indexable reduction to SAT. The class can decide SAT by exhaustive assignment enumeration on its tape and can scan for parity with a counter and one bit in linear time. The reduction of arbitrary bounded nondeterministic acceptance to 3-SAT is where the argument ceases to apply to 2-SAT. Priority is unestablished. [Longer schedule](mixed-tape-williams-schedule.md) · [Shorter iteration](hybrid-tape-cut-trading.md)
+
+Before presenting a restricted-machine lower bound as evidence toward the time milestone, record three checks.
+
+1. Exhibit a correct algorithm for ordinary SAT in the exact machine class, with any finite running time.
+2. Exhibit a linear-time parity algorithm under the same input, instruction and workspace conventions.
+3. Identify the line of proof that fails with 2-SAT as the target. Record any easier problem for which the same argument gives the bound.
+
+Track executed steps per encoded bit or per input word separately from the number of stored instructions. A finite code census addresses the latter. No correct SAT program in the five-slot model has been exhibited here, and its finite census does not advance the unrestricted time milestone.
+
 The five-slot deadline census is complete on the sixteen-selector catalog. For ordinary DIMACS, the five-slot residual also excludes $O(n^{3/2-\epsilon})$ for every fixed $\epsilon>0$ in the separate-operation ISA. Equality on two private halves constrains the remaining public scan, while the other schedules reduce to the earlier cases. A sixth site permits controlling a scan while keeping a distinct data value. The one-register induction applies to unbounded code when stores at a given address can write only that address or a fixed word. [Five slots on ordinary inputs](five-instruction-loops-on-dimacs-sat.md) · [Communication bound](equality-communication-for-five-slot-sat.md) · [Every code size in the one-register model](arbitrary-code-size-with-one-mutable-register.md) · [Finite census](five-static-slots-on-four-input-words.md)
 
 The next-address simulation identifies a stopping point for generalizing the public-scan proof. The payload and compulsory write can stay fixed in form: adaptive reads alone suffice to simulate arbitrary data memory in four probes per guest access on the doubled-width host. [Adaptive head and guest simulation](adaptive-reads-and-compulsory-next-address-writes.md)
