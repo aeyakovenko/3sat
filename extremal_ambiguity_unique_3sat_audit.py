@@ -52,13 +52,37 @@ def abstract_maximum(m, base, two):
     return best
 
 
+def signed_optimum(twos, threes, budget):
+    if budget <= twos:
+        return 2 ** (twos - budget) * 3 ** threes
+    remaining = budget - twos
+    if remaining >= 2 * threes:
+        return 1
+    pairs, single = divmod(remaining, 2)
+    return 2 ** single * 3 ** (threes - pairs - single)
+
+
+def check_signed_envelope(m):
+    v, twos = optimizer(m)
+    for h in range(2 * m + 1):
+        predicted = signed_optimum(twos, m - v - twos, h)
+        candidates = []
+        for num_vars in range(3, m + 1):
+            triples = min(comb(num_vars, 3), m - num_vars)
+            candidates.append(signed_optimum(m - num_vars - triples, triples, h))
+        assert predicted == max(candidates)
+
+
 if __name__ == "__main__":
     # The five anchor pins and all ten positive triples also give the m=15 core.
     for m in range(15, 101):
         check_formula(m)
+    for m in range(16, 101):
+        check_signed_envelope(m)
     for m in range(16, 501):
         v, twos = optimizer(m)
         for base, two in ((3, 2), (7, 3)):
             assert abstract_maximum(m, base, two) == base ** (m - v - twos) * two ** twos
     print("Unique assignments and clause patterns checked for m=15..100.")
+    print("All signed-position budgets checked for m=16..100.")
     print("Both upper envelopes checked against all variable counts for m=16..500.")
