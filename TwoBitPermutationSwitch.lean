@@ -10,6 +10,23 @@ def rows (s x y h₀ h₁ h₂ h₃ h₄ h₅ : Bool) : List Nat :=
   [total h₀ (if s then h₂ else h₁) h₃, total h₁ h₅ h₀, total h₂ h₀ y,
    total h₃ h₄ h₂, total h₄ (if s then h₁ else h₂) x, total h₅ h₃ h₁]
 
+def forwardP (s : Bool) : List Nat :=
+  if s then [2,4,0,5,3,1] else [2,0,4,5,3,1]
+
+def forwardQ : List Nat := [1,5,3,0,2,4]
+
+/-- Evaluate from the actual forward arrays, locating each incoming incidence by value. -/
+def physicalRows (s x y : Bool) (h : Nat → Bool) : List Nat :=
+  (List.range 6).map fun i =>
+    let j := forwardQ.idxOf i
+    let q := if j = 5 then x else if j = 4 then y else h j
+    (h i).toNat + (h ((forwardP s).idxOf i)).toNat + q.toNat
+
+theorem rows_from_forward (s x y h₀ h₁ h₂ h₃ h₄ h₅ : Bool) :
+    rows s x y h₀ h₁ h₂ h₃ h₄ h₅ =
+      physicalRows s x y (fun i => [h₀,h₁,h₂,h₃,h₄,h₅][i]?.getD false) := by
+  cases s <;> rfl
+
 abbrev allowed (s x y : Bool) : Prop :=
   (x = false ∧ y = false) ∨ (x = s ∧ y = !s)
 
@@ -36,5 +53,10 @@ theorem exchange {α : Type} (base : α → Bool → Bool → Prop) (a b : α �
     exact ⟨i, outside, ok⟩
   · rintro ⟨i, outside, ok⟩
     exact ⟨i, a i, b i, outside, (boundary_iff _ _ _ _ _).mpr ⟨rfl, rfl, ok⟩⟩
+
+/-- At size three, exchanging the P-images of columns 0 and 1 cannot preserve
+distinctness of P-images and avoidance of the identity in both switch settings. -/
+theorem three_point_obstruction : ∀ a b : Fin 3,
+    a ≠ 0 → b ≠ 1 → b ≠ 0 → a ≠ 1 → a = b := by decide
 
 end TwoBitPermutationSwitch
