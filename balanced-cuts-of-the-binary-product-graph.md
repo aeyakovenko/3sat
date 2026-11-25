@@ -1,0 +1,40 @@
+# Balanced cuts of the binary matrix-product graph
+
+Let $A,B,C\in\mathbb F_2^{d\times d}$, and regard $G(A,B,C)=[AB=C]$ as a tensor with $3d^2$ binary indices and entries zero or one in an arbitrary field $K$. Fix **any** partition of these individual indices with at least $d^2$ on each side. The flattening $M$ has one row per left assignment, one column per right assignment, and scalar entry $G(A,B,C)$. Then
+
+$$
+   \operatorname{rank}_K M\ \ge\ 2^{\lceil\rho d^2\rceil},
+   \qquad \rho=(3\sqrt3-5)/2>0.098.
+$$
+
+The same partition is used throughout the argument. The permutation matrix used to specialize an input can depend on the partition. Multiplication in the test uses binary arithmetic. The rank of the resulting zero-one matrix can be taken over any field.
+
+## Permutation restrictions give identity submatrices
+
+Color a position by its side of the partition. Pinning $B$ to a permutation matrix with a one in position $(k,\pi(k))$ gives exactly the $d^2$ independent equalities $A_{ik}=C_{i,\pi(k)}$. If $m$ pairs have different colors, pin both ends of every same-color pair to zero. There remain $m$ freely chosen bits on each side. The restricted flattening is a permuted identity matrix of order $2^m$. Its rank lower-bounds the rank of the original flattening because the pinnings select rows and columns. Pinning $A$ to a permutation matrix instead gives the matchings $B_{kj}=C_{\sigma(k),j}$.
+
+Write $h$ for the expected *fraction* of crossing pairs in the first matching when $\pi$ is uniform, and $v$ for that fraction in the second when $\sigma$ is uniform. Thus $h$ is the probability of different colors at a uniform $A$-position and a uniform $C$-position of the same row, with independent column choices. The analogous description of $v$ uses $B,C$ and a common column. Linearity of expectation justifies using one permutation for the entire matrix.
+
+Let $a,b,c$ be the fractions of left positions in $A,B,C$, respectively, and put $s=h+v$. Then $1\le a+b+c\le2$. Comparing the marginals of paired positions gives $h\ge |a-c|$ and $v\ge |b-c|$, so
+
+$$
+    (1-s)/3\le c\le (2+s)/3 .
+$$
+
+Two independent uniform positions of $C$ have different colors with probability $2c(1-c)$. Connect them by visiting the corner with the row of the first and the column of the second. For the same-row step, comparison to a random $A$-position in that row bounds the disagreement probability by $2h$. For the same-column step, comparison to a random $B$-position in that column gives $2v$. The union bound yields $s\ge c(1-c)$.
+
+For $s\le1$, the interval for $c$ has endpoints summing to one. The quadratic $c(1-c)$ takes its minimum on that interval at either endpoint, giving $9s\ge (1-s)(2+s)$. Hence $s\ge 3\sqrt3-5$, also immediate if $s>1$. One of the two expected crossing fractions is at least $\rho$. A permutation in that family attains at least $\lceil\rho d^2\rceil$ crossings. The identity submatrix proves the claim.
+
+For a finite check, enumerate all ordered left/right colorings with $d^2$ through $2d^2$ left bits and try all permutations in both matchings. At $d=1$ there are six colorings. At $d=2$ there are 3,498. In both cases the minimum, over colorings, of the largest available crossing count is one. The calculation uses only comparisons of paired colors and verifies the integer bound at those sizes.
+
+## Consequences for representations
+
+If cutting internal wires of dimensions $q_1,\ldots,q_k$ separates a tensor network into the two sides of this exterior partition, summing over cut indices expresses $M$ as a sum of at most $\prod_i q_i$ rank-one matrices. Thus $\sum_i\log_2 q_i\ge\rho d^2$. An exact tensor network on a subcubic tree with the external bits as leaves has a single bond of dimension at least $2^{\rho d^2}$. Indeed, at a leaf-weighted centroid, one component has between one third and one half of the leaves. For binary wires in a general network, a partition separating those exterior bits must cross at least $\lceil\rho d^2\rceil$ wires. These facts also give an exponential width lower bound for ordered read-once decision diagrams in every variable order, since the number of distinct residual rows at a balanced prefix is at least their linear rank. [Contraction models and costs](https://theoryofcomputing.org/articles/v018a016/v018a016.pdf)
+
+**Planar volume.** An exact planar trivalent binary-wire network for this graph requires $\Omega(d^4)$ vertices. Attach one terminal of weight one at each exterior leg and give the original vertices weight zero. For $S$ total vertices, the weighted planar separator theorem gives $O(\sqrt S)$ vertices whose removal leaves each component with at most two thirds of the terminal weight. Treat the removed vertices as singleton pieces. A union of pieces has between one third and two thirds of the weight. A single piece in that interval suffices, and otherwise one can accumulate smaller pieces up to the lower threshold. Every crossing edge is incident to a removed vertex, giving $O(\sqrt S)$ crossing binary wires by trivalence. The identity-submatrix theorem requires at least $\rho d^2$ wires. Removing the $3d^2$ auxiliary terminals from the final count preserves the quartic asymptotic bound. [Lipton and Tarjan, weighted planar separator theorem](https://www.cs.princeton.edu/courses/archive/fall06/cos528/handouts/sepplanar.pdf)
+
+Classical matrix-multiplication area–time bounds in VLSI already use bisection and specialization of inputs. The model here counts vertices of an arbitrary planar bounded-degree tensor graph and permits field-valued tables and cancellation. The identity submatrix supplies the rank argument in this model. [Savage, *Area–time tradeoffs for matrix multiplication and related problems in VLSI models*](https://doi.org/10.1016/0022-0000(81)90029-5)
+
+A separate example shows why this criterion alone cannot force superlinear volume on unrestricted networks. Take a bounded-degree simple edge expander on $m$ vertices. Its independent-set predicate is an AND of $O(m)$ two-bit NANDs and has a deterministic circuit and a binary-wire tensor network of size $O(m)$. Every balanced vertex cut crosses $\Omega(m)$ edges and contains an induced matching of $\Omega(m)$ crossing edges. Greedily choosing a crossing edge prevents only $O(\Delta^2)$ later choices at maximum degree $\Delta$, by removing edges incident to either endpoint or its neighbors. Pin all unmatched bits to zero. The resulting flattening consists of copies of the rank-two NAND matrix in tensor product and has rank $2^{\Omega(m)}$ over every field. The graph tensor of the one-bit output has the same lower bound at balanced cuts by pinning that output to one. [Gabber and Galil on bounded-degree expanders](https://doi.org/10.1016/0022-0000(81)90040-4)
+
+The theorem concerns the exact Boolean verification predicate. The determinant of $AB-C$ tests singularity, and the formal matrix multiplication tensor has trilinear coefficients indexed by single matrix positions. The proof for the verification predicate uses permutation restrictions and elementary rank, independently of any matrix multiplication exponent. A superlinear vertex-volume lower bound for the bit-product graph and an unrestricted SAT RAM time lower bound both remain open in this argument. Priority of this particular balanced-cut statement has not been established.
