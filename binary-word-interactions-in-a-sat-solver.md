@@ -1,0 +1,48 @@
+# How many bits must a SAT solver combine from two words?
+
+Call an operation a **$b$-bit join** if it has the form $F(u,G(v))$, where $G$ takes at most $2^b$ values. The two functions are fixed by the instruction and public parameters. The import $G(v)$ must be computable from $v$ alone. For example, a one-bit inner product of two private words can require communication proportional to the word width, despite producing only one bit.
+
+## Native simulation with short imports
+
+Fix $\delta>0$, a finite RAM program, and word width $w=\Theta(\log(n+2))$ on inputs of $n$ bits. Assume indirect word reads and writes, copies, Boolean operations, shifts, comparisons, addition, subtraction, multiplication and unsigned division with a specified zero-divisor convention. Any $T$-step run admits a **uniform $O_\delta(T+n^\delta)$-step simulation**. At all sufficiently large lengths, after input-length-only preprocessing its operations consist of unary field extractions and copies, concatenations importing at most $\delta w$ bits, indirect word lookups and stores, and branches testing one bit. The scratch space is unrestricted. The construction applies to every fixed program in this instruction basis, in particular to any SAT algorithm.
+
+Take $b=\max(1,\lfloor\gamma\log_2(n+2)\rfloor)$ for a sufficiently small fixed rational $\gamma>0$. At all large lengths $b\le\delta w$, $3b+O(1)\le w$, and $2^{3b}\le O(n^\delta)$. Finite exceptions can be handled by a length-specific finite case or the width budget rounded up to one bit. Put $B=2^b$. Each source word has at most $d_0=\lceil w/b\rceil=O_\delta(1)$ base-$B$ digits. Generate length-only tables on at most three digits by enumerating keys on the original RAM. Ordinary native arithmetic costs a constant per entry. A fixed auxiliary bank or a constant number of extra host address bits keeps these tables disjoint from all guest addresses. Guest arithmetic is truncated to the original width. Field positions used by the simulator are public functions of the length.
+
+Extract digits with unary projections. Append one digit at a time to build a table key or repack one word. A table lookup can return a digit, carry, product or comparison flag, using a fixed number of output columns. Ripple carry and borrow, digitwise Boolean operations, lexicographic comparison and schoolbook multiplication need a bounded number of such steps. For a variable shift, first compare the amount with $w$ for the source's out-of-range convention. A valid amount is at most $w$ and eventually occupies a single digit. A public table splits it into a whole-digit offset and a residual shift. Choose among the bounded number of digit offsets and combine two adjacent digits using a table indexed by those digits and the residual shift. Indirect reads and stores use fully repacked guest words. The fixed control program can branch on flags and dispatch any legal guest jump among its finite instruction locations.
+
+For division by $D>0$, scale dividend and divisor by the same power of two so that the leading digit $v$ of the normalized $D$ satisfies $v\ge B/2$. A unary digit table gives this shift. In each long-division stage bring down one digit of the scaled dividend, giving $U<BD$ since the preceding remainder was smaller than $D$. If $D$ has $d$ digits, put $h=\lfloor U/B^{d-1}\rfloor$ and $q=\lfloor U/D\rfloor$. Then $h$ occupies at most two digits and $q<B$. From $qD\le U<(q+1)D$ and $v\le D/B^{d-1}<v+1$ we obtain
+
+$$
+ qv\le h<(q+1)(v+1),\qquad
+ q\le\widehat q=\min(B-1,\lfloor h/v\rfloor)\le q+2 .
+$$
+
+The upper estimate uses $(q+1)/v\le2$. Look up $\widehat q$ using the two digits of $h$ and the one digit $v$. Decrement while $\widehat qD>U$, at most twice, and subtract to obtain the new remainder. Scaling adds at most one digit to the dividend, so there are boundedly many stages. Test the zero divisor separately. The simulation constant depends on $\delta$, the width convention and the program. Constant-time arithmetic after preprocessing has prior work by Grandjean and Jachiet. [Grandjean and Jachiet](https://arxiv.org/abs/2206.13851)
+
+## A communication bound with indirect memory and public tables
+
+Give the machine two raw banks of $s$ words each, carrying $m$ private bits per word. Alice holds $x_1,\ldots,x_s$, Bob holds $y_1,\ldots,y_s$, with $x_i,y_i\in\{0,1\}^m$. Each initial input cell belongs to a single party. More generally, allow $O(s)$ designated private cells, each computed from one party's input by its own public recipe. All remaining initial memory, including arbitrary tables and advice, may depend on the length and public layout. Permit arbitrary unary operations and $b$-bit joins, arbitrary indirect memory and bounded branching on a single owned value. Each step makes constantly many accesses. For a deterministic machine computing
+
+$$
+ f(x,y)=\bigoplus_{i=1}^s\langle x_i,y_i\rangle_{\mathbb F_2}
+$$
+
+on every input, its worst-case number $t$ of post-preprocessing steps satisfies
+
+$$
+                 t\bigl(b+\log_2(t+s+2)\bigr)=\Omega(sm).
+$$
+
+Both parties track the public control and one owner for each register and stored value. An owner knows its value. Copies and unary operations preserve ownership. At a join across owners, send $G(v)$ to the owner of $u$, who now computes the result. An owner announces its branch choice in $O(1)$ bits. A store may have different address and value owners. Retain the value with its owner and publicly record that owner with a short tag for the address.
+
+Use **one** public random hash for the run, with pairwise collision probability at most $1/R$ for distinct addresses and $R\ge 8(Kt+1)^2$, where $K$ bounds accesses per step. Bank labels are included in addresses. At every access the address owner announces its hash. For each fixed input, the true deterministic trace is independent of this hash. Its at most $Kt$ accesses suffer a collision between unequal addresses with probability below $1/8$. In the absence of such a collision the latest matching store is identified exactly, including a store of zero. The loaded value inherits its writer's ownership without transmission. On a miss, the address owner can evaluate a public initial cell locally. For a private initial cell it announces its public recipe index among $O(s)$ choices, which assigns ownership to the party able to evaluate it. Communicate the miss type as well. Induction proves agreement until the first collision. Always cut off at $t$ steps and send the final bit. Arbitrary preprocessing of length-only tables costs no communication.
+
+This gives a bounded-error protocol with $C=O(1+t(b+\log(t+s+2)))$ bits. For completeness let $d=sm$ and $H_{xy}=(-1)^{x\cdot y}$ on concatenated $d$-bit strings. The rows of $H$ are orthogonal with squared norm $2^d$. Cauchy–Schwarz bounds the signed mass of any rectangle under uniform inputs by $2^{-d/2}$. Fix public coins attaining error at most $1/8$ under this distribution. At most $2^C$ transcript rectangles with public output bit must produce correlation at least $3/4$, so $C\ge d/2+\log_2(3/4)$. [Chor and Goldreich](https://doi.org/10.1137/0217015)
+
+## Realization by ordinary 3-CNF
+
+For every $i$ use public variables $X_{i,a}$ for $0\le a<2^m$ and $m$ data-bit variables $p_{ij}$. Include the public implications $X_{i,a}\Rightarrow(p_{ij}=a_j)$. The only private literal for this bank at $i$ is the choice of the positive variable $X_{i,x_i}$ in a forcing clause. Make the analogous right bank with $Y_{i,y_i}$ and $q_{ij}$. Fixed gate-equivalence clauses compute the AND of each $p_{ij},q_{ij}$ and the XOR of all resulting bits. Pin that output to one. Any model gives the selected bits. Conversely, setting other selector flags false extends the designated data bits to a model whenever the inner product is one.
+
+Use a public false variable as padding to make each private clause $(X_{i,x_i}\vee z\vee z)$, with $z$ forced false. Repeat literals to pad shorter public clauses. All variable indices have the same public field width. Separate the private fields by public records of at least one physical word so that no physical input word depends on both banks. This takes a bounded number of tautology clauses per private field when the word width is a fixed multiple of log encoded length and the identifier fields are of order $\log(s+2)+m$. A field occupies $O(1)$ words, even if it straddles a word boundary. Thus $O(s)$ public recipes specify every private input word, and a correct SAT solver on this family obeys the bound above. The public implications alone use $O(sm2^m)$ clauses. The communication estimate counts $sm$ private bits. It does not give a superlinear lower bound in the encoded formula length.
+
+Khanna, Putterman and Song bound the depth of comparison trees on opaque edge weights for minimum spanning tree, and invoke Pettie and Ramachandran's MST-specific conversion to uniform running time. A two-weight comparison may use both full words, even if its outcome is binary. Conversely, the RAM simulation above can use short joins at a data-dependent address and then retrieve a full word there. Any proposal to count such comparisons or large binary operations in a SAT solver must account for the conditional reads and writes. The normal form makes the permitted width of imports an arbitrarily small **fixed fraction** of $w$, with constants depending on that fraction. The communication theorem still charges $\log(t+s+2)$ bits per step for routing. Neither result supplies a superlinear SAT time bound on a standard RAM. [DLMST, Theorem 1.1 and §1.1](https://eccc.weizmann.ac.il/report/2026/339/download/) · [Pettie and Ramachandran](https://www.cs.utexas.edu/~vlr/papers/optmsf-jacm.pdf)
