@@ -312,3 +312,120 @@ theorem cpu_cannot_decide_packed_sample
   exact h a b
 
 end TwoPrivateProbeSites
+
+namespace FiveSlotScratchSample
+open TwoPrivateProbeSites
+
+/-- A public step or STORE can choose its successor registers and PC. The
+    LOAD reads through y into x and has one fixed successor PC. -/
+inductive Op (σ word : Type) where
+  | localStep (next : σ)
+  | store (value : word) (next : σ)
+  | load
+  | result (answer : Bool)
+
+variable {PC word : Type} [DecidableEq word]
+abbrev Reg (PC word : Type) := Registers PC word
+abbrev State (PC word : Type) := Reg PC word × Option word
+
+/-- A single fixed writable cell is represented exactly by its last payload.
+    No stores change the original memory outside that address. -/
+def savedAt (scratch : word) (saved : Option word) (addr : word) : Option word :=
+  if addr = scratch then saved else none
+
+variable (cpu : Reg PC word → Op (Reg PC word) word) (resume : PC) (scratch : word)
+
+/-- The Boolean is a trace predicate, unavailable to instructions. It starts
+    true, is cleared by LOAD and is set by STORE. Thus finite halts require
+    a STORE strictly between each two successive LOADs, and nowhere else. -/
+inductive Halts (original : word → word) :
+    Reg PC word → Option word → Bool → Bool → Prop where
+  | localStep (op : cpu r = .localStep r') (tail : Halts original r' saved ready answer) :
+      Halts original r saved ready answer
+  | store (op : cpu r = .store value r') (tail : Halts original r' (some value) true answer) :
+      Halts original r saved ready answer
+  | load (op : cpu r = .load)
+      (tail : Halts original
+        ⟨resume, (savedAt scratch saved r.y).getD (original r.y), r.y⟩ saved false answer) :
+      Halts original r saved true answer
+  | result (op : cpu r = .result answer) : Halts original r saved ready answer
+
+private def afterLoad (pc : PC) (addr value : word) : State PC word :=
+  (⟨pc, value, addr⟩, none)
+
+private def project (r : Reg PC word) (saved : Option word) (ready : Bool) : State PC word :=
+  (r, if ready then saved else none)
+
+variable (base : word → word) (A B : word) (wordA wordB : Bool → word)
+
+/-- On a real trace, any scratch value discarded at a LOAD will be
+    overwritten before it can be read. A hit on a stored scratch value
+    is therefore a public step even when the scratch is A or B. -/
+private def contract (s : State PC word) : PublicOp (State PC word) :=
+  match cpu s.1 with
+  | .localStep r => .internal (r, s.2)
+  | .store v r => .internal (r, some v)
+  | .result ans => .result ans
+  | .load =>
+    match savedAt scratch s.2 s.1.y with
+    | some v => .internal (afterLoad resume s.1.y v)
+    | none =>
+      if s.1.y = A then .first
+      else if s.1.y = B then .second
+      else .internal (afterLoad resume s.1.y (base s.1.y))
+
+private theorem replay {a b : Bool} {r : Reg PC word} {saved : Option word} {ready answer : Bool}
+    (h : Halts cpu resume scratch (twoWordMemory base A B wordA wordB a b) r saved ready answer) :
+    MachineHalts (contract cpu resume scratch base A B)
+      (fun bit => afterLoad resume A (wordA bit)) (fun bit => afterLoad resume B (wordB bit))
+      a b (project r saved ready) answer := by
+  induction h with
+  | localStep op _ ih =>
+    exact .internal (by simp [contract, project, op]) ih
+  | store op _ ih =>
+    exact .internal (by simp [contract, project, op]) ih
+  | result op => exact .result (by simp [contract, project, op])
+  | @load r saved answer op _ ih =>
+    cases hs : savedAt scratch saved r.y with
+    | some val =>
+      apply MachineHalts.internal (r := afterLoad resume r.y val) (by simp [contract, project, op, hs])
+      simpa [project, afterLoad, hs] using ih
+    | none =>
+      by_cases ha : r.y = A
+      · have hsA : savedAt scratch saved A = none := ha ▸ hs
+        apply MachineHalts.first (by simp [contract, project, op, ha, hsA])
+        simpa [project, afterLoad, twoWordMemory, ha, hsA] using ih
+      · by_cases hb : r.y = B
+        · have hba : B ≠ A := by simpa only [hb] using ha
+          have hsB : savedAt scratch saved B = none := hb ▸ hs
+          apply MachineHalts.second (by simp [contract, project, op, hb, hsB, hba])
+          simpa [project, afterLoad, twoWordMemory, hb, hsB, hba] using ih
+        · apply MachineHalts.internal (r := afterLoad resume r.y (base r.y))
+            (by simp [contract, project, op, hs, ha, hb])
+          simpa [project, afterLoad, hs, twoWordMemory, ha, hb] using ih
+
+/-- All scratch addresses are covered, including the two private words. -/
+theorem cannot_decide_eight (start : Reg PC word) :
+    ¬ (∀ a b, Halts cpu resume scratch (twoWordMemory base A B wordA wordB a b)
+      start none true (satEight a b)) := by
+  intro h
+  apply machine_cannot_decide_eight (contract cpu resume scratch base A B)
+    (fun bit => afterLoad resume A (wordA bit)) (fun bit => afterLoad resume B (wordB bit))
+    (project start none true)
+  exact fun a b => replay cpu resume scratch base A B wordA wordB (h a b)
+
+/-- The literal 87-byte little-endian DIMACS samples defeat every program
+    in the class at every choice of its fixed scratch address. -/
+theorem cannot_decide_packed_sample
+    (machine : Reg PC Nat → Op (Reg PC Nat) Nat) (resumePC : PC)
+    (addr : Nat) (start : Reg PC Nat) :
+    ¬ (∀ a b, Halts machine resumePC addr (sampleMemory a b)
+      start none true (satEight a b)) := by
+  intro h
+  apply cannot_decide_eight machine resumePC addr (sampleMemory true true) 34 39
+    (fun bit => sampleMemory bit true 34) (fun bit => sampleMemory true bit 39) start
+  intro a b
+  rw [← sample_layout a b]
+  exact h a b
+
+end FiveSlotScratchSample
