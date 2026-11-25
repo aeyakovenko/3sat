@@ -49,10 +49,10 @@ def main():
         preserved.add(sum(1 << i for i in keep))
     assert len(positive) == 80 and len(negative) == 176
     assert len(unary) == 18 and len(preserved) == 427
-    for predicates in combinations_with_replacement(range(len(unary)+len(OPS)), 3):
+    for predicates in combinations_with_replacement(range(len(unary)+len(OPS)), 4):
         required = sum(1 << i for i in set(predicates))
         assert any(c & required == required for c in preserved)
-    print("80 SAT, 176 UNSAT; 427 closure signatures defeat all three-predicate selections.")
+    print("80 SAT, 176 UNSAT; 427 closure signatures defeat all four-predicate selections.")
 
 
 if __name__ == '__main__':

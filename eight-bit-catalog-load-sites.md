@@ -56,3 +56,5 @@ Reproduce the comparison closure and both C++ cases with:
     /tmp/eight-bit-store
 
 This establishes a finite failure for the full stated static class at multiplier one. The minimum number of executed steps with unrestricted code at eight selector bits, and the asymptotic time for explicit SAT, are separate questions.
+
+At six stored instructions the one-comparison allocation also fails, even with arbitrary indirect memory operations among its five data sites. The full six-slot case remains open. [Finite witness suite for a single comparison](single-comparison-at-eight-selector-bits.md)
