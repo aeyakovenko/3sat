@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from itertools import combinations, product
+from math import inf, prod
 
 
 def parity(word):
@@ -119,6 +120,98 @@ def check_source_families():
     return cases
 
 
+def physical_link_cost(literal, before, after):
+    counts = (literal + (1 - before) + after, literal + before + (1 - after))
+    if 0 in counts:
+        return inf
+    return sum(count % 2 == 0 for count in counts)
+
+
+def physical_cycle_minimum(literals, width, link_cost):
+    # Minimize over actual state paths, keeping both possible initial bits.
+    # The only allowed terminal bit is the complement of the initial bit.
+    best = inf
+    for initial in (0, 1):
+        costs = [0 if bit == initial else inf for bit in (0, 1)]
+        for j in range(width):
+            lit = (literals >> j) & 1
+            costs = [
+                min(costs[old] + link_cost[lit, old, new] for old in (0, 1))
+                for new in (0, 1)
+            ]
+        best = min(best, costs[1 - initial])
+    return best
+
+
+def check_minimum_defects(tables):
+    link_cost = {}
+    for lit, before, after in product((0, 1), repeat=3):
+        cost = physical_link_cost(lit, before, after)
+        inc = before ^ after
+        assert cost == (inf if inc > lit else 2 * (lit - inc))
+        link_cost[lit, before, after] = cost
+        if after == (before ^ lit):
+            # Each exact XOR link excludes the four wrong local triples.
+            actual = (lit, before, after)
+            for bad in product((0, 1), repeat=3):
+                if bad[2] != (bad[0] ^ bad[1]):
+                    count = sum(a != b for a, b in zip(actual, bad))
+                    assert count % 2 == 1
+
+    cycle_cost = {}
+    for groups in (3, 4):
+        width = 3 * groups
+        costs = [
+            physical_cycle_minimum(lit, width, link_cost)
+            for lit in range(1 << width)
+        ]
+        for lit, cost in enumerate(costs):
+            assert cost == (inf if lit == 0 else 2 * (1 - parity(lit)))
+        cycle_cost[groups] = costs
+
+    # Every row in a block reads the same raw encodings for the three source
+    # bits and, when guarded, the same three activation shares.
+    logical_costs = {}
+    for raw in range(1 << 12):
+        logical = decode(raw, 4)
+        raw_source = sum(((raw >> (4 * j)) & 7) << (3 * j) for j in range(3))
+        per_clause = []
+        for bad in range(8):
+            guarded = parity(bad) == 0
+            groups = 4 if guarded else 3
+            encoded = raw if guarded else raw_source
+            forbidden = tables[groups][bad | (8 if guarded else 0)]
+            # Fix the raw shares; state variables in different cycles are private.
+            per_clause.append(sum(cycle_cost[groups][encoded ^ p] for p in forbidden))
+        assert logical_costs.setdefault(logical, per_clause) == per_clause
+
+    cases = 0
+    for mask in range(256):
+        clauses = [bad for bad in range(8) if mask >> bad & 1]
+        expected = min(
+            (sum(2 * 4**(3 if parity(bad) else 4)
+                 for bad in clauses if not parity(x ^ bad))
+             for x in range(8) if x not in clauses),
+            default=inf,
+        )
+        if mask == (255 ^ (1 << 1)):
+            assert expected == 384
+        block_cost = [
+            min(sum(logical_costs[x | (active << 3)][bad] for bad in clauses)
+                for x in range(8))
+            for active in (0, 1)
+        ]
+        costs = [0, inf]
+        for _ in range(8):
+            costs = [
+                min(costs[old] + block_cost[old ^ new] for old in (0, 1))
+                for new in (0, 1)
+            ]
+            assert costs[1] == expected
+            cases += 1
+    return cases
+
+
 def prefix_characters(groups):
     first = [1 << (2 * j) for j in range(groups)]
     second = [a << 1 for a in first]
@@ -139,6 +232,51 @@ def character_sums(states, width):
     # integer, so that a population count gives its exact pair disagreement.
     columns = [sum(((y >> j) & 1) << i for i, y in enumerate(states)) for j in range(width)]
     return [len(states) - 2 * (a ^ b).bit_count() for a, b in combinations(columns, 2)]
+
+
+def check_uniform_models(tables):
+    checked = 0
+    for groups in (3, 4):
+        width = 3 * groups
+        scale = 1 << width
+        extensions = [0] * scale
+        for delta, words in tables[groups].items():
+            if not delta:
+                continue
+            moments = [0] * width
+            for literals in words:
+                ones = [0] * width
+                count = 0
+                increments = literals
+                while increments:
+                    if parity(increments):
+                        count += 1
+                        support = increments
+                        while support:
+                            low = support & -support
+                            ones[low.bit_length() - 1] += 1
+                            support -= low
+                    increments = (increments - 1) & literals
+                extensions[literals] = 2 * count  # Two possible initial states.
+                assert extensions[literals] == cycle_count(literals, width)
+                for edge in range(width):
+                    moments[edge] += (count - 2 * ones[edge]) * (scale // count)
+            for edge, moment in enumerate(moments):
+                single = int((1 << edge) in words)
+                assert moment == (len(words) // 2 - single) * scale
+                checked += 1
+            # For any fixed raw encoding and forbidden decoded tuple with
+            # difference delta, xor with its forbidden patterns gives this fiber.
+            assert prod(extensions[word] for word in words) == 1 << (width * 4**groups // 2)
+        # Confirm the fiber translation on every raw encoding of a permitted
+        # tuple, with one fixed forbidden tuple. Other tuples translate by XOR.
+        bad = 1
+        supports = {delta: set(words) for delta, words in tables[groups].items()}
+        for raw in range(scale):
+            delta = decode(raw, groups) ^ bad
+            if delta:
+                assert {raw ^ p for p in supports[bad]} == supports[delta]
+    return checked
 
 
 def check_moments(tables):
@@ -214,12 +352,15 @@ def main():
     cycles, assignments = check_local_cycles()
     patterns, rows = check_clauses(tables)
     families = check_source_families()
+    defect_cases = check_minimum_defects(tables)
+    uniform_edges = check_uniform_models(tables)
     local, activations, mixtures = check_moments(tables)
     print(f"{patterns} forbidden patterns, {rows} raw clause evaluations, "
           f"{cycles} full cycle truth tables with {assignments} satisfying extensions, "
           f"{families} source-family/block counts, {local} nonzero local parity fibers, "
           f"{activations} global single-activation fibers, {mixtures} clause mixtures; "
-          f"interval masks through 16 groups")
+          f"interval masks through 16 groups, {defect_cases} exact defect minima "
+          f"(seven-clause sentinel: 384), {uniform_edges} uniform-model edge moments")
 
 
 if __name__ == "__main__":
