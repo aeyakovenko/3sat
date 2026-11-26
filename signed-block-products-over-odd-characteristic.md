@@ -93,3 +93,43 @@ $$
 for the binary multiplication graph and $\operatorname{char}F\ne2$. In particular, a procedure extracting a formal bilinear rank decomposition from **every** exact bit network for that graph cannot guarantee only a polylogarithmic multiplicative loss. More generally a universal inequality $\operatorname{rank}_F(T_d)\le d^{o(1)}V_F(G_d)^\gamma$ would require $\gamma\ge45/44$. This comparison uses both directions of the upstream rank result, while the graph network construction itself only used its upper bound. The formalization checks the signed-binomial identities; the signing, block layout and total volume are manuscript proofs. [Upstream rank corollary](https://github.com/openai/math/blob/3344da59991ed94f9ba711217b29c1d760badfa6/preprints/The-matrix-multiplication-exponent-is-nine-fourths-November-24-2026/build/intro.tex) · [Lean coefficient check](upstream-checks/SignedBinomialEvaluation.lean)
 
 A graph-volume lower exponent $2+\delta$ would exclude SAT clocks only strictly below $1+\delta/2$ by the existing transfer. This upper bound forces $\delta\le1/5$ for this graph. In particular the endpoint $11/10$ itself cannot be excluded by that exponent comparison. No lower bound on the execution time of an unrestricted SAT solver follows from the construction.
+
+## A mod-four determinant attempt
+
+Use $Z_{ki}$ as the test bit for output entry $(i,k)$, a fixed transpose of the preceding test bank. For binary matrices regarded temporarily as integer matrices, form the following integer matrix of side $3d$.
+$$
+ K=\begin{pmatrix}I&A&0\\0&I&B\\2Z&0&I\end{pmatrix}.
+$$
+Eliminating the first two identity blocks gives $\det K=\det(I+2ZAB)$. The Leibniz expansion modulo four retains its constant and linear terms, so $\det K\equiv1+2\operatorname{tr}(ZAB)\pmod4$. In particular the odd-unit character $\chi_4(1)=1$, $\chi_4(3)=-1$ gives *exactly* the desired binary trace sign. The matrix has $O(d^2)$ explicitly supplied coefficients. Computing this character with $d^{2+o(1)}$ binary trivalent sites would give the same exponent for the graph via the inverse Walsh transform. Computing the determinant in the coefficient field alone supplies a different operation. In particular odd integers agreeing in a finite odd field can have opposite characters modulo four.
+
+A candidate was a finite Gauss sum on $O(d)$ auxiliary coordinates over a fixed finite ring, with each matrix supplying quadratic couplings to those coordinates. The following elementary obstruction tests even arbitrary bank-local couplings. Suppose the resulting scalar is
+$$
+       \sum_{t\in T} f_t(A)g_t(B)h_t(Z)
+$$
+over any field with $2\ne0$. At $Z=I$ the target matrix indexed by $A,B$ is a Walsh matrix of order $2^{d^2}$, up to transposing the bits of one bank. It has full rank since its square after this reindexing is $2^{d^2}I$. Each summand has rank at most one. Thus $|T|\ge 2^{d^2}$. This applies to the Gauss sum because fixing its auxiliary coordinates leaves exactly three factors when its exponent is a sum of separate bank contributions. Adjoining a root of unity to the coefficient field preserves the obstruction.
+
+Thus a constant number of length-$d$ auxiliary vectors with bank-local couplings cannot implement this identity. A network with interacting banks or more latent bits is outside this calculation. The determinant attempt leaves the near-quadratic upper bound open.
+
+## A cost bound for static signings of the block decomposition
+
+The raw $d^{5/2}$ estimate above survives a simple restriction. Set every external macro block to zero except for one compatible triple of blocks. An odd number of rank terms see that triple, since its grid-tensor coefficient is one in $\mathbb F_2$. For each inner triangle the integer coefficient is now a sum of an odd number of signs, hence has absolute value at least one. The same second- and fourth-moment proof gives signed range $\Omega(m^{5/2})$ for square inner blocks of side $m$, even after arbitrary additive corrections that each see at most two banks.
+
+One can also charge for the number of distinct triples of linear forms. Here is the resulting limit for the implementation in this note. Assume it materializes a separate table bit per rank index and inner position in each transformed bank, and allocates at least one slot per unit of worst-case signed range. With any fixed signing, the cost is at least
+$$
+                  d^{3\omega/(\omega+1)-o(1)}
+                       =d^{27/13-o(1)}\qquad (\omega=9/4).
+$$
+The upper exponent of this implementation remains $11/5$. This lower bound concerns its explicit costs. An arbitrary network computing the same graph may share table entries, query implicit forms or evaluate the parity differently. [Upstream square rank theorem supplying $\omega$](https://github.com/openai/math/blob/3344da59991ed94f9ba711217b29c1d760badfa6/preprints/The-matrix-multiplication-exponent-is-nine-fourths-November-24-2026/build/intro.tex)
+
+Let the inner dimensions be $I,J,K$, cyclically named so $I$ is smallest. At every inner position let $a_{ih},y_{hk},z_{ki}$ denote the vectors of original bits indexed by all macro blocks in the corresponding bank. Let $R$ count the rank labels with three nonzero binary linear forms. Among their triples of coefficient vectors $(u_r,v_r,w_r)$, let $R_0$ count the distinct triples occurring an odd number of times. These $R_0$ triples alone still decompose the binary grid tensor, since repetitions cancel in pairs. Put $\chi_u(a)=(-1)^{u\cdot a}$. Center the signed integer lift separately in each bank by subtracting its average over that entire bank with the others held fixed. Each centering multiplies the supremum norm by at most two. It kills any term independent of that bank. Applied in all three banks, this operation also removes any additive two-bank corrections and yields $-1/8$ times
+$$
+   H=\sum_{i,h,k,r}\sigma_{rihk}\chi_{u_r}(a_{ih})
+                     \chi_{v_r}(y_{hk})\chi_{w_r}(z_{ki}).
+$$
+Thus the signed range, measured by maximum absolute residual, is at least $\|H\|_\infty/64$.
+
+For fixed $h,k$, draw all $a,z$ independently and uniformly. At $y_{hk}=y$ let $W_i(y)$ be the sum over $r$ at this $i,h,k$, and $F(y)=\sum_i W_i(y)$. For fixed $y$, the $W_i$ are independent, centered, and bounded in magnitude by $R$. Averaging $\mathbb E_{a,z} W_i(y)^2$ over uniform $y$ gives a sum of squared grouped coefficients by Walsh orthogonality in the three independent vectors. Each of the $R_0$ odd groups contributes at least one, for every $i$. Hence some fixed $y_*$ has $V=\mathbb E_{a,z}F(y_*)^2\ge I R_0$.
+
+If $R^2\le I R_0$, independence and $|W_i|\le R$ give $\mathbb E F(y_*)^4\le R^2V+3V^2\le4V^2$. Hölder gives $\mathbb E|F(y_*)|\ge\sqrt V/2$. For every realization of $a,z$, the average of $F(y)$ over $y$ is zero because every $v_r$ is nonzero. Therefore $\max_yF(y)\ge\max(0,F(y_*))$, whose expectation is at least $\sqrt V/4$ since $F(y_*)$ is centered. The maximizing $y_{hk}$ can be chosen separately at every one of the $JK$ positions. Linearity of expectation over the shared $a,z$ proves $\|H\|_\infty\ge JK\sqrt{I R_0}/4$. In the other case $R^2>I R_0$, the explicit table for this bank already costs $RJK>JK\sqrt{I R_0}$. In both cases the total cost is $\Omega(JK\max\{R_0,\sqrt{I R_0}\})$.
+
+For grid dimensions $B_j=d^{x_j}$, write $S=x_1+x_2+x_3$, $M=\max_j x_j$, and $B_1 I=B_2 J=B_3 K=d$. Cyclically tensoring the $R_0$-term decomposition gives a square tensor of side $B_1B_2B_3$ and rank at most $R_0^3$. Hence $R_0\ge d^{\omega S/3}$. The two costs have exponents at least $2-S+M+\omega S/3$ and $5/2-S+M/2+\omega S/6$. Using $M\ge S/3$ gives $2+(\omega-2)S/3$ and $5/2+(\omega-5)S/6$. Their maximum is smallest at $S=3/(\omega+1)$, as claimed. With ordinary zero padding, keep only complete macro blocks along each axis, and drop labels with a zero restricted form. For inner length $m_j$ this leaves $\lfloor d/m_j\rfloor$ complete blocks whose combined length is at least $d/2$. The restricted labels still decompose that full rectangular grid. All its inner vectors can be varied independently, and the constant-factor changes leave the exponent intact.
