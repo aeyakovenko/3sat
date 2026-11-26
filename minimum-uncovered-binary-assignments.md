@@ -1,0 +1,47 @@
+# How many assignments can a union of affine flats leave uncovered?
+
+Let $v\ge2$. Among families of at most $r$ affine flats of codimension at least two in $\mathbb F_2^v$ that leave a point uncovered, the smallest possible number of uncovered points is
+
+| Number of flats | Smallest positive complement |
+|---|---:|
+| $r=0$ | $2^v$ |
+| $r=1$ | $3\cdot2^{v-2}$ |
+| $2\le r\le v$ | $2^{v-r+1}$ |
+| $r\ge v+1$ | $1$ |
+
+In particular, two or more such forbidden flats leave twice the usual $2^{v-r}$ lower bound when $r\le v$. Three parallel codimension-two flats attain the bound at $r=3$. The result applies to [proper clauses added in batches of at most two](six-models-from-two-clause-batches.md). It concerns the number of assignments surviving affine exclusions. Counting these assignments gives no RAM running-time separation by itself.
+
+## A binary proof using two normals per flat
+
+Translate a surviving point to the origin. Each forbidden flat can be enlarged to codimension two while still avoiding the origin. Indeed, one of its defining linear equations separates it from zero, and we can retain that equation and one other independent constraint. For an exact codimension-two flat $F_i$, its two-dimensional space of normals has exactly two forms $a_i,b_i$ taking value one identically on $F_i$. They are independent and $F_i=\{x:a_i(x)=b_i(x)=1\}$. Any point annihilated by a choice of one form per flat survives.
+
+**The case $r=v$.** It suffices to find a second survivor. If the $a_i$ are dependent their common kernel already contains one. Otherwise take $a_i$ as a coordinate basis for the dual. If the $i$th coefficient of $b_i$ vanishes, the $i$th primal basis vector survives. In the remaining case every $b_i=a_i+\sum_{j\in S_i}a_j$ with a nonempty $S_i$ excluding $i$. Draw arcs $i\to j$ for $j\in S_i$. Each vertex has an outgoing arc. Choose a shortest directed cycle. Each vertex on the cycle has exactly one outgoing arc to another cycle vertex, since any additional such arc would give a shorter directed cycle. Put ones on the cycle and zeros elsewhere. At a cycle vertex $b_i(x)=1+1=0$, and off the cycle $a_i(x)=0$. This constructs a second survivor. The impossibility of a singleton here also follows from Jamison's punctured-space covering theorem. [Jamison, Theorem 2, p. 257](https://doi.org/10.1016/0097-3165(77)90001-2)
+
+**Increasing the dimension.** For $r\ge4$ fixed and $v>r$, choosing just one normal from each pair leaves a linear subspace of dimension at least $v-r$. Take two distinct survivors there. Among the $2^{v-1}$ linear forms separating these two points, at most $3r$ occur in any of the forbidden flats' normal spaces. Since $2^{v-1}\ge2^r>3r$, choose a separating form outside all those spaces. Both fibers contain a survivor. Its restriction to the direction space of every $F_i$ is nonconstant, so each fiber meets $F_i$ in codimension exactly two relative to that fiber. Applying the bound at dimension $v-1$ to both fibers doubles it. For $r=1,2,3$ the union bound suffices directly, since each flat covers at most a quarter of the space.
+
+**Attainment.** For $r=1,2,3$ use different fibers of $(x_1,x_2)$. For $3\le r\le v+1$ first cover its three nonzero fibers. Use each remaining flat to impose $x_1=0$ and $x_j=1$, with $j=3,\ldots,r-1$. The remaining assignments have $x_1=\cdots=x_{r-1}=0$, giving the stated number, including a singleton at $r=v+1$. Additional repetitions preserve that singleton when exactly $r$ entries in a list are requested. The extremum for at most $r$ flats is the same.
+
+## Prescribed dimensions over any finite field
+
+Let $q$ be a prime power, $v\ge1$ and $Q=q^v$. Prescribe any finite list of dimensions $v>a_1\ge\cdots\ge a_r\ge0$. Each member of the family is to have its indicated dimension. Start with $R=Q-1$. For slot $i$, subtract the largest power of $q$ at most $\min(q^{a_i},R)$, leaving $R$ alone if it is zero. **The exact smallest positive complement is $R+1$ at the end.** This also holds when each $a_i$ is only an upper bound on the dimension.
+
+For a common codimension $c$, put $s=v-c$ and $z=q^c-1$. Up to $r=z$, the minimum is $(q^c-r)q^s$. For $r\ge z$, write $r-z=h(q-1)+b$ with $0\le b<q-1$. The answer is $(q-b)q^{s-h-1}$ for $h<s$, and one for $h\ge s$. These formulas agree at the common endpoint. The first $r$ permitting a singleton is $q^c-1+(v-c)(q-1)$, the classical theorem of Jamison.
+
+**Root polynomials.** Identify the vector space with the field of $Q$ elements. For an $a$-dimensional linear subspace $W$, its monic root polynomial $L_W(X)=\prod_{w\in W}(X-w)$ is a sum of powers $X^{q^j}$ for $0\le j\le a$. To see this directly, start with $L_{\{0\}}=X$. Enlarging $W$ by an independent vector $z$ replaces $L_W$ by
+
+$$ \prod_{\lambda\in\mathbb F_q}(L_W(X)-\lambda L_W(z))
+       =L_W(X)^q-L_W(z)^{q-1}L_W(X). $$
+
+The induction uses $\mathbb F_q$-linearity of each preceding polynomial. Translating a flat adds only a constant to its root polynomial. The product $P$ of the root polynomials of the given flats is nonzero precisely on the uncovered set. These are Jamison's root polynomials. His published singleton proof studies multiples of $Q-1$ among the exponents in this same product. [Jamison, Lemmas A and B, pp. 259–260, and proof of Theorem 2, pp. 260–262](https://doi.org/10.1016/0097-3165(77)90001-2)
+
+**Bounding the reduced degree.** Every exponent in the product is a sum with at most one contribution per slot $i$, chosen from $0,1,q,\ldots,q^{a_i}$. Replace $X^Q$ by $X$ until all powers are below $Q$. Each reduced exponent still has a representation obeying all the original slot bounds. Indeed, if a sum is at least $Q$, sort its positive powers decreasingly. Some prefix has sum exactly $Q$. Until this target is reached, the next power divides both $Q$ and the preceding partial sum, hence cannot jump over the target. Replace that prefix by a single unit in one of its original slots and by zeroes in its other slots. This subtracts $Q-1$ from the exponent. Repeat as necessary. This argument is applied separately to each monomial, prior to any coefficient cancellations.
+
+The stated greedy rule maximizes such a sum subject to total at most $Q-1$. More generally fix a remaining capacity $R$ and sort any feasible choice of powers decreasingly within the remaining slots. This respects the decreasing slot bounds. Let $S$ be the greedy choice in the first slot. Every chosen power is at most $S$. If their sum is below $S$, $S$ alone gives a larger sum. Otherwise a prefix has sum exactly $S$, by the same divisibility argument. Coalesce that prefix into $S$ in the first slot. The remaining choices give the old sum using the new residual capacity. Induction on the number of slots proves greedy optimality. Thus the reduced polynomial has degree at most $Q-1-R_{\mathrm{final}}$. A surviving point ensures that this polynomial is nonzero. The univariate root bound yields at least $R_{\mathrm{final}}+1$ survivors.
+
+**Building the extremal flats.** Order vectors by their base-$q$ digit strings, using any fixed labeling of the elements of $\mathbb F_q$ by the digits. Maintain an initial segment $[0,E)$ of covered vectors, where $R=Q-1-E$. When the greedy rule selects $S=q^j>0$, all earlier choices were powers at least $S$, so $E$ is aligned to $S$. The next $S$ vectors form a coordinate $j$-flat. If $j=a_i$ take that flat. Otherwise $R<q^{j+1}$, forcing the highest $v-j-1$ digits of $E$ all to be $q-1$. Free any $a_i-j$ of these fixed high coordinates as well as the $j$ low coordinates. There are enough because $a_i<v$. The resulting $a_i$-flat contains the required next $S$ vectors. Every further point on it has decreased at least one of those maximal high digits and is already in $[0,E)$. If $R=0$, a further flat of the required proper dimension can be placed entirely in the covered set by avoiding the one remaining point. This realizes the exact claimed value with the prescribed dimensions.
+
+## Relation to earlier covering bounds
+
+For finite elementary abelian groups, Sambale and Tărnăuceanu's Theorem 6 gives an exact worst-case density bound over unrestricted choices of subgroup dimensions. For $\mathbb F_2^v$ their bound is $2^{-r}$. Sambale's later Theorems 1 and 2 establish the same density lower bound for general finite groups and characterize equality. Bishnoi, Boyadzhiyska, Das and Mészáros study multiply covering the punctured space while constraining the origin's coverage. The result above determines the minimum positive complement for a prescribed dimension list. It follows by applying a reduced-degree bound to Jamison's product. I have not established publication priority for that refinement. [Sambale and Tărnăuceanu, Theorem 6](https://benjaminsambale.github.io/pdfs/unioncosets.pdf) · [Sambale, Theorems 1–2](https://arxiv.org/abs/2609.09052) · [Bishnoi et al., *Subspace coverings with multiplicities*](https://doi.org/10.1017/S0963548323000123)
+
+[Lean](GreedyFieldDigits.lean) proves the exact-prefix exchange for divisible powers used both when reducing exponents and when maximizing a mixed sum. It also proves greedy optimality for capped top digits and ordinary base-$q$ lower digits. The root-polynomial and geometric arguments are manuscript proofs. The [finite audit](affine_flat_complement_audit.py) independently enumerates small affine geometries and compares larger examples with exact subset-sum calculations.
