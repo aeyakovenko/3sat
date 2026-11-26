@@ -7,8 +7,6 @@ from functools import lru_cache
 from itertools import product
 from random import Random
 
-import pycosat
-
 from table_probe_context_audit import parse
 
 
@@ -180,6 +178,8 @@ def packet_verdict(records):
 
 
 def physical_verdict(graph, records):
+    import pycosat
+
     data = graph.prefix + b"".join(records)
     for i, raw in enumerate(records):
         begin = len(graph.prefix) + i*WORD_BYTES

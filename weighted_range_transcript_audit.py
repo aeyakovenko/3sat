@@ -19,6 +19,8 @@ def render(rows):
 
 
 class Transcript:
+    rows_per_packet = 4
+
     def __init__(self, n, schedule):
         self.n = n
         self.bits = n.bit_length()
@@ -63,10 +65,7 @@ class Transcript:
                 new_total.append(self.xor_gate(mixed, carry))
                 carry = self.or_gate(self.and_gate(left, right), self.and_gate(carry, mixed))
             total = new_total
-        mismatch = self.false
-        for actual, claimed in zip(total, answer_lo + answer_hi):
-            mismatch = self.or_gate(mismatch, self.xor_gate(actual, claimed))
-        self.rows.append(proper(mismatch))
+        self.require_mismatch(total, answer_lo + answer_hi)
         positions = 3*self.bits*len(self.update) + 2*len(self.query)
         self.receipts = [self.fresh() for _ in range(positions)]
         received = self.false
@@ -74,9 +73,15 @@ class Transcript:
             received = self.or_gate(received, receipt)
         self.rows.append(proper(received))
         self.word_bytes = 160
-        header = f"p cnf {self.last} {len(self.rows) + 4*positions}\n".encode()
+        header = f"p cnf {self.last} {len(self.rows) + self.rows_per_packet*positions}\n".encode()
         raw = header + render(self.rows)
         self.prefix = raw + b" " * (-len(raw) % self.word_bytes)
+
+    def require_mismatch(self, total, operand):
+        mismatch = self.false
+        for actual, claimed in zip(total, operand):
+            mismatch = self.or_gate(mismatch, self.xor_gate(actual, claimed))
+        self.rows.append(proper(mismatch))
 
     def fresh(self):
         self.last += 1
@@ -132,7 +137,7 @@ class Transcript:
             result = self.or_gate(smaller, self.and_gate(equal, result))
         return result
 
-    def packet(self, slot, rec):
+    def packet_rows(self, slot, rec):
         receipt = self.receipts[slot]
         kind, *fields = rec
         rows = [proper(-receipt)]
@@ -152,7 +157,12 @@ class Transcript:
             rows.append(proper(-self.before[j], wire if value else -wire))
         else:
             assert kind == 'D'
-        rows.extend([(-1, 2, 3)] * (4-len(rows)))
+        return rows
+
+    def packet(self, slot, rec):
+        rows = self.packet_rows(slot, rec)
+        assert len(rows) <= self.rows_per_packet
+        rows.extend([(-1, 2, 3)] * (self.rows_per_packet-len(rows)))
         raw = render(rows)
         assert len(raw) < self.word_bytes
         return raw + b" " * (self.word_bytes-len(raw))
