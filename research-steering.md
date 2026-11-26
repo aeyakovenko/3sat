@@ -6,6 +6,8 @@
 
 The unrestricted-clock search now has a value-sensitive family over $S_3$. The same wiring tests 3-colorability or bipartiteness depending on one coefficient bit. Linear preprocessing reduces all paired parts to an $O(k+1)$-gate circuit on the $k$ triply occurring names. A one-token attachment with only paired or singleton internal names has exactly sixteen possible tables. A fresh commutator even deletes the effective inequality on a graph edge. An induction using these systems must account for the work of solving the residual constraints after the paired parts are eliminated. [Exact attachment census and reductions](branching-in-equations-over-six-permutations.md)
 
+On a single explicitly listed simple permutation the 3-colorability of consecutive entries in its two orders carries all three unrestricted SAT clocks. The order 2463715 defeats every one-point insertion intended to preserve both simplicity and a negative verdict. The larger successor preserves both properties and has a linear-time decoder, so iterating it from finitely many seeds cannot amplify execution time. Disjoint swaps on an explicit negative simple permutation force $\Omega(N/\log N)$ native steps and a globally correct program attains that cost on the whole constructed family. The unresolved step is to force processing beyond a scan of the packed words. [Successor, exact census and RAM probe argument](sat-on-a-single-simple-permutation.md) · [Alternative product tests on the same letters](shared-permutation-products-and-local-edits.md)
+
 ## Earlier directions and findings
 
 The entries below record the earlier research agenda and its outcomes.
