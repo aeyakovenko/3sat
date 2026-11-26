@@ -1,0 +1,46 @@
+# A one-bit SAT edit can change a RAM execution even after optimal realignment
+
+Fix a deterministic logarithmic-word RAM program $A$ that decides SAT. Compare its two complete executions by the minimum number of instruction records one must insert and delete to turn one into the other. Each record gives the controller before and after the instruction, including the program counter, and the memory access with its address and value. Repeated records may match and an identical suffix may move arbitrarily far. We use the single-access instruction convention of the [replay lemma](realigning-a-ram-execution-after-an-input-edit.md).
+
+**Theorem.** If $A$ has a polynomial clock, there are proper ASCII DIMACS 3-CNFs $F,F'$ of the same length $L$ differing in one physical bit for which
+$$
+ d_{\rm ins/del}(\operatorname{trace}_A(F),\operatorname{trace}_A(F'))
+ \;=\;\Omega_A\!\left(\frac{\log L}{(\log\log L)^{3/2}}\right).
+$$
+This holds separately for each of three requirements on the endpoints. Both can be uniquely satisfiable with their models differing in exactly two declared variables. Both can be unsatisfiable. Or their verdicts can be opposite. The witnesses can differ for the three claims and for different programs. The bound holds at every sufficiently large template scale $N=s^4$, with a template-specific length $L=\Theta(N^2\log N)$. The transfer uses [Ko's Theorem 1.1](https://arxiv.org/abs/2611.11508).
+
+In fact fix any exponent $a\ge1$. For each of the three templates, at each sufficiently large scale, either $A$ takes more than $L^a$ steps on its **public blank file** or the stated one-bit pair exists. Only this single anchor needs a time hypothesis. Even an exponential-time exhaustive-search solver can meet it by first checking for the public blank. This version applies whether or not SAT has any polynomial-time decider. A globally correct solver can recognize the public fixed layouts and decide all these families in $O(L)$ time. The theorem measures the difference between runs of a program with random access and free workspace. The lower bound on the time of a single SAT decision remains open.
+
+## Turning small trace changes into an online solver
+
+The online input starts with $N$ sets $S_j\subseteq[N]$. After preprocessing there are $s=N^{1/4}$ distinct insertions into $X$, each followed by a query asking whether $X\cap S_j$ is empty. Ko gives a machine-independent distribution on which the expected probe count is $\Omega(s(\log N/\log\log N)^2)$ with cells of $\Theta(\log N)$ bits. All probes following preprocessing count, including query writes. An exact data structure qualifies. We use the stated result as an input to the proof. [Ko, Theorem 1.1 and §§2.2–3.1](https://arxiv.org/pdf/2611.11508)
+
+Each template has one physical bit for each set membership, insertion flag and query selector. Build the incidence matrix from the all-zero blank with no query selected. Perform each insertion with no query selected. To ask a question, temporarily select the single requested query. These edits, including setup and eventual resets, involve only public bit positions. Full gate equivalences and pins for otherwise unused identifiers ensure that all positive files have exactly one model. In the direct disjointness template the only variables that change between any two positive neighbors are the edited flag and its complement. [Pin construction, three output functions and native-file audit](one-bit-pins-for-dynamic-disjointness.md)
+
+Assume at the chosen scale that the blank finishes by $L^a$ and that all edges of the designated verdict class in the template have distance at most $r$. Compute and index the blank execution. For a mandatory baseline edit, use bounded replay to recover an optimal edit script and patch the saved trace and input. For a speculative query, search up to the same bound on a frozen baseline. If replay reaches the complete endpoints, it supplies the exact new verdict. If it exhausts the budget, use the chosen template to determine the verdict.
+
+| Required witness class | Baseline with no query | Why every baseline edit is short under the assumption | Verdict to use when a query exceeds the budget |
+| --- | --- | --- | --- |
+| SAT to SAT | SAT | Every graph edit, insertion and reset preserves satisfiability. | UNSAT. A SAT answer would give a short positive edge. |
+| UNSAT to UNSAT | UNSAT | The output requires a queried collision, so all baseline files are unsatisfiable. | SAT. A negative answer would give a short negative edge. |
+| Opposite verdicts | A known parity bit $b$ | Each graph or balancing-pin flip and each insertion or reset toggles $b$. | $b$. An opposite answer would give a short opposite edge. |
+
+In the first row the queried SAT bit is disjointness. In the second row complement the bit. In the last row the queried bit is $b$ XOR disjointness. The one graph-balancing pin makes $b$ the parity of $|X|$ after setup. A speculative query leaves all baseline records and bits in place. There is no promise on the distance of the other verdict class. This yields all three separate conclusions. Lean checks the capped verdict inference and the additive length bound for a chain of actual edit scripts. [CappedTraceVerdicts.lean](CappedTraceVerdicts.lean) The data structure also answers every fixed legal query sequence exactly. Duplicate insertions, if allowed, are detected from the current flag. Outside a prescribed finite horizon it can answer by direct inspection.
+
+When all mandatory edges have distance at most $r$, baseline lengths obey $T_{i+1}\le T_i+r$. Setup has at most $N^2+1$ edges. Within a batch the baseline length is consequently at most $L^a+(N^2+1+s)r$. After clearing the insertions the input, and hence its complete deterministic run, returns to the graph baseline. Lengths of far speculative queries need no bound. A search to edit depth $r$ examines new prefixes of length at most the current old length plus $r$. The historical index of a polynomial number of patches fits polynomial space with word size $\Theta(\log N)$.
+
+## Amortization from a single blank
+
+Write $\lambda=\log\log(N+4)$. For a polynomial horizon and $r\le\log N$, the dynamic replay index takes $O((1+r)^2\lambda)$ probes per edit as an expected amortized bound. It can spend initial potential while patching, so charging only the online part of an isolated batch directly would leave a gap. Let $P=N^{O(1)}$ cover blank construction, graph setup and the initial index charges. The work to construct these objects has a fixed polynomial bound in expectation independent of the number of later batches. The algorithms for a polynomial horizon need only $\Theta(\log N)$-bit words. A larger fixed polynomial changes constants. [Dynamic predecessor index and replay analysis](realigning-a-ram-execution-after-an-input-edit.md)
+
+Sample one database from Ko's distribution. Run $K$ independent batches conditional on that database, rolling back each batch's insertion flags in reverse order. This uses $O(Ks)$ updates and queries. It preserves the correct graph trace across batches, although its internal data-structure representation can change. The total expected cost including construction and resets is at most
+$$
+ P+O\big(Ks(1+r)^2\lambda\big).
+$$
+For a matching lower bound on forward operations alone, select a uniform batch number $J$ in free preprocessing of a *single* Ko instance. On its actual database sample and simulate $J-1$ prior conditional batches, including their resets, and retain the resulting memory. The genuine forward operations now have exactly the law of batch $J$. Sampling these earlier operations uses no information about the genuine future sequence. Ko's per-fixed-input correctness requirement holds because the decoder is exact even off the hard distribution. The expected sum of forward costs across all $K$ batches is therefore at least $K$ times Ko's one-batch lower bound, up to $O(Ks)$ bookkeeping probes. No fixed database is required to be hard for every solver.
+
+Choose $K=N^{O(1)}$ large enough to absorb $P$ and put $r=\lfloor c\log N/\lambda^{3/2}\rfloor$. All index lengths and addresses are polynomial in $N$. For sufficiently small fixed $c>0$ the upper bound contradicts Ko's theorem. Since $\log L=\Theta(\log N)$ and $\log\log L=\Theta(\lambda)$, the claimed trace distance follows. Equivalently, one can use $r=o(\log N/\lambda^{3/2})$ on a hypothetical subsequence of scales, keep the word coefficient fixed, and obtain the same contradiction with no choice of competing constants.
+
+## Scope of the exhaustion step
+
+The proof exhausts alignments of bounded cost for a fixed **actual** solver and a single edited word. It includes runs where an inserted instruction moves an arbitrarily long unchanged suffix. For the positive pair, even knowledge of either endpoint's unique model would leave only two coordinate changes between the answers as assignment strings. A length-$L$ trace can already accommodate the entire distance lower bound. Adding many edits around a cycle does not add their distances to the cost of any one execution. A successor argument for the unrestricted time goal would have to force extra work within the same individual run.
