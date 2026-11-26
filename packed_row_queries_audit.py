@@ -244,8 +244,127 @@ def check_mgg():
     )
 
 
+def check_affine_cut_identity():
+    # Restrict each actual powered seed to its low four bits. At y=0 the
+    # higher zero nibbles preserve the endpoint of the first labelled move.
+    k = 4
+    book = [mgg_segment(4, 2, seed) for seed in range(16)]
+    seed_for_path = {(0, 0): 0, (0, 1): 8, (1, 0): 13, (1, 1): 1}
+    assert all(book[seed] == path for path, seed in seed_for_path.items())
+    layout = RowQueryLayout(k, 4, 4, segment_codebook=book, half_tag=True)
+    rng = Random(717)
+    opposite = 0
+    for x in range(1 << k):
+        # Exactly two ones per row. Among columns 0 and 1 only x_i is good.
+        rows = [4 | (1 << ((x >> i) & 1)) for i in range(k)]
+        order = rng.sample(range(layout.packet_count), layout.packet_count)
+        tag_start = len(layout.public) + order.index(layout.half_slot) * layout.word_bytes
+        answer_row = 0
+        for y in range(1 << k):
+            bits = tuple((y >> i) & 1 for i in range(k))
+            seeds = [seed_for_path[bits[i:i + 2]] for i in range(0, k, 2)]
+            left, right = (layout.render(rows, seeds, order, half=h) for h in (0, 1))
+            assert len(left) == len(right)
+            differences = [i for i, (u, v) in enumerate(zip(left, right)) if u != v]
+            assert len(differences) == 1
+            pos = differences[0]
+            assert tag_start <= pos < tag_start + layout.word_bytes
+            assert (left[pos], right[pos]) == (ord("2"), ord("3"))
+            misses = [check_file(layout, rows, seeds, order, half=h) for h in (0, 1)]
+            differing = x ^ y
+            assert misses == [(differing & 3).bit_count(), (differing >> 2).bit_count()]
+            opposite += bool(misses[0]) != bool(misses[1])
+            if misses == [0, 0]:
+                answer_row |= 1 << y
+        assert answer_row == 1 << x
+    assert opposite == 96
+    print("Affine-cut equality: the decoded 16-by-16 matrix is the identity over F2; "
+          "512 proper DIMACS files, 256 one-bit tag pairs, 96 opposite-verdict pairs.")
+
+
+def check_shared_row_group_table():
+    # Use four genuine 640-bit labels without enumerating the full alphabet.
+    # The second shear in the last label follows the first in execution order.
+    stay = int("8" * 160, 16)
+    labels = (stay, (stay & ~15) | 2, (stay & ~15) | 6, (stay & ~255) | 0x62)
+    columns, group_length, word_bits = 4, 2, 3
+    pieces = [(start, mgg_transition(columns, start, label))
+              for label in labels for start in range(columns)]
+
+    def pack(bits):
+        return tuple(sum(bit << i for i, bit in enumerate(bits[start:start + word_bits]))
+                     for start in range(0, len(bits), word_bits))
+
+    def extract(words, index):
+        return (words[index // word_bits] >> (index % word_bits)) & 1
+
+    # Each entry depends only on row offset, mask, and packed query-word index.
+    shared = [{mask: pack([(mask >> piece[j]) & 1 for piece in pieces])
+               for mask in range(1 << columns)} for j in range(group_length)]
+
+    def group_words(left, right):
+        return tuple(a & b for a, b in zip(shared[0][left], shared[1][right]))
+
+    for left, right in product(range(1 << columns), repeat=2):
+        packed = group_words(left, right)
+        for i, (a, b) in enumerate(pieces):
+            assert extract(packed, i) == ((left >> a) & (right >> b) & 1)
+
+    # Exhaust the four-row segment seeds over the sampled alphabet. After
+    # a boundary the new piece starts at path[2], which includes the move
+    # from path[1] to path[2] supplied by the middle transition.
+    segments = []
+    for moves in product(range(len(labels)), repeat=3):
+        for start in range(columns):
+            seed = start + columns * sum(labels[m] << (640 * i) for i, m in enumerate(moves))
+            path = mgg_segment(columns, 4, seed)
+            indices = (start + columns * moves[0], path[2] + columns * moves[2])
+            assert tuple(pieces[i] for i in indices) == (path[:2], path[2:])
+            segments.append((path, indices))
+
+    baseline = tuple(j * 31 for j in range(8))
+    rows = []
+    for idx in baseline:
+        for column in segments[idx][0]:
+            rows.append((1 << column) | (1 << ((column + 1) % columns)))
+    groups = [group_words(rows[i], rows[i + 1]) for i in range(0, len(rows), 2)]
+    cases = [tuple((i + j) % len(segments) for j in baseline)
+             for i in range(len(segments))]
+    for j in (0, 4):
+        # One offending segment in either half, all other segments good.
+        wrong = next(i for i, (path, _) in enumerate(segments)
+                     if any(not (rows[4*j + t] >> c & 1) for t, c in enumerate(path)))
+        cases.append(baseline[:j] + (wrong,) + baseline[j + 1:])
+    observed = set()
+    reset_would_fail = False
+    for case in cases:
+        selected = [c for i in case for c in segments[i][0]]
+        gathered = []
+        for j, idx in enumerate(case):
+            path, (first, second) = segments[idx]
+            gathered.extend((extract(groups[2*j], first), extract(groups[2*j + 1], second)))
+            wrong_start = second - path[2] + path[0]
+            reset_would_fail |= extract(groups[2*j + 1], wrong_start) != gathered[-1]
+        half_verdicts = []
+        for h in (0, 1):
+            flags = gathered[8*h:8*h + 8]
+            words = pack(flags)
+            # The final short word must compare against only its two live bits.
+            miss = words != pack([1] * len(flags))
+            assert miss == any(not (rows[i] >> selected[i] & 1)
+                               for i in range(16*h, 16*h + 16))
+            half_verdicts.append(miss)
+        observed.add(tuple(half_verdicts))
+    assert reset_would_fail and len(observed) == 4
+    print("Shared row-group table: 4,096 mask/path predicates, all 256 powered-walk "
+          "segments on the four-label subalphabet, 258 whole queries and both half tags; "
+          "resetting at a boundary changes a group bit and packed flags cross words.")
+
+
 def audit():
     check_mgg()
+    check_affine_cut_identity()
+    check_shared_row_group_table()
     small = RowQueryLayout(2, 2, 2, 2)
     all_slots = list(permutations(range(small.packet_count)))
     yes = no = count = 0
