@@ -1,0 +1,44 @@
+# Formula and branching-program size of ordinary encoded 3-SAT
+
+For every sufficiently large byte-aligned bit length $N$, a device deciding satisfiability on every well-formed proper ASCII DIMACS 3-CNF of length $N$ has the following worst-case size. A proper clause has three literals on distinct variables. The device may behave arbitrarily on malformed files.
+
+| Nonuniform decision model on the physical input bits | Size lower bound |
+| --- | --- |
+| Binary De Morgan formula, measured in literal leaves | $\Omega(N^3/(\log^2 N\,\log\log N))$ |
+| Formula over all binary Boolean gates, measured in leaves | $\Omega(N^2/\log N)$ |
+| Deterministic bit-query branching program, measured in nonsink nodes | $\Omega(N^2/\log^2 N)$ |
+| Nondeterministic or parity bit-query branching program, measured in nonsink nodes | $\Omega(N^{3/2}/\log N)$ |
+
+The same bounds hold for deciding unsatisfiability on the valid files. The programs may read variables repeatedly and in data-dependent orders. Unfolding a depth-$D$ fan-in-two AND/OR circuit with literal inputs gives at most $2^D$ leaves. Thus even with shared gates, its depth on the SAT decision problem is at least $3\log_2 N-2\log_2\log_2 N-\log_2\log_2\log_2 N-O(1)$.
+
+Williams already stated the $N^{3-o(1)}$ formula lower bound for SAT via tight reductions from Andreev's function. The argument below retains the specific logarithmic factors of Tal's revised theorem in physical DIMACS length. The branching-program bounds use classical subfunction lower bounds and the repository's existing dense list projection. Priority for the exact serialized statements is unestablished. [Williams, *Some Open Problems Regarding Lower Bounds For NP*, p. 2](https://www.cs.umd.edu/~gasarch/open/lbfornp.pdf) · [Tal, revised Theorem 7.2](https://eccc.weizmann.ac.il/report/2014/048/revision/1/download/) · [Beame, Grosshans, McKenzie and Segoufin, §§2–3, 6–7](https://homes.cs.washington.edu/~beame/papers/neciporuk.pdf)
+
+## Andreev's function in linear encoded length
+
+Let $n=2^r$, $m=\lfloor n/r\rfloor$. The source has a truth table $x$ of $n$ bits and $r$ disjoint rows of $m$ bits each. Their respective parities form an $r$-bit address $z$, and the answer is $x[z]$. Fixing the table to a Boolean function $H$ of $r$ bits with formula size $\Omega(2^r/\log r)$ and invoking the parity composition lemma gives $\Omega(m^2 2^r/\log r)$ leaves. This also justifies the floor for every sufficiently large integer $r$. The revised result has one power of $\log\log n$ in the denominator. The first version reported its cube. [Tal, Lemma 7.1 and Theorem 7.2](https://eccc.weizmann.ac.il/report/2014/048/revision/1/download/) · [Revision history](https://eccc.weizmann.ac.il/report/2014/048/)
+
+Choose $h$ to be the largest power of two at most $r/8$. A mask of $h$ bits is printed as $h$ ASCII digits in a variable name, after a fixed nonzero decimal prefix. Make two disjoint libraries with prefixes `1` and `2`.
+
+1. For every mask $\mu$, a public unit fixes $P_\mu$ to its parity. Split each source row into $h$-bit chunks, padding its last chunk with fixed zero bits. For a chunk of value $\mu$, place the two binary clauses expressing $u\leftrightarrow P_\mu$ for a private scalar $u$. Take the XOR of the scalars in each row with ordinary fixed width-three gate clauses. These $r$ results are $z$.
+2. Use a fixed binary tree of prefix-match flags for the low $\log_2 h$ address bits. The root is true and each child equals the conjunction of its parent and its particular next bit or its negation. For each possible mask $\mu$ and each offset $i<h$, a binary clause says that if the leaf for $i$ is true, then $S_\mu=\mu_i$. Consequently all $S_\mu$ simultaneously provide the contents of their masks at the same selected offset.
+3. Split the truth table into consecutive $h$-bit chunks. For each chunk of value $\nu$, put $v\leftrightarrow S_\nu$ in two binary clauses with a private $v$. Select one such $v$ with a binary multiplexer tree controlled by the high address bits, and assert the output. Every gate has equivalence clauses and the resulting CNF is satisfiable exactly when $x[z]=1$. Replacing the final assertion by its negation gives the opposite predicate. The construction checks an address even when some source parities coincide as bits because their wires remain separately named.
+
+Make the clauses proper by fixing three fresh false anchors with the seven ternaries excluding their nonzero assignments. Append distinct false anchors to each unit or binary clause. Allocate ordinary gate identifiers consecutively above the two mask ranges and cover any holes below that range with satisfied public ternaries, using a negated false anchor. Wire identifiers have $O(r)$ bits and every declared identifier occurs. The number of clauses is
+
+$$
+O\big(n/h+r+h2^h+10^h\big)=O(n/r).
+$$
+
+Every public field is fixed at a given $r$. In a data-dependent mask name, each `0` or `1` changes only the low ASCII bit, and that bit copies one source input. The two occurrences of the same mask name duplicate that source bit at two public positions. The header, signs, token boundaries and field lengths stay fixed. The serialized file therefore has $N_r=O(n)$ bits. Since the varying fields contain copies of the $n$ table bits, $N_r=\Theta(n)$. Substituting the physical projection into any candidate decision formula and simplifying constants cannot increase its number of leaves. For UNSAT either negate the decision formula by De Morgan duality or use the opposite final assertion. [Serialized projection and PicoSAT audit](andreev_dimacs_projection_audit.py)
+
+The finite check exhausts all 256 inputs with $r=m=h=2$ and tests two larger layouts, including a final partial row chunk. Across the three layouts PicoSAT checked 280 verdicts. All 59 source-bit columns changed exactly two physical ASCII bits and the checked superpositions reproduced the complete serialized files. The asymptotic claim follows from the counting and projection argument above.
+
+## The dense list restriction for branching programs
+
+Take $R=2^a$ records of $2a$ bits each, with $L=2aR$ total bits and universe $R^2$. The dense list projection already produces a proper DIMACS file of $\Theta(L)$ bits whose satisfiability means that some two records agree. It selects at least two records and makes all selected records use the same value in each of eight digit chunks. Each data digit is a projection of one raw input bit, including when its variable name appears more than once. The physical construction suffices here independently of any lower bound on unrestricted circuits. [Dense list construction](checking-the-sat-circuit-bound.md) · [Executable projection](dense_ascii_chunk_circuit_audit.py)
+
+Partition the source inputs into the $R$ records. Hold one record free and fix all the others to distinct values with set $D$, of size $R-1$. Collision on the free record is exactly membership in $D$. Distinctness is exactly nonmembership. For each sign, the number $s$ of induced subfunctions per block satisfies $\log s\ge\log\binom{R^2}{R-1}=\Omega(R\log R)=\Omega(L)$. The deterministic Nečiporuk bound contributes $\Omega(\log s/\log\log s)$ per block, and the nondeterministic and parity bounds contribute $\Omega(\sqrt{\log s})$. For formulas over the full binary basis, Proposition 8.1 contributes $\Omega(\log s)$ leaves per block. Summing the $R=\Theta(L/\log L)$ terms proves the claimed exponents for both answers. This treats nondeterministic acceptance of each sign directly. The nondeterministic bound does not require a size-preserving complementation procedure. [Beame et al., Lemma 2.6 and Propositions 6.1, 7.1, 8.1](https://homes.cs.washington.edu/~beame/papers/neciporuk.pdf)
+
+To pull a branching program back, relabel a copied-bit node by its source bit. For a constant position, keep the node, label it by any source bit, and give both labels the original constant-enabled successor set. Every source assignment then induces the same enabled graph as its image. This preserves reachability and accepting-path parity with the same number of nonsink nodes. The deterministic case preserves each unique transition.
+
+Finally, each construction has canonical lengths bounded by a constant multiple of $2^r$ or $a2^a$, respectively. Choose the largest parameter whose fixed upper length envelope fits a requested sufficiently large byte length, and pad with ordinary whitespace. Each envelope grows by a bounded factor, so the source length stays $\Theta(N)$ and the padding bits are fixed. The results measure a formula or an entire branching program for the decision predicate at a particular length. A RAM can reuse work words and execute a short path even in a large branching program. These size lower bounds leave unrestricted RAM time open.
