@@ -102,9 +102,17 @@ class RowQueryLayout:
         segment_codebook=None,
         half_tag=False,
         word_coefficient=32,
+        batch_size=1,
+        row_blocks=None,
     ):
         if k < 2 or not power_of_two(k):
             raise ValueError("k must be a power of two at least two")
+        if not power_of_two(batch_size):
+            raise ValueError("batch size must be a positive power of two")
+        if row_blocks is not None:
+            if not power_of_two(row_blocks) or row_blocks > k:
+                raise ValueError("row block count must be a power of two dividing k")
+            half_tag = True
         row_bits = k.bit_length() - 1
         h = (
             packet_bits
@@ -154,9 +162,13 @@ class RowQueryLayout:
         self.packet_bits = h
         self.queries_per_packet = g
         self.data_count = k * b // h
-        self.query_count = k // g
-        self.half_slot = self.data_count + self.query_count if half_tag else None
-        self.packet_count = self.data_count + self.query_count + int(half_tag)
+        self.batch_size = batch_size
+        self.query_count = batch_size * (k // g)
+        self.row_blocks = row_blocks
+        block_start = self.data_count + self.query_count
+        self.block_slots = range(block_start, block_start + (2 if row_blocks is not None else 0))
+        self.half_slot = self.block_slots.stop if half_tag else None
+        self.packet_count = self.block_slots.stop + int(half_tag)
         self.half_names = None
 
         clauses = []
@@ -196,6 +208,7 @@ class RowQueryLayout:
 
         self.row_selectors = reserve(row_bits)
         self.column_selectors = reserve(column_bits)
+        self.batch_selectors = reserve(batch_size.bit_length() - 1)
         address = list(self.column_selectors) + list(self.row_selectors)
         data_low = h.bit_length() - 1
         query_low = g.bit_length() - 1
@@ -244,19 +257,43 @@ class RowQueryLayout:
         self.query_flags = reserve(self.query_count)
 
         data = choose(self.data_flags, address[data_low:])
-        match = choose(self.query_flags, self.row_selectors[query_low:])
+        query_address = list(self.row_selectors[query_low:]) + list(self.batch_selectors)
+        match = choose(self.query_flags, query_address)
+        tag_bit = self.row_selectors[-1]
+        if row_blocks is not None:
+            # Each public predicate tests a high row index. Give it a positive
+            # dense name so the two packet values are independent of the tag.
+            bits = row_blocks.bit_length() - 1
+            block_tests = [one]
+            if bits:
+                selectors = self.row_selectors[-bits:]
+                block_tests = [-selectors[0], selectors[0]]
+                for selector in selectors[1:]:
+                    block_tests = [conjunction(a, sign) for sign in (-selector, selector)
+                                   for a in block_tests]
+            self.block_names = reserve(row_blocks)
+            for alias, test in zip(self.block_names, block_tests):
+                equivalent(alias, test)
+            self.block_flags = reserve(2)
+            tag_bit = new()
+            selected_block = mux(tag_bit, self.block_flags[0], self.block_flags[1])
+            clauses.append((selected_block, pad, zero))
         if half_tag:
             # Every skipped ID is fixed. The two positive name spellings
             # differ only by the low ASCII bit of their final digit, 2/3.
             for filler in reserve((2 - (variables + 1)) % 10):
                 clauses.append((-filler, pad, zero))
             self.half_names = reserve(2)
-            equivalent(self.half_names[0], -self.row_selectors[-1])
-            equivalent(self.half_names[1], self.row_selectors[-1])
+            equivalent(self.half_names[0], -tag_bit)
+            equivalent(self.half_names[1], tag_bit)
         clauses.extend(((-data, pad, zero), (match, pad, zero)))
         self.variable_count = variables
         self.clause_count = len(clauses) + 2 * self.packet_count
         public = f"p cnf {variables} {self.clause_count}\n".encode("ascii")
+        if batch_size > 1:
+            public += f"c walk-batch {k} {b} {h} {g} {batch_size}\n".encode("ascii")
+        if row_blocks is not None:
+            public += f"c walk-blocks {k} {b} {h} {g} {batch_size} {row_blocks}\n".encode("ascii")
         public += b"".join(clause_bytes(*c) for c in clauses)
         digits = len(str(variables))
         # Exact word width: w = C * ceil(log2(N+2)) bits for the *final* N.
@@ -290,6 +327,9 @@ class RowQueryLayout:
             elif self.data_count <= number < self.data_count + self.query_count:
                 names = self.query_names
                 flag = self.query_flags[number - self.data_count]
+            elif number in self.block_slots:
+                names = self.block_names
+                flag = self.block_flags[number - self.block_slots.start]
             else:
                 raise ValueError("packet number out of range")
             if not 0 <= value < len(names):
@@ -299,7 +339,7 @@ class RowQueryLayout:
         return clauses.ljust(self.word_bytes - 1, b" ") + b"\n"
 
     def masks(self, rows, queries):
-        """Pack row words and either k query columns or one codebook seed per segment."""
+        """Pack shared rows and batch-major columns or segment seed IDs."""
         if len(rows) != self.k:
             raise ValueError("one data word required per bank")
         b, g = self.columns, self.queries_per_packet
@@ -316,18 +356,24 @@ class RowQueryLayout:
             ):
                 raise ValueError("expected one valid codebook seed per segment")
             return masks + list(queries)
-        if len(queries) != self.k or any(not 0 <= j < b for j in queries):
+        if len(queries) != self.k * self.batch_size or any(not 0 <= j < b for j in queries):
             raise ValueError("expected one valid query column per bank")
         ell = b.bit_length() - 1
         masks.extend(
             sum(queries[i + j] << (ell * j) for j in range(g))
-            for i in range(0, self.k, g)
+            for i in range(0, len(queries), g)
         )
         return masks
 
-    def render(self, rows, queries, slot_order=None, *, half=None):
+    def render(self, rows, queries, slot_order=None, *, half=None, blocks=None):
         """slot_order gives the logical packet at each successive aligned physical slot."""
         values = self.masks(rows, queries)
+        if self.row_blocks is not None:
+            if blocks is None or len(blocks) != 2 or not all(0 <= i < self.row_blocks for i in blocks):
+                raise ValueError("expected an ordered pair of row blocks")
+            values.extend(blocks)
+        elif blocks is not None:
+            raise ValueError("select row_blocks to include block selectors")
         if self.half_slot is not None:
             if half not in (0, 1):
                 raise ValueError("the half-tag layout requires half=0 or half=1")
