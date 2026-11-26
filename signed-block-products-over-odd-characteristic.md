@@ -73,6 +73,16 @@ Use the block algorithm over $K$. Each primitive term is the integer representat
 
 For each index use up to $(p-1)^2$ separately labeled signed unit factors, with exactly $|\sigma e|$ of them active. Use the multiset construction on these unit factors. To recover the required output weights, view the truncated identity as a polynomial, then substitute $x=\tau-1$ in the cyclic group ring $F[\tau]/(\tau^p-1)$. After multiplication by $\tau^{-L}$ it equals $\tau^S$. This bookkeeping can be implemented entirely by scalar tables over $F$: for each finite selected slot branch between adding one to a running residue and contributing weight $-1$. The first branch represents $\tau$ and the second represents $-1$. Initialize the residue to $-L$ modulo $p$ and give the final residue weight $[0]-[1]$, meaning one at zero, minus one at one, and zero elsewhere. A padding slot has a single continuation of weight one, and occurrences of negative unit factors contribute their formal-series signs as before. The residue needs only constant space per slot. Summing the legal encodings of $Z$, rejecting invalid element encodings if present, and multiplying by the normalization proves the claim. For matching characteristic the earlier graph construction already has volume $d^{2+o(1)}$. Thus switching between fixed finite input fields does not restore the full formal rank exponent for this graph.
 
+## Rectangular grids in the same cost estimate
+
+A rectangular rank decomposition cannot lower the $11/5$ exponent by changing only the grid dimensions in the preceding construction. Let the three grid sides be $d^{x_1},d^{x_2},d^{x_3}$ up to subpolynomial factors, set $S=x_1+x_2+x_3$, and write the grid rank as $d^{r+o(1)}$. Suppose all three transformed block tables are materialized and that the signing budget used is the universal $O(d\sqrt M)$ estimate on $M$ scalar terms. The exponent charged for the largest table is $2+r-S+\max_i x_i$. The charged signing exponent is $5/2+(r-S)/2$, since $M=d^{3-S+r+o(1)}$.
+
+Tensor the grid algorithm with its two cyclic permutations. This gives a square multiplication tensor of side the product of the three grid sizes and rank at most the cube of the original rank. The upstream square rank bound gives $r\ge\omega S/3$ for $\omega=9/4$. Also $\max_i x_i\ge S/3$. Thus these two charges have maximum at least
+$$
+\max\left\{2+(\omega-2)S/3,\quad 5/2+(\omega-3)S/6\right\}.
+$$
+For $0\le S\le3$ the minimum is attained at $S=3/(\omega-1)$ and equals $2+(\omega-2)/(\omega-1)=11/5$. Several rectangular rank levels followed by scalar multiplication combine into one grid with multiplied sides and ranks, giving the same estimate. This optimization concerns the stated charges. A smaller discrepancy bound for the actual forms, or a way to query them without materializing those tables, could change the exponent. [Square rank statement used in the optimization](https://github.com/openai/math/blob/3344da59991ed94f9ba711217b29c1d760badfa6/preprints/The-matrix-multiplication-exponent-is-nine-fourths-November-24-2026/build/intro.tex)
+
 ## Consequence for extracting formal rank
 
 Combining the bit-graph upper bound with the preprint's formal lower bound $\operatorname{rank}_F(T_d)\ge d^{9/4}$ gives
