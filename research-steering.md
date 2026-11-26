@@ -4,6 +4,8 @@
 
 **26 November 2026, revised.** The tape result now concerns closure of nondeterministic linear time under complement. Audit the remaining geometric case in which every characteristic has ports. A future unrestricted RAM entry needs to charge actual executed work on a family that resists direct indexing. The forecast-certificate line is closed to new variants. The final odd-characteristic matrix attempt gave a modulo-four identity and a rank obstruction to its short auxiliary sum. Park that construction line. The exact SAT network ceiling over fixed finite fields is still quadratic. [Tape theorem, field filter and references](tape-time-under-complement.md) · [Final matrix attempt and the cost of every static grid signing](signed-block-products-over-odd-characteristic.md#a-mod-four-determinant-attempt) · [Network ceiling](exact-network-ceiling-for-ordinary-sat.md)
 
+The unrestricted-clock search now has a value-sensitive family over $S_3$. The same wiring tests 3-colorability or bipartiteness depending on one coefficient bit. Linear preprocessing reduces all paired parts to an $O(k+1)$-gate circuit on the $k$ triply occurring names. A one-token attachment with only paired or singleton internal names has exactly sixteen possible tables. A fresh commutator even deletes the effective inequality on a graph edge. An induction using these systems must account for the work of solving the residual constraints after the paired parts are eliminated. [Exact attachment census and reductions](branching-in-equations-over-six-permutations.md)
+
 ## Earlier directions and findings
 
 The entries below record the earlier research agenda and its outcomes.
