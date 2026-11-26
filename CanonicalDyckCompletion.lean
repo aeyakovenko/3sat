@@ -305,4 +305,62 @@ theorem trace_encode_injective (code : α → List Bool) (b : Nat) (positive : 0
       obtain ⟨head, tail⟩ := List.append_inj eq ((len x).trans (len z).symm)
       rw [encode_injective code b positive size unique head, ih tail]
 
+/-- A successful stack run remains valid with any untouched stack suffix. -/
+private theorem extend_run [DecidableEq α] (xs : List (Action α)) (s t extra : List α)
+    (success : run xs s = some t) : run xs (s ++ extra) = some (t ++ extra) := by
+  induction xs generalizing s t with
+  | nil => simp_all [run]
+  | cons x xs ih =>
+    cases hs : step x s with
+    | none => simp [run, hs] at success
+    | some next =>
+      have hnext := ih next t (by simpa [run, hs] using success)
+      have ext : step x (s ++ extra) = some (next ++ extra) := by
+        cases x with
+        | skip => simp_all [step]
+        | push x =>
+          have eq : x :: s = next := Option.some.inj hs
+          rw [← eq]
+          rfl
+        | pop x =>
+          cases s with
+          | nil => simp [step] at hs
+          | cons y ys => by_cases eq : x = y <;> simp_all [step]
+      simpa [run, ext] using hnext
+
+private theorem unit_append_comm (xs ys : List Unit) : xs ++ ys = ys ++ xs := by
+  apply List.ext_getElem
+  · simp [Nat.add_comm]
+  · intros; exact Subsingleton.elim _ _
+
+/-- One bracket type cannot detect the crossed order. The four blocks can
+have arbitrary lengths and may even contain skips. -/
+theorem one_type_accepts_crossed (ua da ub db : List (Action Unit))
+    (ha : run (ua ++ da) [] = some []) (hb : run (ub ++ db) [] = some []) :
+    run (ua ++ (ub ++ (da ++ db))) [] = some [] := by
+  cases h : run ua [] with
+  | none => simp [run_append, h] at ha
+  | some sa =>
+    cases k : run ub [] with
+    | none => simp [run_append, k] at hb
+    | some sb =>
+      have closeA : run da sa = some [] := by simpa [run_append, h] using ha
+      have closeB : run db sb = some [] := by simpa [run_append, k] using hb
+      have openB : run ub sa = some (sb ++ sa) := by simpa using extend_run ub [] sb sa k
+      have closeA' : run da (sb ++ sa) = some sb := by
+        rw [unit_append_comm sb sa]
+        simpa using extend_run da sa [] sb closeA
+      simp [run_append, h, openB, closeA', closeB]
+
+theorem no_one_type_letter_homomorphism (f : Action Bool → List (Action Unit)) :
+    ¬ (∀ xs, run (xs.flatMap f) [] = some [] ↔ run xs [] = some []) := by
+  intro exactCode
+  have pairOk (x : Bool) : run (f (.push x) ++ f (.pop x)) [] = some [] := by
+    simpa using (exactCode [.push x, .pop x]).mpr (by simp [run, step])
+  have crossed := one_type_accepts_crossed _ _ _ _ (pairOk false) (pairOk true)
+  have encoded : run (([.push false, .push true, .pop false, .pop true] : List (Action Bool)).flatMap f)
+      [] = some [] := by simpa using crossed
+  have := (exactCode _).mp encoded
+  simp [run, step] at this
+
 end CanonicalDyckCompletion
