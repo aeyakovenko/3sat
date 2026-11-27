@@ -1,0 +1,27 @@
+# The static probe cost of a separated equality encoding
+
+Consider any ordinary proper ASCII DIMACS encoding $F(a,x)$ of equality, with physical bit length at most $N$. Suppose the data owner can compute a header $h(a)$ of at most $b$ bits, and the actual clauses can be partitioned into $P(a)$ and $Q(h(a),x)$. Common public clauses can be included on either side. Assume that $F(a,x)$ is satisfiable precisely for $a=x$ and that both functions specifying clauses are computable, with arbitrary local running time.
+
+After unlimited preprocessing of $a$, **every equality query can be answered in**
+$$
+ O\!\left(1+\frac{b+N/\log(N+2)}{W}\right)
+$$
+**static probes to $W$-bit cells.** This holds deterministically and simultaneously for positive and negative queries. If another tag requests the opposite bit, negate the answer. No hypothesis on native SAT time enters the bound.
+
+## One public assignment for each diagonal
+
+Let $v$ be the maximum number of distinct variable names occurring in one of the files. There are $O(\sqrt N)$ possible positive integers with canonical decimal spellings shorter than $\tfrac12\log_{10}N$ digits. Every longer name costs $\Omega(\log N)$ bits at its first occurrence. Thus $v=O(1+N/\log(N+2))$. The header's declared largest legal name may be much bigger. [Salamon and Wehar, variable-count bound](https://doi.org/10.1007/s00224-023-10119-x)
+
+There is a public indexed family of total assignments, with an index of at most $v+O(\log(N+2))$ bits, such that every satisfiable file of length at most $N$ has a model in the family. Consider independently chosen random truth functions on the finite universe of legal names with representations of at most $N$ bits. A satisfiable file fixes at most $v$ names in one model, so a random function satisfies it with probability at least $2^{-v}$. With $K=\lceil 2^v(N+3)\rceil$ independent functions, its failure probability is at most $\exp(-(N+3))$. There are fewer than $2^{N+1}$ bit strings of lengths through $N$. The union bound gives a list hitting all satisfiable files. A uniform procedure with unbounded local computation could pick the lexicographically first such list by exhaustive enumeration. Universal sets giving this kind of covering are classical. [Naor, Schulman and Srinivasan, universal sets and splitters](https://users.cms.caltech.edu/~schulman/Papers/splitters.pdf)
+
+On database $a$, choose a public-list index $i$ whose model satisfies $F(a,a)$. The preprocessor stores just $i$ and $h(a)$ in fixed-width packed fields. On query $x$, read them, reconstruct the public truth function $\sigma_i$ locally and evaluate all clauses $Q(h(a),x)$ under it. If $x=a$ they pass by construction. Conversely, if they pass, $\sigma_i$ satisfies them and already satisfies $P(a)$, so it satisfies $F(a,x)$. Correctness of the encoding forces $x=a$. This gives the claimed probe bound. The work of generating the truth function, recovering the public circuit, and checking all query clauses is local and unbounded. It cannot be counted as constant native RAM time.
+
+The pair $(h(a),i)$ also determines $a$ amongst all possible databases: its query-side test accepts exactly $a$. Hence the number of distinct databases in such an equality code is at most $2^{b+v+O(\log(N+2))}$, allowing one additional bit for variable header lengths or padding. This rules out packing $\Theta(N)$ independent diagonal bits into this kind of ordinary SAT family at $b=o(N)$.
+
+## Application to the common-roster construction
+
+There the header is the compressed union $V$ of the private positions visited before the quotas. Once $V$ is known, tag and basis are determined. All clauses whose values depend on $x$ are confined to these known positions; each straddling clause continues in public, slot-dependent decimal digits. Put the fixed circuit, actual data pins and remaining clauses into $P(a)$. On the equality tag this satisfies the hypotheses with $b=O(m)=O(N/\log N)$ and $W=\Theta(\log N)$. The resulting static upper bound is $O(N/\log^2 N)$ for **all** queries. [The physical straddling clauses](two-fixed-query-words-for-a-coded-sat-equality.md)
+
+This order is sharp for some separated equality families with polynomially many static cells of $W$ bits. Use $L$ independent Boolean names, pin them from a data vector and pin the same names from the query vector using separate clauses. Two false anchors pad each pin to a proper ternary clause. Physical length is $\Theta(L\log L)$, and the resulting formula is satisfiable exactly on equality. Against a static data structure with $S$ cells, suppose each diagonal query takes at most $t$ probes. Record the addresses and contents on $x=a$. Equal records would replay on the other database at the original query and certify a false equality. Hence $t(\lceil\log_2(S+1)\rceil+W)+O(1)\ge L$ by padding transcripts to a common length with a reserved sentinel address. With polynomial $S$ and logarithmic $W$ this is $\Omega(N/\log^2 N)$, already without layout advice. This diagonal argument is also what prices the more general native suffix in the roster construction. [Common-roster proof and its native charge](a-common-sat-pair-for-a-growing-program-roster.md)
+
+The upper bound applies to the abstract post-preprocessing cell-probe problem. A charge beyond it on one native execution would have to use the work of building or using the representation, a property not captured by this static communication reduction.
