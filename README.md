@@ -27,7 +27,7 @@ The working approach since 25 November has been to exhaust the smallest RAM on s
 - Concatenating independent sign-plane records does not add their clocks once a word holds several records. [Packed records](notes/which-four-word-sat-targets-finish-in-seven-steps.md)
 - A superlinear bound therefore has to limit the program text: one finite program at every length, or a budget on its size. Exhaustion over program size is complete only through five stored instructions, where no program decides DIMACS SAT at any speed; every correct solver is larger. [Five instructions](notes/five-instructions-cannot-decide-dimacs-sat.md)
 
-Every family built so far to carry a lower bound has a globally correct solver running in packed-scan time on that family. The open step is to force processing beyond a scan on one cold run of an arbitrary correct solver.
+The steering file names the open step: to force processing beyond a scan of the packed words on a run of an arbitrary correct solver. For the per-word execution bounds and the exact clocks above, programs that meet the bound on the same files, exactly or up to a constant factor, are recorded next to them.
 
 ### What would suffice
 
