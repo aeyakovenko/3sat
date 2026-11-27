@@ -29,7 +29,7 @@ Karve's 2021 thesis asks whether the complete 4-uniform and 5-uniform hypergraph
 | 5 | 7 | No | Twenty-one clauses cover at most $21/32$ of the cube. |
 | 5 | 8 | Yes | Fifty-six explicit forbidden quintuples cover all 256 assignments. |
 
-For each positive cover the Lean checker verifies that every support of the given width occurs exactly once, that the forbidden assignment has ones only within its support, and that every Boolean word is covered. Padded extensions preserve unsatisfiability at larger variable counts. The finite constructions settle the two entries marked unknown in that table and give a different answer for the five-variable triple entry. I have not established whether a subsequent publication already makes these corrections. [Three explicit covers and verification](CompleteClauseSeed.lean)
+For each positive cover the Lean checker verifies that every support of the given width occurs exactly once, that the forbidden assignment has ones only within its support, and that every Boolean word is covered. Padded extensions preserve unsatisfiability at larger variable counts. Korea Superintelligence Labs had already settled both entries and corrected the five-variable entry by September 2026. Its Theorems 1.1–1.4 also give the first unsatisfiable lengths at widths two through eight. The calculations here independently reproduce the overlapping thresholds and supply a smaller first-uncovered-point search for the width-three base. [Korea Superintelligence Labs, September 2026, Theorems 1.1–1.4](https://ideosphere.ai/papers/graphsat-uniform-v1.pdf) [Three explicit covers and verification](CompleteClauseSeed.lean)
 
 ## Why degree $k$ cannot refute
 
