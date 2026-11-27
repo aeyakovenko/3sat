@@ -1,0 +1,26 @@
+# Python and linter caches
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# Lean build products
+*.olean
+*.ilean
+*.c.o
+.lake/
+build/
+
+# Compiled census workers and solver scratch
+*.o
+*.out
+*.lrat
+*.drat
+*.tmp
+
+# Editor and OS files
+.DS_Store
+*.swp
+.vscode/
+.idea/
