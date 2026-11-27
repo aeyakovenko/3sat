@@ -1,0 +1,162 @@
+{
+  "about": [
+    "Baseline for tools/check.py.",
+    "`failures` maps each file that is expected to fail when run on its own to a category.",
+    "`categories` gives the reason for each category and a regular expression that the output of such a file must contain.",
+    "`broken_links` lists the relative link targets that are known not to resolve, by Markdown file and target as written.",
+    "`recorded` is the environment in which the baseline was measured."
+  ],
+  "recorded": {
+    "date": "2026-11-27",
+    "lean": "4.19.0",
+    "python": "3.10.12",
+    "numpy": "1.21.5",
+    "scipy": "1.8.0",
+    "sympy": "1.12",
+    "c++": "g++ 11.4.0"
+  },
+  "categories": {
+    "lean-mathlib": {
+      "pattern": "error: unknown module prefix '",
+      "reason": "Imports Mathlib, directly or through another file of `lean/`. This covers all 13 files of `upstream-checks/`, one of which also imports `OAI`. Running `lean File.lean` with the pinned toolchain provides neither library."
+    },
+    "lean-sibling-import": {
+      "pattern": "error: unknown module prefix '",
+      "reason": "Imports another file of `lean/` that needs only the bundled libraries. Running `lean File.lean` does not compile imports."
+    },
+    "python-pycosat": {
+      "pattern": "ModuleNotFoundError: No module named 'pycosat'",
+      "reason": "Imports the `pycosat` package, which was not installed when the baseline was recorded."
+    },
+    "python-usage": {
+      "pattern": "(?m)^usage: ",
+      "reason": "Exits with a usage error when run without arguments. These scripts need a solver path, a compiled binary, a state or output directory, an instance or a mode option."
+    }
+  },
+  "failures": {
+    "audits/almost_mixed_cutoff_audit.py": "python-pycosat",
+    "audits/andreev_dimacs_projection_audit.py": "python-pycosat",
+    "audits/certified_stream_sat_audit.py": "python-pycosat",
+    "audits/circuit_hard_partitions_audit.py": "python-pycosat",
+    "audits/clocked_native_path_campaign.py": "python-usage",
+    "audits/combined_list_refutation_audit.py": "python-pycosat",
+    "audits/compact_first_error_projection_audit.py": "python-pycosat",
+    "audits/compact_kov_projection_audit.py": "python-pycosat",
+    "audits/compact_product_projection_audit.py": "python-pycosat",
+    "audits/compact_threshold_pair_audit.py": "python-pycosat",
+    "audits/coupled_native_clock_census.py": "python-usage",
+    "audits/cubic_parity_growth_audit.py": "python-pycosat",
+    "audits/delayed_root_neighborhood_audit.py": "python-pycosat",
+    "audits/dense_ascii_chunk_circuit_audit.py": "python-pycosat",
+    "audits/dense_projection_scan_audit.py": "python-pycosat",
+    "audits/doubled_tseitin_dimacs_audit.py": "python-pycosat",
+    "audits/failed_cutoff_extraction_audit.py": "python-pycosat",
+    "audits/five_bit_selector_clock_replay.py": "python-usage",
+    "audits/glued_boundary_tables_audit.py": "python-pycosat",
+    "audits/indirect_leaf_campaign.py": "python-usage",
+    "audits/interval_multipliers_audit.py": "python-pycosat",
+    "audits/last_butterfly_word_audit.py": "python-pycosat",
+    "audits/last_packet_index_audit.py": "python-pycosat",
+    "audits/late_matrix_patch_audit.py": "python-pycosat",
+    "audits/list_to_permutation_switch_audit.py": "python-pycosat",
+    "audits/masked_word_pair_dimacs_audit.py": "python-pycosat",
+    "audits/nae_literal_projection_audit.py": "python-pycosat",
+    "audits/native_gate_lift.py": "python-usage",
+    "audits/nested_timed_core_audit.py": "python-pycosat",
+    "audits/one_bit_sibling_audit.py": "python-pycosat",
+    "audits/one_byte_dense_successor_audit.py": "python-pycosat",
+    "audits/one_edit_cubic_sat_audit.py": "python-pycosat",
+    "audits/one_hot_after_stream_audit.py": "python-pycosat",
+    "audits/one_wrong_initializer_audit.py": "python-pycosat",
+    "audits/ordered_cutoff_pruning_audit.py": "python-pycosat",
+    "audits/parity_cube_anchor_audit.py": "python-pycosat",
+    "audits/parity_cube_clock_audit.py": "python-pycosat",
+    "audits/path_augmentation_audit.py": "python-pycosat",
+    "audits/private_clause_neighbor_audit.py": "python-pycosat",
+    "audits/reachability_share_edit_audit.py": "python-usage",
+    "audits/remaining_native_leaf_campaign.py": "python-usage",
+    "audits/replay_5488_native_cubes.py": "python-usage",
+    "audits/selected_triangle_audit.py": "python-pycosat",
+    "audits/selector_parity_cube_audit.py": "python-pycosat",
+    "audits/semantic_continuation_audit.py": "python-pycosat",
+    "audits/seven_terminal_theta_audit.py": "python-usage",
+    "audits/shared_square_query_audit.py": "python-usage",
+    "audits/signed_dense_projection_audit.py": "python-pycosat",
+    "audits/single_lane_compiler_audit.py": "python-pycosat",
+    "audits/sparse_edit_address_audit.py": "python-pycosat",
+    "audits/stopped_disjointness_fork_audit.py": "python-pycosat",
+    "audits/switch_index_checksum_audit.py": "python-pycosat",
+    "audits/syntactic_read_k_projection_audit.py": "python-pycosat",
+    "audits/synthesize_native_gate_lift.py": "python-usage",
+    "audits/three_cutoff_files_audit.py": "python-pycosat",
+    "audits/triangle_twin_parity_audit.py": "python-pycosat",
+    "lean/AffineCutRank.lean": "lean-mathlib",
+    "lean/AffineTriangleDimension.lean": "lean-mathlib",
+    "lean/AffineWeightFlats.lean": "lean-mathlib",
+    "lean/AlternatingLastWrite.lean": "lean-mathlib",
+    "lean/AvoidanceTableBlocks.lean": "lean-mathlib",
+    "lean/BalancedRowCertificates.lean": "lean-mathlib",
+    "lean/BalancedSelectorCut.lean": "lean-mathlib",
+    "lean/BatchedWalkEquality.lean": "lean-mathlib",
+    "lean/CheckpointEndpointLists.lean": "lean-mathlib",
+    "lean/DenseGroupFlagRank.lean": "lean-mathlib",
+    "lean/DoubledTseitinLift.lean": "lean-mathlib",
+    "lean/EightTerminalCycle.lean": "lean-sibling-import",
+    "lean/MovingWalkWindows.lean": "lean-mathlib",
+    "lean/OneAdditionInnerProduct.lean": "lean-mathlib",
+    "lean/QueriedCutMemory.lean": "lean-mathlib",
+    "lean/SatCoverOptimality.lean": "lean-mathlib",
+    "lean/SheetGuardProjection.lean": "lean-mathlib",
+    "lean/ShiftedConvolutionSlice.lean": "lean-mathlib",
+    "lean/SupportedWordTransition.lean": "lean-mathlib",
+    "lean/ThreePermutationProducts.lean": "lean-sibling-import",
+    "lean/UniformRangeCensus.lean": "lean-mathlib",
+    "lean/UnknownXorShiftWalsh.lean": "lean-sibling-import",
+    "lean/WitnessedInterfaceRank.lean": "lean-mathlib",
+    "upstream-checks/AdversarialSignCompletion.lean": "lean-mathlib",
+    "upstream-checks/AffineWitnessSlice.lean": "lean-mathlib",
+    "upstream-checks/BinaryEvaluationDivisibility.lean": "lean-mathlib",
+    "upstream-checks/CrossCharacteristicProductWidth.lean": "lean-mathlib",
+    "upstream-checks/IntegerPolynomialGather.lean": "lean-mathlib",
+    "upstream-checks/MatchingCharacteristicProduct.lean": "lean-mathlib",
+    "upstream-checks/ModelSumMaskLower.lean": "lean-mathlib",
+    "upstream-checks/ParityQueryFiber.lean": "lean-mathlib",
+    "upstream-checks/PoweredMatrixResolvent.lean": "lean-mathlib",
+    "upstream-checks/PrimePowerWitnessFilter.lean": "lean-mathlib",
+    "upstream-checks/PrivatePatternBudget.lean": "lean-mathlib",
+    "upstream-checks/SignedBinomialEvaluation.lean": "lean-mathlib",
+    "upstream-checks/list-distinctness/ListAudit.lean": "lean-mathlib"
+  },
+  "broken_links": [
+    {
+      "source": "notes/adaptive-entries-of-a-large-binary-matrix-power.md",
+      "target": "1/D(z",
+      "reason": "Mathematical notation in which a parenthesis follows a closing bracket; not a link."
+    },
+    {
+      "source": "notes/degree-two-permanent.md",
+      "target": "1+tX_v",
+      "reason": "Mathematical notation in which a parenthesis follows a closing bracket; not a link."
+    },
+    {
+      "source": "notes/dyadic-relations.md",
+      "target": "u,v",
+      "reason": "Mathematical notation in which a parenthesis follows a closing bracket; not a link."
+    },
+    {
+      "source": "notes/first-unmatched-rank-of-sat-rejections.md",
+      "target": "short-clock-prefix-allocation.md",
+      "reason": "Link to a note that is not committed."
+    },
+    {
+      "source": "notes/forest-certificates-for-matrix-product-parity.md",
+      "target": "y-x",
+      "reason": "Mathematical notation in which a parenthesis follows a closing bracket; not a link."
+    },
+    {
+      "source": "notes/random-matching-blocks.md",
+      "target": "y_B-y'_B",
+      "reason": "Mathematical notation in which a parenthesis follows a closing bracket; not a link."
+    }
+  ]
+}
