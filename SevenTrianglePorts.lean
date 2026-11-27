@@ -76,6 +76,71 @@ theorem boundary_iff (a b s t : Color) :
     subst t
     exact ⟨baseWitness a b,tipWitness a b,witness_valid a b hab,rfl,rfl,rfl,rfl⟩
 
+/-- Restrict a tile to its eight base vertices and seven tips. Values of the
+coloring functions outside those indices do not distinguish fillings. -/
+def tileRows (y z : Nat → Color) : List Color × List Color :=
+  ([y 0, y 1, y 2, y 3, y 4, y 5, y 6, y 7], [z 0, z 1, z 2, z 3, z 4, z 5, z 6])
+
+-- For endpoints a,b the first interior base c determines both rows.
+private def baseRow (a b c : Color) (i : Nat) : Color :=
+  [a,c,third a c,c,third a c,a,third a b,b].getD i a
+
+private def tipRow (a b c : Color) (i : Nat) : Color :=
+  [third a c,a,a,a,c,b,a].getD i a
+
+private def filling (a b c : Color) := tileRows (baseRow a b c) (tipRow a b c)
+
+private theorem filling_valid (a b c : Color) (hab : a ≠ b) (hac : a ≠ c) :
+    Tile (baseRow a b c) (tipRow a b c) := by
+  have tri : ∀ a b c : Color, a ≠ b → a ≠ c → ∀ i : Fin 7,
+      triangle (baseRow a b c i) (tipRow a b c i) (baseRow a b c (i.val + 1)) := by unfold triangle; decide
+  have lane : ∀ a b c : Color, a ≠ b → a ≠ c →
+      let z := tipRow a b c
+      z 1 ≠ z 4 ∧ z 4 ≠ z 3 ∧ z 3 ≠ z 5 ∧ z 5 ≠ z 6 ∧ z 6 ≠ z 0 ∧ z 0 ≠ z 2 := by decide
+  exact ⟨fun i hi => tri a b c hab hac ⟨i, hi⟩, lane a b c hab hac⟩
+
+set_option synthInstance.maxSize 500 in
+set_option maxRecDepth 20000 in
+set_option maxHeartbeats 3000000 in
+private theorem forced_rows : ∀ a b c d e f g h : Color,
+    a ≠ b ∧ b ≠ c ∧ c ≠ d ∧ d ≠ e ∧ e ≠ f ∧ f ≠ g ∧ g ≠ h →
+    (let tips := [third a b, third b c, third c d, third d e, third e f, third f g, third g h]
+     third b c ≠ third e f ∧ third e f ≠ third d e ∧ third d e ≠ third f g ∧
+     third f g ≠ third g h ∧ third g h ≠ third a b ∧ third a b ≠ third c d →
+     ([a,b,c,d,e,f,g,h], tips) = filling a h b) := by decide
+
+/-- For any distinct ordered endpoints exactly two restrictions to the tile's
+vertices occur. They are distinguished by the first interior base color. -/
+theorem exactly_two_fillings (a b : Color) (hab : a ≠ b) :
+    ∃ r₁ r₂ : List Color × List Color, r₁ ≠ r₂ ∧ ∀ r,
+      (∃ y z, Tile y z ∧ y 0 = a ∧ y 7 = b ∧ tileRows y z = r) ↔ r = r₁ ∨ r = r₂ := by
+  have different : ∀ a b : Color, a ≠ b → filling a b b ≠ filling a b (third a b) := by decide
+  refine ⟨filling a b b, filling a b (third a b), different a b hab, ?_⟩
+  intro r
+  constructor
+  · rintro ⟨y,z,H,rfl,rfl,rfl⟩
+    have adj (i : Nat) (hi : i < 7) := (H.1 i hi).2.2
+    have tz (i : Nat) (hi : i < 7) := determined _ _ _ (H.1 i hi)
+    obtain ⟨h1,h2,h3,h4,h5,h6⟩ := H.2
+    have rows : tileRows y z = filling (y 0) (y 7) (y 1) := by
+      unfold tileRows
+      simp only [tz 0 (by decide), tz 1 (by decide), tz 2 (by decide), tz 3 (by decide),
+        tz 4 (by decide), tz 5 (by decide), tz 6 (by decide)] at h1 h2 h3 h4 h5 h6 ⊢
+      exact forced_rows _ _ _ _ _ _ _ _
+        ⟨adj 0 (by decide), adj 1 (by decide), adj 2 (by decide), adj 3 (by decide),
+         adj 4 (by decide), adj 5 (by decide), adj 6 (by decide)⟩ ⟨h1,h2,h3,h4,h5,h6⟩
+    have choices : ∀ a b c : Color, a ≠ b → a ≠ c → c = b ∨ c = third a b := by decide
+    rcases choices _ _ _ hab (adj 0 (by decide)) with hc | hc
+    · exact Or.inl (rows.trans (congrArg (filling _ _) hc))
+    · exact Or.inr (rows.trans (congrArg (filling _ _) hc))
+  · have realize (c : Color) (hac : a ≠ c) :
+        ∃ y z, Tile y z ∧ y 0 = a ∧ y 7 = b ∧ tileRows y z = filling a b c :=
+      ⟨_, _, filling_valid a b c hab hac, rfl, rfl, rfl⟩
+    rintro (rfl | rfl)
+    · exact realize b hab
+    · exact realize (third a b) (thirdProps a b hab).1
+
+
 private theorem sameThird : ∀ a b s t : Color, a ≠ b →
     s ≠ a → s ≠ b → t ≠ a → t ≠ b → s = t := by decide
 
