@@ -34,6 +34,7 @@ The steering file names the open step: to force processing beyond a scan of the 
 - A speedup of deterministic RAM time by a constant number of alternations that remains valid when one memory snapshot is as long as the run, about $n\log n$ bits. [Where the hierarchy proof stops](research-steering.md#where-the-hierarchy-proof-stops)
 - Or a locally bit-indexed reduction of unary-clock nondeterministic RAM acceptance to $o(t\log t)$ bits of DIMACS. [Compiler criterion](notes/compact-compilers-and-linear-sat-time.md)
 - An argument that also holds relative to the oracle of [relativized-clock.md](notes/relativized-clock.md) cannot work, since linear-time SAT holds there.
+- Every recorded barrier, stated with its exact hypotheses, and the two combinations of techniques that pass all of them on paper: [What any proof must get past](notes/what-any-proof-of-superlinear-sat-time-must-get-past.md)
 
 ## Layout
 
