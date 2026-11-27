@@ -1,5 +1,7 @@
 # Eight executed instructions on one four-word SAT input
 
+The subsequent full census establishes a global optimum of nine in this finite model with arbitrary addressing. [Complete theorem and replay](exact-nine-step-clock-for-four-sat-words.md)
+
 In the four-bit native RAM and the dense sign-plane SAT catalog, the satisfiable input **5488** requires at least **eight executed instructions** in every globally correct program. Its own optimal accepting path has exactly eight steps, since its four words can each be loaded and compared to a literal. In contrast the exact pointwise optimum on **4488** is seven. These two physical input memories differ by one bit and have the same SAT verdict. The finite lower bound places the unrestricted-code **global** worst-case optimum at this one length between eight and nine. The encoded length is sixteen data bits in this catalog. [Encoding, opcodes, writable addresses and terminal convention](exact-clocks-for-two-word-sat-inputs.md) · [Earlier seven-step lower bound and nine-step global algorithm](seven-tests-for-six-native-steps.md)
 
 ## When an indirect read saves a step

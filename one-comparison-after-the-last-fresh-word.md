@@ -1,5 +1,7 @@
 # One comparison after the last fresh word
 
+The subsequent full census establishes a global optimum of nine in this finite model with arbitrary addressing. [Complete theorem and replay](exact-nine-step-clock-for-four-sat-words.md)
+
 For the eight-step question on the 64 complementary high-word SAT files, every path with at least two comparisons now has the support bounds needed by the marked-rejection argument. A one-comparison path covering at most 36 targets would close that argument. Two families of one-comparison paths admit stronger restrictions. [Complete two-comparison census](exhausting-two-alu-indirect-accepting-leaves.md) · [Marked-rejection recurrence](marked-leaves-and-high-word-lookups.md)
 
 ## Two arithmetic operations with arbitrarily many read-only loads
