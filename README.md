@@ -1,6 +1,39 @@
 # How fast can a deterministic RAM decide SAT?
 
-<!-- STATUS-SUMMARY -->
+## Status (27 November 2026)
+
+**The question is open.** Nothing in this repository proves that explicit SAT needs more than linear time on a logarithmic-word RAM with unrestricted workspace, and nothing here proves the quadratic or cubic exclusions either. Every lower bound recorded below is for a different model, is conditional, is finite, or is of the same order as one packed scan of the input. The test for what counts as progress is fixed in [research-steering.md](research-steering.md#what-counts-as-progress-on-the-lower-bound).
+
+### What is established, and its scope
+
+| Result | Scope | Note |
+| --- | --- | --- |
+| Every bounded-fan-in Boolean circuit for 3-SAT has $\Omega(n(\log n)^\sigma)$ gates for some $\sigma>0$. | Circuit size, not RAM time. Rests on the list-distinctness theorem of the 24 November 2026 OpenAI preprint. A RAM decides the same hard files in $\Theta(n/\log n)$ steps. | [Proof and encoding](notes/checking-the-sat-circuit-bound.md) · [RAM clock on those files](notes/scan-time-on-the-dense-list-projection.md) |
+| Proper ASCII 3-SAT needs $\Omega(N^3/(\log^2N\log\log N))$ De Morgan formula leaves and $\Omega(N^2/\log^2N)$ branching-program nodes. | Formula and branching-program size. The formula bound was already recorded by Williams. | [Bounds and credits](notes/formula-and-branching-program-size-of-sat.md) |
+| Weak ETH implies $\Omega(n\sqrt{\log n})$ multitape time for 2-SAT. If some characteristic lacks ports, nondeterministic linear tape time is not closed under complement. | Multitape Turing machines, conditional. | [2-SAT on tapes](notes/checking-a-word-transpose-with-two-clauses-per-cell.md) · [Complement](notes/tape-time-under-complement.md) |
+| SAT is not in time $O(n^{1.082})$ on a machine with one unlimited planar tape and $T^{1/4+o(1)}$ random-access scratch words. | Restricted memory geometry. | [Mixed-tape schedule](notes/mixed-tape-williams-schedule.md) |
+| Linear time together with $O(n/\log^{6.155}n)$ auxiliary bits is impossible. | Time–space band. A linear-time RAM may use $\Theta(n\log n)$ bits, so this leaves the unrestricted case untouched. | [Band](notes/sat-time-space-band.md) · [Mixed profiles](notes/mixed-checkpoint-profiles.md) |
+| A linear-time solver would have to retrieve nonzero data from more than $Cn/\log^{11}n$ distinct work addresses on files of each verdict. | A property of every hypothetical linear-time solver. A linear-time computation can have this property. | [Theorem](notes/fast-sat-must-retrieve-nonzero-work-words.md) |
+| On one positive DIMACS file per length, every program executes at least $(2-O(1/\log w))N/w$ instructions, and every fixed program at least $(5/2-o(1))N/w$ on a second family. | Constant factors above one load per word. Programs taking $2N/w+O(1)$ and $(3+o(1))N/w$ exist on the same files. | [Two per word](notes/two-instructions-per-homogeneous-dimacs-word.md) · [Five halves](notes/generating-fresh-addresses-on-one-native-sat-file.md) |
+| The exact worst-case clock of the 16-bit sign-plane SAT catalog on the four-bit RAM is nine executed instructions. It is still exactly nine at 20 bits and in one 21-bit variant; the other 21-bit variant has upper bound nine. | Finite. No growth at the first extension. | [Exact nine](notes/exact-nine-step-clock-for-four-sat-words.md) · [Twenty bits](notes/nine-steps-at-twenty-tightly-packed-selector-bits.md) · [Fifth word](notes/the-first-fifth-word-does-not-increase-the-nine-step-upper-bound.md) |
+| Cube-cycle clause banks: at most five omitted labels per bank is linear-time; one fixed six-omission pattern encodes arbitrary 3-SAT. | A sharp tractability threshold, not a time lower bound. | [Threshold](notes/shuffled-four-cube-cycle-banks-in-ordinary-sat.md) |
+
+### The finite-exhaustion approach and its ceiling
+
+The working approach since 25 November has been to exhaust the smallest RAM on small SAT catalogs, find the exact clock, and look for a transformation to the next size under which the deficit survives. Its measured outcome:
+
+- The exact finite clocks exist and are reproducible (rows above). They do not grow at the first extension.
+- With unbounded code, **every** predicate on $N$ bits is decided in at most $N+\lceil N/w\rceil$ executed instructions: one load per word and one comparison per bit. So the finite census with unbounded code measures a quantity that is $O(N)$ for every language. It can at best separate a packed scan ($N/w$) from a bit scan ($N$); it cannot show superlinear time. The measured SAT clock of nine at 16 input bits is below the clock of a typical 16-bit predicate, which is at least twelve. [Asymptotic form, 25 November](notes/worst-labelling-clock-with-unbounded-program-text.md) · [Explicit bounds at the census sizes](notes/the-ceiling-of-the-unbounded-code-clock.md)
+- Concatenating independent sign-plane records does not add their clocks once a word holds several records. [Packed records](notes/which-four-word-sat-targets-finish-in-seven-steps.md)
+- A superlinear bound therefore has to limit the program text: one finite program at every length, or a budget on its size. Exhaustion over program size is complete only through five stored instructions, where no program decides DIMACS SAT at any speed; every correct solver is larger. [Five instructions](notes/five-instructions-cannot-decide-dimacs-sat.md)
+
+Every family built so far to carry a lower bound has a globally correct solver running in packed-scan time on that family. The open step is to force processing beyond a scan on one cold run of an arbitrary correct solver.
+
+### What would suffice
+
+- A speedup of deterministic RAM time by a constant number of alternations that remains valid when one memory snapshot is as long as the run, about $n\log n$ bits. [Where the hierarchy proof stops](research-steering.md#where-the-hierarchy-proof-stops)
+- Or a locally bit-indexed reduction of unary-clock nondeterministic RAM acceptance to $o(t\log t)$ bits of DIMACS. [Compiler criterion](notes/compact-compilers-and-linear-sat-time.md)
+- An argument that also holds relative to the oracle of [relativized-clock.md](notes/relativized-clock.md) cannot work, since linear-time SAT holds there.
 
 ## Layout
 
@@ -45,7 +78,7 @@ The results are compared with [tools/known-failures.json](tools/known-failures.j
 
 ### Tool versions
 
-Use Lean 4.19.0 with its bundled Std library and Python 3.11 or later. The finite permanent-grid and matching experiments use SymPy. The independent singleton optimization check uses NumPy and SciPy.
+Use Lean 4.19.0 with its bundled Std library and Python 3.10 or later. The finite permanent-grid and matching experiments use SymPy. The independent singleton optimization check uses NumPy and SciPy.
 
 The baseline in `tools/known-failures.json` was recorded on 2026-11-27 with Lean 4.19.0, Python 3.10.12, NumPy 1.21.5, SciPy 1.8.0, SymPy 1.12 and g++ 11.4.0 installed as `c++`, which five audits use to compile C++20 sources.
 

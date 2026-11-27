@@ -24,7 +24,7 @@ For an efficient literal prefix reference $V$, define the largest single-program
 $$
  A_v(y)=\sup_{p:V(p)=y}2^{-|p|}\min(1,v/\tau_V(p)).
 $$
-With $v$ a power of two, $-\log_2 A_v(y)$ differs by less than one from the [integer soft cost](unary-speed-gap.md). Let $B_t^S(y)$ denote the expectation $B$ above for a fixed ordinary sampler $S$. Suppose linear-time SAT holds on the model in the [research goal](../README.md). Then there are constants $c>0$ and $e$ depending only on $S,V$ such that for every $t\ge2$ and $|y|\le\lceil\log_2 t\rceil$,
+With $v$ a power of two, $-\log_2 A_v(y)$ differs by less than one from the [integer soft cost](unary-speed-gap.md). Let $B_t^S(y)$ denote the expectation $B$ above for a fixed ordinary sampler $S$. Suppose linear-time SAT holds on the model in the [research goal](../RESULTS.md#research-goal). Then there are constants $c>0$ and $e$ depending only on $S,V$ such that for every $t\ge2$ and $|y|\le\lceil\log_2 t\rceil$,
 $$
  A_{t(2+\lceil\log_2 t\rceil)^e}(y)\ \ge\ c B_t^S(y).
 $$
