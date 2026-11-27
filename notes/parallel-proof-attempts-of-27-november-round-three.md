@@ -9,6 +9,7 @@ On 27 November, a third round of parallel attempts took up the open steps left b
 | Mechanical check of the five-slot case split | [The five-slot case split is exhaustive](the-five-slot-case-split-is-exhaustive.md) |
 | The landmark chart left as a sketch in the seed note | [A landmark shared-bank chart for the seed note's runs](the-seed-note-runs-have-a-landmark-shared-bank-chart.md) |
 | Games whose first move describes memory, inside the reductio | [Description-first games fail on one hard-table opponent](description-first-games-fail-on-one-hard-table-opponent.md) |
+| The six-instruction frontier in the five-slot machine | [Six-instruction control classes: 925 excluded, 14 open](six-instruction-control-classes-in-the-five-slot-machine.md) |
 
 ## Attempts recorded here
 
