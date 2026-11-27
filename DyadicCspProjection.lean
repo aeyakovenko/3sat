@@ -148,4 +148,91 @@ theorem count_if_every_tuple_omits_a_pattern (n k : Nat) (F : Family n)
 #print axioms shatters_iff_all_patterns
 #print axioms forbidden_pattern_bound
 
+
+/-- The Boolean family of all shattered coordinate masks. Skipping projects away
+the first coordinate, while keeping it requires every tail pattern on both sides. -/
+def shatteredMasks : (n : Nat) → Family n → Family n
+  | 0, F, _ => F ()
+  | n+1, F, (false,m) => shatteredMasks n (join (left F) (right F)) m
+  | n+1, F, (true,m) =>
+    shatteredMasks n (left F) m && shatteredMasks n (right F) m
+
+def asMask : Coords n k → Bits n
+  | .empty => ()
+  | .skip m => (false, asMask m)
+  | .take m => (true, asMask m)
+
+theorem mask_iff_shatters (m : Coords n k) (F : Family n) :
+    shatteredMasks n F (asMask m) = true ↔ shatters m F := by
+  induction m with
+  | empty => rfl
+  | skip m ih => exact ih _
+  | take m ih => simp only [shatteredMasks, asMask, Bool.and_eq_true, ih, shatters]
+
+theorem all_masks_represented (n : Nat) (b : Bits n) :
+    ∃ k, ∃ m : Coords n k, asMask m = b := by
+  induction n with
+  | zero => exact ⟨0, .empty, rfl⟩
+  | succ n ih =>
+    obtain ⟨side, rest⟩ := b
+    obtain ⟨k,m,hm⟩ := ih rest
+    cases side with
+    | false => exact ⟨k, .skip m, by simp [asMask,hm]⟩
+    | true => exact ⟨k+1, .take m, by simp [asMask,hm]⟩
+
+theorem count_mono (n : Nat) (F G : Family n)
+    (sub : ∀ x, F x = true → G x = true) : count n F ≤ count n G := by
+  induction n with
+  | zero =>
+    have h := sub ()
+    cases hF : F () <;> cases hG : G () <;> simp_all [count]
+  | succ n ih =>
+    apply Nat.add_le_add
+    · exact ih (left F) (left G) (fun x => sub (false,x))
+    · exact ih (right F) (right G) (fun x => sub (true,x))
+
+/-- The cardinality of any family is bounded by its number of shattered subsets,
+including when the missing supports form a nonuniform independence system. -/
+theorem strong_sauer (n : Nat) (F : Family n) :
+    count n F ≤ count n (shatteredMasks n F) := by
+  induction n with
+  | zero => exact Nat.le_refl _
+  | succ n ih =>
+    let l := left F
+    let r := right F
+    have cross : count n (shatteredMasks n (meet l r)) ≤
+        count n (meet (shatteredMasks n l) (shatteredMasks n r)) := by
+      apply count_mono
+      intro b hs
+      obtain ⟨k,m,hm⟩ := all_masks_represented n b
+      subst b
+      have h := (mask_iff_shatters m _).mp hs
+      apply Bool.and_eq_true_iff.mpr
+      constructor
+      · apply (mask_iff_shatters m _).mpr
+        exact shatters_mono m _ _ (fun x hx => (Bool.and_eq_true_iff.mp hx).1) h
+      · apply (mask_iff_shatters m _).mpr
+        exact shatters_mono m _ _ (fun x hx => (Bool.and_eq_true_iff.mp hx).2) h
+    have hj := ih (join l r)
+    have hm := ih (meet l r)
+    have total := union_inter_count n l r
+    change count n l + count n r ≤ count n (shatteredMasks n (join l r)) +
+      count n (meet (shatteredMasks n l) (shatteredMasks n r))
+    omega
+
+/-- If the old pair can trigger a clause forbidding one extension bit, the family
+of rows allowing both extensions cannot shatter that pair. -/
+theorem ambiguous_rows_omit_pair (m : Coords n 2) (target : Bits 2) (sign : Bool)
+    (ok : Bits n → Bool → Bool)
+    (forbid : ∀ x, proj m x = target → ok x sign = false) :
+    ¬shatters m (fun x => ok x false && ok x true) := by
+  intro sh
+  obtain ⟨x, hx, hp⟩ := (shatters_iff_all_patterns m _).mp sh target
+  have h := forbid x hp
+  have both := Bool.and_eq_true_iff.mp hx
+  cases sign <;> simp_all
+
+#print axioms strong_sauer
+#print axioms ambiguous_rows_omit_pair
+
 end DyadicCspProjection
