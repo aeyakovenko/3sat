@@ -1,6 +1,6 @@
 # Searching across lengths for a short program that misses an early output
 
-**Research journal, 24 November 2026.** Can a fast SAT algorithm find a length at which an early output is missing, without finding the missing output itself? For a single prefix-free source there are many such lengths. The difficulty is to pick one with a short description, or to certify a block containing a sufficiently small fraction of exceptions. This gives a test for the linear SAT target in the [project goal](../README.md#research-goal).
+**Research journal, 24 November 2026.** Can a fast SAT algorithm find a length at which an early output is missing, without finding the missing output itself? For a single prefix-free source there are many such lengths. The difficulty is to pick one with a short description, or to certify a block containing a sufficiently small fraction of exceptions. This gives a test for the linear SAT target in the [project goal](../RESULTS.md#research-goal).
 
 ## A single source across all lengths
 
