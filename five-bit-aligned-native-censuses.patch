@@ -1,0 +1,750 @@
+--- a/eight_step_direct_guard_census.cpp
++++ b/eight_step_direct_guard_census.cpp
+@@ -1,6 +1,6 @@
+ // Test the one- and two-comparison Kraft bounds for directly addressed runs.
+ // All four input words must be essential on every accepted target file.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <cstdint>
+@@ -22,7 +22,8 @@
+ };
+ struct Examples {
+   std::array<Registers, blocks> input{};
+-  std::array<Word, 16> literal{};
++  std::vector<Registers> all_negative;
++  std::array<Word, 32> literal{};
+   std::vector<Operation> operations;
+   Examples();
+ };
+@@ -33,8 +34,8 @@
+          (column(code, 2) != 15 || column(code, 3) != 15);
+ }
+ Examples::Examples() {
+-  for (int v = 0; v < 16; ++v)
+-    for (int j = 0; j < 4; ++j)
++  for (int v = 0; v < 32; ++v)
++    for (int j = 0; j < 5; ++j)
+       literal[v][j] = (v >> j & 1) ? all_lanes : 0;
+   std::set<int> targets, negative;
+   for (int p = 4; p < 12; ++p)
+@@ -71,8 +72,17 @@
+   rows.insert(rows.end(), rejections.begin(), rejections.end());
+   for (int i = 0; i < (int)rows.size(); ++i)
+     for (int r = 0; r < 4; ++r)
+-      for (int b = 0; b < 4; ++b)
+-        input[i / 64][r][b] |= Mask(column(rows[i], r) >> b & 1) << (i % 64);
++      for (int b = 0; b < 5; ++b)
++        input[i / 64][r][b] |= Mask(physical_input(column(rows[i],r),r) >> b & 1) << (i % 64);
++  std::vector<int> all_codes;
++  for(int r=0;r<65536;++r) if(!positive(r)) all_codes.push_back(r);
++  if(all_codes.size()!=58976) throw std::runtime_error("incorrect full negative domain");
++  while(all_codes.size()%64) all_codes.push_back(all_codes.back());
++  all_negative.resize(all_codes.size()/64);
++  for(int i=0;i<(int)all_codes.size();++i)
++    for(int j=0;j<4;++j)
++      for(int b=0;b<5;++b)
++        all_negative[i/64][j][b] |= Mask((physical_input(column(all_codes[i],j),j)>>b)&1)<<(i%64);
+   for (int f = 0; f < 20; ++f) {
+     operations.push_back({f, false});
+     if (f != And && f != Or && f != Xor && f != Add && f != Mul && f != Eq &&
+@@ -162,10 +172,10 @@
+     return;
+   ++templates;
+   auto yes = ex.input[0], no = ex.input[1];
+-  for (int a = 0; a < ((used & (1 << 4)) ? 16 : 1); ++a) {
++  for (int a = 0; a < ((used & (1 << 4)) ? 32 : 1); ++a) {
+     // Either placeholder may occur anywhere. Putting distinct literals in
+     // increasing order introduces no restriction after interchanging names.
+-    for (int b = second ? a + 1 : 0; b < (second ? 16 : 1); ++b) {
++    for (int b = second ? a + 1 : 0; b < (second ? 32 : 1); ++b) {
+       constants = {a, b};
+       yes[4] = no[4] = ex.literal[a];
+       if (comparisons == 2)
+@@ -217,8 +227,8 @@
+   }
+ }
+ bool Search::fits_remaining(int k, int d) const {
+-  for (int block = 2; block < blocks; ++block) {
+-    auto s = ex.input[block];
++  for (int block = 2; block < blocks+(int)ex.all_negative.size(); ++block) {
++    auto s=block<blocks ? ex.input[block] : ex.all_negative[block-blocks];
+     s[4] = ex.literal[constants[0]];
+     if (comparisons == 2)
+       s[5] = ex.literal[constants[1]];
+--- a/eight_step_common_guard_census.cpp
++++ b/eight_step_common_guard_census.cpp
+@@ -3,7 +3,7 @@
+ // is the memory word read through that result if a direct column is omitted.
+ // Build: c++ -O3 -std=c++20 eight_step_common_guard_census.cpp -o
+ // /tmp/has_separating_triple
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <cstdlib>
+@@ -96,7 +96,7 @@
+ }
+ long long choice_count = 0, guard_pairs = 0;
+ constexpr int threshold = 9;
+-bool has_separating_triple(const std::array<RegisterTable, 22> &reg,
++bool has_separating_triple(const std::array<RegisterTable, 46> &reg,
+                            const std::vector<int> &live, Mask allowed,
+                            int layout, Node node) {
+   std::vector<Comparison> comparisons;
+@@ -168,12 +168,13 @@
+ }
+ int main() {
+   Files ex = make_examples();
+-  std::array<RegisterTable, 22> reg{};
++  std::array<RegisterTable, 46> reg{};
+   for (int b = 0; b < block_count; ++b)
+     for (int j = 0; j < 64; ++j)
+-      for (int k = 0; k < 20; ++k) {
+-        int v = k < 16 ? k : word_at(ex[b][j], k - 16);
+-        for (int i = 0; i < 4; ++i)
++      for (int k = 0; k < 46; ++k) {
++        if (k >= 20 && k < 30) continue;
++        int v = k < 16 ? k : k >= 30 ? k - 14 : physical_input(word_at(ex[b][j], k - 16), k - 16);
++        for (int i = 0; i < 5; ++i)
+           reg[k][b][i] |= Mask((v >> i) & 1) << j;
+       }
+   // All four base reads are fresh. Either every column is loaded directly,
+@@ -183,6 +184,7 @@
+     for (int r = 0; r < 20; ++r)
+       if (r != 16 + omit || omit == -1)
+         raw.push_back(r);
++    for (int r=30;r<46;++r) raw.push_back(r);
+     std::unordered_set<RegisterTable, RegisterHash> seen;
+     for (int a : raw)
+       for (int b : raw)
+@@ -203,7 +205,7 @@
+               Word out{};
+               for (int j = 0; j < 4; ++j) {
+                 auto mask = equal(w[c], reg[j][c], ~Mask(0));
+-                for (int p = 0; p < 4; ++p)
++                for (int p = 0; p < 5; ++p)
+                   out[p] |= mask & reg[16 + j][c][p];
+               }
+               reg[21][c] = out;
+--- a/two_alu_indirect_leaf_census.cpp
++++ b/two_alu_indirect_leaf_census.cpp
+@@ -2,7 +2,7 @@
+ // comparisons. A reported path is checked on the 64 specified positive
+ // inputs and every negative physical file. Input words occupy addresses 0..3.
+ // The first-table range is half-open and fully restartable.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <array>
+ #include <bit>
+@@ -12,7 +12,7 @@
+ #include <stdexcept>
+ #include <unordered_set>
+ #include <vector>
+-using Reg = std::array<Word, 24>;
++using Reg = std::array<Word, 46>;
+ constexpr Mask all = ~Mask(0);
+ constexpr int quick = 3;
+ struct Guard {
+@@ -84,9 +84,10 @@
+     rows.push_back(rows.back());
+   input.resize(rows.size() / 64);
+   for (int t = 0; t < (int)rows.size(); ++t)
+-    for (int r = 0; r < 20; ++r) {
+-      int v = r < 16 ? r : (rows[t] >> (12 - 4 * (r - 16))) & 15;
+-      for (int b = 0; b < 4; ++b)
++    for (int r = 0; r < 46; ++r) {
++      if(r>=20 && r<30) continue;
++      int v = r < 16 ? r : r >= 30 ? r-14 : physical_input((rows[t] >> (12-4*(r-16))) & 15,r-16);
++      for (int b = 0; b < 5; ++b)
+         input[t / 64][r][b] |= Mask((v >> b) & 1) << (t % 64);
+     }
+ }
+@@ -94,7 +95,7 @@
+   Word out{};
+   for (int j = 0; j < 4; ++j) {
+     Mask hit = equal(key, lanes[j], all);
+-    for (int b = 0; b < 4; ++b)
++    for (int b = 0; b < 5; ++b)
+       out[b] |= hit & lanes[16 + j][b];
+   }
+   return out;
+@@ -236,6 +237,7 @@
+   for (int i = 0; i < 20; ++i)
+     if (i < 16 || (direct >> (i - 16) & 1))
+       raw.push_back(i);
++  for(int r=30;r<46;++r) raw.push_back(r);
+   auto withfirst = raw;
+   withfirst.push_back(20);
+   if (access & 1)
+--- a/native_high_guard_families.cpp
++++ b/native_high_guard_families.cpp
+@@ -2,7 +2,7 @@
+ // rejecting input with words 4..11. 'lookup' closes one computed register
+ // under read-only indirect loads; 'stores' excludes an arbitrary subset of
+ // the four original addresses for a computed store address.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <iostream>
+@@ -16,7 +16,7 @@
+                            // duplicate padding lanes.
+ using Table = std::array<Word, blocks>;
+ using MaskTable = std::array<Mask, blocks>;
+-using Registers = std::array<Table, 24>;
++using Registers = std::array<Table, 40>;
+ constexpr Mask all = ~Mask(0);
+ template <class T> struct TableHash {
+   std::size_t operator()(const T &t) const {
+@@ -49,21 +49,21 @@
+     files.push_back(files.back());
+   Registers reg{};
+   for (int i = 0; i < blocks * 64; ++i)
+-    for (int r = 0; r < 20; ++r) {
+-      int v = r < 16 ? r : (files[i] >> (12 - 4 * (r - 16))) & 15;
+-      for (int bit = 0; bit < 4; ++bit)
++    for (int r = 0; r < 36; ++r) {
++      int v = r < 32 ? r : physical_input((files[i] >> (12-4*(r-32))) & 15,r-32);
++      for (int bit = 0; bit < 5; ++bit)
+         reg[r][i / 64][bit] |= Mask((v >> bit) & 1) << (i % 64);
+     }
+   return reg;
+ }
+ void close_reads(Registers &reg) {
+-  for (int r = 20; r < 23; ++r)
++  for (int r = 36; r < 39; ++r)
+     for (int i = 0; i < blocks; ++i) {
+       Word out{};
+       for (int addr = 0; addr < 4; ++addr) {
+         Mask hit = equal(reg[r][i], reg[addr][i], all);
+-        for (int bit = 0; bit < 4; ++bit)
+-          out[bit] |= hit & reg[16 + addr][i][bit];
++        for (int bit = 0; bit < 5; ++bit)
++          out[bit] |= hit & reg[32 + addr][i][bit];
+       }
+       reg[r + 1][i] = out;
+     }
+@@ -118,12 +118,12 @@
+   Registers reg = input();
+   std::unordered_set<Table, TableHash<Table>> seen;
+   std::uint64_t pairs = 0;
+-  for (int a = 0; a < 20; ++a)
+-    for (int b = 0; b < 20; ++b)
++  for (int a = 0; a < 36; ++a)
++    for (int b = 0; b < 36; ++b)
+       for (int f = 0; f < 20; ++f) {
+         for (int i = 0; i < blocks; ++i)
+-          reg[20][i] = operation(f, reg[a][i], reg[b][i], all);
+-        if (!seen.insert(reg[20]).second)
++          reg[36][i] = operation(f, reg[a][i], reg[b][i], all);
++        if (!seen.insert(reg[36]).second)
+           continue;
+         if (lookup)
+           close_reads(reg);
+@@ -134,11 +134,11 @@
+           for (int i = 0; i < blocks; ++i)
+             for (int addr = 0; addr < 4; ++addr)
+               if (!equals && ((excluded >> addr) & 1))
+-                allowed[i] &= ~equal(reg[20][i], reg[addr][i], all);
++                allowed[i] &= ~equal(reg[36][i], reg[addr][i], all);
+           if (equals)
+             for (int i = 0; i < blocks; ++i)
+-              allowed[i] = equal(reg[20][i], reg[excluded][i], all);
+-          if (has_pair(reg, lookup ? 24 : 21, allowed, threshold, pairs))
++              allowed[i] = equal(reg[36][i], reg[excluded][i], all);
++          if (has_pair(reg, lookup ? 40 : 37, allowed, threshold, pairs))
+             throw std::runtime_error("a pair survives on the negative suite");
+         }
+       }
+--- a/two_arithmetic_results_with_unlimited_native_reads.cpp
++++ b/two_arithmetic_results_with_unlimited_native_reads.cpp
+@@ -1,7 +1,7 @@
+ // On the audited files every raw input word selects zero on dereference.
+ // Each arithmetic result then creates at most three additional lookup tables.
+ // Give both operations all such iterates, even with arbitrarily many loads.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <iostream>
+@@ -9,7 +9,7 @@
+ #include <stdexcept>
+ #include <unordered_set>
+ #include <vector>
+-using Registers = std::array<Word, 28>;
++using Registers = std::array<Word, 44>;
+ constexpr Mask all = ~Mask(0);
+ constexpr int fast = 3;
+ struct FastTable {
+@@ -35,7 +35,7 @@
+ std::vector<Registers> input;
+ int negative_count = 0;
+ long long states = 0, full = 0, blocks_done = 0;
+-int column(int row, int i) { return (row >> (12 - 4 * i)) & 15; }
++int column(int row, int i) { return physical_input((row >> (12-4*i)) & 15,i); }
+ bool satisfiable(int row) {
+   return !(column(row, 0) & column(row, 2)) &&
+          !(column(row, 1) & column(row, 3)) && (row & 255) != 255;
+@@ -56,7 +56,7 @@
+       if (ok)
+         neg.push_back(c);
+     }
+-  if (neg.size() != 22064 || rows.size() != 64)
++  if (neg.size() != (extend_second_negative ? 37192 : 28855) || rows.size() != 64)
+     throw std::runtime_error("wrong null-lookup file count");
+   negative_count = neg.size();
+   std::mt19937 g(58241);
+@@ -67,9 +67,9 @@
+     rows.push_back(rows.back());
+   input.resize(rows.size() / 64);
+   for (int i = 0; i < (int)rows.size(); ++i)
+-    for (int r = 0; r < 20; ++r) {
+-      int v = r < 16 ? r : column(rows[i], r - 16);
+-      for (int b = 0; b < 4; ++b)
++    for (int r = 0; r < 36; ++r) {
++      int v = r < 32 ? r : column(rows[i], r-32);
++      for (int b = 0; b < 5; ++b)
+         input[i / 64][r][b] |= Mask(v >> b & 1) << (i % 64);
+     }
+ }
+@@ -77,8 +77,8 @@
+   Word out{};
+   for (int j = 0; j < 4; ++j) {
+     Mask hit = equal(key, r[j], all);
+-    for (int b = 0; b < 4; ++b)
+-      out[b] |= hit & r[16 + j][b];
++    for (int b = 0; b < 5; ++b)
++      out[b] |= hit & r[32 + j][b];
+   }
+   return out;
+ }
+@@ -106,7 +106,7 @@
+   int begin = argc > 1 ? atoi(argv[1]) : 0,
+       end = argc > 2 ? atoi(argv[2]) : 99999, threshold = 37;
+   prepare_inputs();
+-  auto first = options(20), second = options(24);
++  auto first = options(36), second = options(40);
+   std::unordered_set<std::vector<Word>, FullHash> first_tables;
+   for (auto first_op : first) {
+     std::vector<Word> word;
+@@ -118,8 +118,8 @@
+     if (index < begin || index >= end)
+       continue;
+     for (int i = 0; i < (int)word.size(); ++i) {
+-      input[i][20] = word[i];
+-      extend(input[i], 20);
++      input[i][36] = word[i];
++      extend(input[i], 36);
+     }
+     std::unordered_set<FastTable, FastHash> excluded;
+     // A fast-table coincidence is safe only when the earlier representative
+@@ -133,11 +133,11 @@
+       bool possible = false;
+       ++states;
+       for (int i = 0; i < fast; ++i) {
+-        input[i][24] = key.w[i];
+-        extend(input[i], 24);
++        input[i][40] = key.w[i];
++        extend(input[i], 40);
+       }
+       int available = fast;
+-      for (int b = 24; b < 28; ++b)
++      for (int b = 40; b < 44; ++b)
+         for (int a = 0; a <= b; ++a) {
+           auto p = tests(input[0][a], input[0][b], all),
+                e = tests(input[1][a], input[1][b], all),
+@@ -154,8 +154,8 @@
+               for (int block = fast; block < (int)input.size(); ++block) {
+                 auto &r = input[block];
+                 if (block >= available) {
+-                  r[24] = eval(r, second_op);
+-                  extend(r, 24);
++                  r[40] = eval(r, second_op);
++                  extend(r, 40);
+                   ++available;
+                   ++blocks_done;
+                 }
+--- a/remaining_native_one_guard_census.cpp
++++ b/remaining_native_one_guard_census.cpp
+@@ -1,5 +1,5 @@
+ // Residual one-comparison eight-step shapes for the four-word catalog.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <array>
+ #include <bit>
+@@ -12,7 +12,7 @@
+ #include <unordered_map>
+ #include <unordered_set>
+ #include <vector>
+-using Reg = std::array<Word, 26>;
++using Reg = std::array<Word, 46>;
+ constexpr Mask all = ~Mask(0);
+ constexpr int quick = 3;
+ struct GH {
+@@ -81,9 +81,10 @@
+     rows.push_back(rows.back());
+   input.resize(rows.size() / 64);
+   for (int t = 0; t < (int)rows.size(); ++t)
+-    for (int r = 0; r < 20; ++r) {
+-      int v = r < 16 ? r : (rows[t] >> (12 - 4 * (r - 16))) & 15;
+-      for (int b = 0; b < 4; ++b)
++    for (int r = 0; r < 46; ++r) {
++      if(r>=20 && r<30) continue;
++      int v = r < 16 ? r : r >= 30 ? r-14 : physical_input((rows[t] >> (12-4*(r-16))) & 15,r-16);
++      for (int b = 0; b < 5; ++b)
+         input[t / 64][r][b] |= Mask((v >> b) & 1) << (t % 64);
+     }
+ }
+@@ -91,7 +92,7 @@
+   Word out{};
+   for (int j = 0; j < 4; ++j) {
+     Mask hit = equal(key, s[j], all);
+-    for (int b = 0; b < 4; ++b)
++    for (int b = 0; b < 5; ++b)
+       out[b] |= hit & s[16 + j][b];
+   }
+   return out;
+@@ -167,7 +168,7 @@
+               << " support " << count << "\n";
+     std::exit(1);
+   }
+-  // A terminal fresh equality covering 37 positives must use a non-address
++  // A terminal fresh equality covering every one of the 64 targets must use a non-address
+   // earlier ALU as its high expected value. Order branches have separate
+   // one-dimensional fiber bounds.
+   bool last_read(const std::vector<Node> &third) {
+@@ -185,7 +186,7 @@
+             masks[i] &= equal(origin[previous], origin[missing[1 - i]], all);
+           }
+         }
+-        if (std::popcount(masks[0] | masks[1]) >= 37)
++        if (std::popcount(masks[0] | masks[1]) >= 64)
+           candidates.push_back({y, masks});
+       }
+     if (candidates.empty())
+@@ -200,7 +201,7 @@
+         target[i] = equal(pos, s[0][missing[i]], all);
+       bool has = false;
+       for (auto &[y, m] : candidates)
+-        if (std::popcount((target[0] & m[0]) | (target[1] & m[1])) >= 37)
++        if (std::popcount((target[0] & m[0]) | (target[1] & m[1])) >= 64)
+           has = true;
+       if (!has)
+         continue;
+@@ -212,7 +213,7 @@
+       auto left = lookup(s[1], key.val[1]), right = lookup(s[2], key.val[2]);
+       for (auto &[y, m] : candidates) {
+         int count = std::popcount((target[0] & m[0]) | (target[1] & m[1]));
+-        if (count < 37 || equal(left, s[1][y], all) ||
++        if (count < 64 || equal(left, s[1][y], all) ||
+             equal(right, s[2][y], all))
+           continue;
+         local = possible = true;
+@@ -264,9 +265,9 @@
+     int j = std::countr_zero(unsigned((~direct) & 15));
+     int ptr = access == 1 ? 20 : 22;
+     Mask fresh = equal(s[0][ptr], s[0][j], all);
+-    if (std::popcount(fresh) < 37)
++    if (std::popcount(fresh) < 64)
+       return false;
+-    std::array<StoreMask, 24> bystore{};
++    std::array<StoreMask, 46> bystore{};
+     for (int t : live)
+       for (int i = 0; i < quick; ++i) {
+         auto &x = bystore[t];
+@@ -292,7 +293,7 @@
+               if (access == 2 && (k || d))
+                 continue;
+               Mask inv = d ? all : 0, pos = (test[0][k] ^ inv) & fresh;
+-              if (std::popcount(pos) < 37)
++              if (std::popcount(pos) < 64)
+                 continue;
+               Mask nega = test[1][k] ^ inv, negb = test[2][k] ^ inv;
+               for (int store : live) {
+@@ -308,7 +309,7 @@
+                   }
+                   if ((north & ~sm.can_hit_literal[1]) ||
+                       (west & ~sm.can_hit_literal[2]) ||
+-                      std::popcount(yes) < 37)
++                      std::popcount(yes) < 64)
+                     continue;
+                   int ban = 0;
+                   for (int bit = 0; bit < 4; ++bit)
+@@ -316,7 +317,7 @@
+                       ban |= 1 << bit;
+                       yes &= ~sm.cell[0][bit];
+                     }
+-                  if (std::popcount(yes) < 37)
++                  if (std::popcount(yes) < 64)
+                     continue;
+                   candidate = true;
+                   if (!deep_test({a, b, k, bool(d)}, store, before, ban))
+@@ -324,7 +325,7 @@
+                   for (int bit = 0; bit < 4; ++bit)
+                     if (ban >> bit & 1)
+                       yes &= ~sm.cell[0][bit];
+-                  if (std::popcount(yes) >= 37) {
++                  if (std::popcount(yes) >= 64) {
+                     std::cout << "RELAXED STORE " << direct << "," << access
+                               << " op " << one.op << "," << one.a << ","
+                               << one.b << " " << two.op << "," << two.a << ","
+@@ -344,12 +345,14 @@
+   // Recompute the suffix on the same 64 input lanes before a full-file check.
+   bool last_alu(const std::vector<int> &live, const std::vector<Node> &third) {
+     Mask fresh = permitted(s[0]);
+-    if (std::popcount(fresh) < 37)
++    if (std::popcount(fresh) < 64)
+       return false;
+     int pointer_slot = (access & 2) ? 22 : 20;
+     int last = pointer_slot + 1, required = (access & 2) ? 23 : 22;
+     auto altered = s[0];
+     altered[last] = altered[15];
++    altered[last][4]=equal(s[0][pointer_slot],s[0][2],all);
++    if (extend_second_negative) altered[last][4]|=equal(s[0][pointer_slot],s[0][3],all);
+     if (last == 21)
+       altered[22] = eval(altered, two);
+     bool possible = false;
+@@ -374,7 +377,7 @@
+           Mask inverse = n1[k];
+           auto pos = tests(key.val[0], s[0][other], all)[k] ^ inverse;
+           int count = std::popcount(pos & fresh);
+-          if (count < 37)
++          if (count < 64)
+             continue;
+           possible = local = true;
+           if ((tests(eval(altered, c), altered[other], all)[k] ^ inverse) &
+@@ -431,6 +434,7 @@
+   for (int i = 0; i < 20; ++i)
+     if (i < 16 || (direct >> (i - 16) & 1))
+       live.push_back(i);
++  for(int r=30;r<46;++r) live.push_back(r);
+   auto first = choices(live);
+   live.push_back(20);
+   if (access & 1)
+@@ -464,7 +468,7 @@
+       Mask hit = 0;
+       for (int j : missing)
+         hit |= equal(initial[0][20], initial[0][j], all);
+-      if (std::popcount(hit) < 37)
++      if (std::popcount(hit) < 64)
+         continue;
+     }
+     ++shard_checks;
+--- a/two_arithmetic_results_with_a_literal_read_store.cpp
++++ b/two_arithmetic_results_with_a_literal_read_store.cpp
+@@ -1,6 +1,6 @@
+ // Two ALUs, one store and fixed literal input reads. Find the minimum set J
+ // of original addresses that would have to mask every negative comparison.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <iostream>
+@@ -10,7 +10,7 @@
+ #include <vector>
+ constexpr Mask all = ~Mask(0);
+ constexpr int fast = 3;
+-using Reg = std::array<Word, 22>;
++using Reg = std::array<Word, 38>;
+ using Key = std::array<Word, fast>;
+ template <class T> struct TH {
+   size_t operator()(const T &x) const {
+@@ -43,9 +43,9 @@
+     rows.push_back(rows.back());
+   input.resize(rows.size() / 64);
+   for (int i = 0; i < (int)rows.size(); ++i)
+-    for (int r = 0; r < 20; ++r) {
+-      int v = r < 16 ? r : val(rows[i], r - 16);
+-      for (int k = 0; k < 4; ++k)
++    for (int r = 0; r < 36; ++r) {
++      int v = r < 32 ? r : physical_input(val(rows[i],r-32),r-32);
++      for (int k = 0; k < 5; ++k)
+         input[i / 64][r][k] |= Mask(v >> k & 1) << (i % 64);
+     }
+ }
+@@ -88,7 +88,7 @@
+ int main(int argc, char **argv) {
+   int lo = argc > 1 ? atoi(argv[1]) : 0, hi = argc > 2 ? atoi(argv[2]) : 99999;
+   prep();
+-  auto first = opts(20), second = opts(21);
++  auto first = opts(36), second = opts(37);
+   std::unordered_set<std::vector<Word>, TH<std::vector<Word>>> seen;
+   for (auto one : first) {
+     std::vector<Word> word;
+@@ -100,7 +100,7 @@
+     if (idx < lo || idx >= hi)
+       continue;
+     for (int i = 0; i < (int)input.size(); ++i)
+-      input[i][20] = word[i];
++      input[i][36] = word[i];
+     std::unordered_set<Key, TH<Key>> excluded;
+     for (auto two : second) {
+       Key key;
+@@ -112,28 +112,28 @@
+       int filled = fast;
+       std::array<std::array<Hits, 2>, fast> h;
+       for (int i = 0; i < fast; ++i) {
+-        input[i][21] = key[i];
++        input[i][37] = key[i];
+         for (int who = 0; who < 2; ++who)
+-          h[i][who] = hits(input[i], 20 + who);
++          h[i][who] = hits(input[i], 36 + who);
+       }
+       bool candidate = false;
+-      for (int a = 0; a < 22; ++a)
+-        for (int b = a; b < 22; ++b) {
++      for (int a = 0; a < 38; ++a)
++        for (int b = a; b < 38; ++b) {
+           std::array<std::array<Mask, 5>, fast> t;
+           for (int i = 0; i < fast; ++i)
+             t[i] = tests(input[i][a], input[i][b], all);
+           for (int k = 0; k < 5; ++k)
+             for (int inv = 0; inv < 2; ++inv) {
+               Mask flip = inv ? all : 0, pos = t[0][k] ^ flip;
+-              if (std::popcount(pos) < 37)
++              if (std::popcount(pos) < 64)
+                 continue;
+               for (int who = 0; who < 2; ++who) {
+-                if (!who && b != 21)
++                if (!who && b != 37)
+                   continue;
+                 int ban = 0;
+                 if (!cover(t[1][k] ^ flip, h[1][who], ban) ||
+                     !cover(t[2][k] ^ flip, h[2][who], ban) ||
+-                    support(pos, h[0][who], ban) < 37)
++                    support(pos, h[0][who], ban) < 64)
+                   continue;
+                 candidate = true;
+                 ++full_count;
+@@ -141,13 +141,13 @@
+                 for (int i = fast; i < (int)input.size(); ++i) {
+                   auto &r = input[i];
+                   if (i >= filled) {
+-                    r[21] = eval(r, two);
++                    r[37] = eval(r, two);
+                     ++filled;
+                     ++blocks;
+                   }
+                   Mask passed = tests(r[a], r[b], all)[k] ^ flip;
+-                  if (!cover(passed, hits(r, 20 + who), ban) ||
+-                      support(pos, h[0][who], ban) < 37) {
++                  if (!cover(passed, hits(r, 36 + who), ban) ||
++                      support(pos, h[0][who], ban) < 64) {
+                     ok = false;
+                     break;
+                   }
+--- a/one_store_after_one_native_alu.cpp
++++ b/one_store_after_one_native_alu.cpp
+@@ -3,7 +3,7 @@
+ // two words obtained by up to five updated-memory loads from that enlarged
+ // register set. The finite necessary test uses all 64 targets and all 3,772
+ // high negatives.
+-#include "native_four_bit_planes.hpp"
++#include "five_bit_native_planes.hpp"
+ #include <algorithm>
+ #include <bit>
+ #include <cstdlib>
+@@ -14,7 +14,7 @@
+ #include <unordered_set>
+ #include <vector>
+ constexpr Mask all = ~Mask(0);
+-using Initial = std::array<Word, 24>;
++using Initial = std::array<Word, 40>;
+ using Table = std::array<Word, 60>;
+ struct RegisterTableHash {
+   size_t operator()(const Table &t) const {
+@@ -44,9 +44,9 @@
+   while (rows.size() % 64)
+     rows.push_back(rows.back());
+   for (int id = 0; id < (int)rows.size(); ++id)
+-    for (int j = 0; j < 20; ++j) {
+-      int v = j < 16 ? j : (rows[id] >> (12 - 4 * (j - 16))) & 15;
+-      for (int b = 0; b < 4; ++b)
++    for (int j = 0; j < 36; ++j) {
++      int v = j < 32 ? j : physical_input((rows[id] >> (12-4*(j-32))) & 15,j-32);
++      for (int b = 0; b < 5; ++b)
+         input[id / 64][j][b] |= Mask(v >> b & 1) << (id % 64);
+     }
+ }
+@@ -54,15 +54,15 @@
+   Word out{};
+   for (int a = 0; a < 4; ++a) {
+     Mask hit = equal(src[a], key, all);
+-    for (int k = 0; k < 4; ++k)
+-      out[k] |= hit & src[a + 16][k];
++    for (int k = 0; k < 5; ++k)
++      out[k] |= hit & src[a + 32][k];
+   }
+   return out;
+ }
+ Word updated_load(const Initial &src, const Word &key, int addr, int stored) {
+   auto out = initial_load(src, key);
+   Mask hit = equal(src[addr], key, all);
+-  for (int k = 0; k < 4; ++k)
++  for (int k = 0; k < 5; ++k)
+     out[k] = mux(hit, src[stored][k], out[k]);
+   return out;
+ }
+@@ -84,7 +84,7 @@
+     return Hash{}(x.p) ^ (Hash{}(x.n) << 1);
+   }
+ };
+-int counter = 0, first_table = 0, past_last_table = 954;
++int counter = 0, first_table = 0, past_last_table = 99999;
+ long long states = 0, tests_count = 0, candidates = 0;
+ bool passes_all_negatives(Read a, Read b, int addr, int stored, int op,
+                           bool inverse) {
+@@ -105,7 +105,7 @@
+   // still work, evaluate every expression pair in the corresponding groups on
+   // every remaining block. No equality on a partial table licenses a discard.
+   std::unordered_map<TwoBlockWord, std::vector<Read>, TwoBlockHash> words;
+-  for (int i = 0; i < 24; ++i) {
++  for (int i = 0; i < 40; ++i) {
+     Word x = p[i], y = n[i];
+     for (int depth = 0; depth <= 5; ++depth) {
+       words[{x, y}].push_back({i, depth});
+@@ -123,7 +123,7 @@
+       for (int k = 0; k < 5; ++k)
+         for (int d = 0; d < 2; ++d) {
+           Mask bias = d ? all : 0;
+-          if ((n[k] ^ bias) || std::popcount(p[k] ^ bias) < 37)
++          if ((n[k] ^ bias) || std::popcount(p[k] ^ bias) < 64)
+             continue;
+           for (auto a : it->second)
+             for (auto b : jt->second) {
+@@ -142,11 +142,11 @@
+ }
+ int main(int argc, char **argv) {
+   first_table = argc > 1 ? atoi(argv[1]) : 0;
+-  past_last_table = argc > 2 ? atoi(argv[2]) : 954;
++  past_last_table = argc > 2 ? atoi(argv[2]) : 99999;
+   prepare_inputs();
+   std::unordered_set<Table, RegisterTableHash> seen;
+-  for (int a = 0; a < 20; ++a)
+-    for (int b = 0; b < 20; ++b)
++  for (int a = 0; a < 36; ++a)
++    for (int b = 0; b < 36; ++b)
+       for (int f = 0; f < 20; ++f) {
+         Table r;
+         for (int c = 0; c < 60; ++c)
+@@ -158,12 +158,12 @@
+           continue;
+         for (int c = 0; c < 60; ++c) {
+           auto &s = input[c];
+-          s[20] = r[c];
+-          for (int k = 20; k < 23; ++k)
++          s[36] = r[c];
++          for (int k = 36; k < 39; ++k)
+             s[k + 1] = initial_load(s, s[k]);
+         }
+-        for (int addr = 0; addr < 24; ++addr)
+-          for (int stored = 0; stored < 24; ++stored)
++        for (int addr = 0; addr < 40; ++addr)
++          for (int stored = 0; stored < 40; ++stored)
+             if (check_store(addr, stored)) {
+               std::cout << " ALU id " << id << " op " << f << " inputs " << a
+                         << "," << b << "\n";

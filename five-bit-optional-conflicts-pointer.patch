@@ -1,0 +1,29 @@
+--- a/two_alu_indirect_leaf_census.cpp
++++ b/two_alu_indirect_leaf_census.cpp
+@@ -61,11 +61,16 @@
+   for (int r = 0; r < 65536; ++r)
+     if (!sat(r))
+       neg.push_back(r);
++  // x10 need not be forced false in the 19-/20-selector catalogs.
++  // Low-N negatives have a genuine conflicting bit. The old sentinel with
++  // x10 free is satisfiable and must not be put in this additional slice.
++  for (int r=0;r<65536;++r)
++    if ((r >> 12 & r >> 4 & 15) || (r >> 8 & r & 15)) neg.push_back(r|65536);
+   std::mt19937 gen(73533011);
+   std::shuffle(neg.begin(), neg.end(), gen);
+   // Seed the first negative block with the exceptional disjoint rejection and
+   // the next with uniformly high mismatches; remaining negatives are complete.
+-  if (neg.size() != 58976 || rows.size() != 64)
++  if (neg.size() != 117951 || rows.size() != 64)
+     throw std::runtime_error("wrong number of SAT labels");
+   std::iter_swap(neg.begin(), std::find(neg.begin(), neg.end(), 255));
+   int at = 64;
+@@ -86,7 +91,7 @@
+   for (int t = 0; t < (int)rows.size(); ++t)
+     for (int r = 0; r < 46; ++r) {
+       if(r>=20 && r<30) continue;
+-      int v = r < 16 ? r : r >= 30 ? r-14 : physical_input((rows[t] >> (12-4*(r-16))) & 15,r-16);
++      int v = r < 16 ? r : r >= 30 ? r-14 : (physical_input((rows[t] >> (12-4*(r-16))) & 15,r-16) - (r==19 && (rows[t]&65536) ? 16 : 0));
+       for (int b = 0; b < 5; ++b)
+         input[t / 64][r][b] |= Mask((v >> b) & 1) << (t % 64);
+     }
