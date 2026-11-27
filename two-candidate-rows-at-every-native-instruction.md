@@ -26,7 +26,7 @@ Let \(s\) bits of instance-dependent advice enable the evaluator in at most \(M^
 \[
                          s+e\log(M+2)\ \geq\ \frac{M}{(\log(M+2))^C}.
 \]
-This tolerates two different proposed truthful histories at every individual time and charges only complete misses. A single selector bit per time would itself occupy \(T\) bits. The argument does not supply that selector. [Pinned inputs and tester theorem](priority-pinned-sat.md) · [Single-field verification and its other resource tradeoffs](one-certified-index-for-all-writes-of-a-ram-run.md)
+Each time can have an arbitrary competing record alongside the true one. The bound charges only complete misses. A single selector bit per time would itself occupy \(T\) bits. [Pinned inputs and tester theorem](priority-pinned-sat.md) · [Single-field verification and its other resource tradeoffs](one-certified-index-for-all-writes-of-a-ram-run.md)
 
 Guess the evaluator advice, \(T\) and a sorted list of true replacement records for exceptional times. Each replacement with its time has \(O_p(j)\) bits. Replace that time's menu by the specified singleton. A wrong guessed repair or evaluator cannot create a false certified verdict since every satisfying selection describes a legal computation of \(D\).
 
