@@ -1,13 +1,13 @@
 """Suite-correct programs on the 5/2 suite, for five-halves-per-word-is-tight-on-the-single-edit-suite.md.
 
-Suite (notes/generating-fresh-addresses-on-one-native-sat-file.md): the positive
+Suite (generating-fresh-addresses-on-one-native-sat-file.md): the positive
 file F = prefix + A*m + trailer and its 2m single-word edits (one-bit B and the
 whitespace alternative B' with B' = A mod w).  The layout code (positions, raw,
 layout, sat, alternative) is copied from the journal audits
 fresh_native_address_audit.py and dimacs_whitespace_residue_audit.py
 (kept as copies so that this module is self-contained).
 
-Machine: separate-operation RAM (notes/five-instruction-loops-on-dimacs-sat.md):
+Machine: separate-operation RAM (five-instruction-loops-on-dimacs-sat.md):
 registers start at zero, LOAD/STORE take a register or an immediate as the full
 address, numerical ops are binary with register/immediate operands, a branch
 compares two operands and jumps to a fixed target, verdicts are terminal.

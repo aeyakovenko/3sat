@@ -14,13 +14,13 @@ Two further statements, each in a short section below: the program-size lift of 
 
 **Layouts.**
 - **Audit layout:** prefix + A^m + a 7-byte trailer, exactly as built by the journal audits; the trailer is the last, partial word, and ⌈n/w⌉ = m + 2. [fresh_native_address_audit.py](../audits/fresh_native_address_audit.py) · [dimacs_whitespace_residue_audit.py](../audits/dimacs_whitespace_residue_audit.py)
-- **Padded layout:** the manuscript's F_N, with m = ⌊N/w⌋ − C and the remaining bytes filled with spaces, placed before the trailer digit or after its newline. Runs used C ∈ {2, 3, 4, 6} and r ∈ {0, 7, 100} extra bytes.
+- **Padded layout:** the manuscript's F_N, with m = ⌊N/w⌋ − c and the remaining bytes filled with spaces, placed before the trailer digit or after its newline. Runs used the padding count c ∈ {2, 3, 4, 6} and r ∈ {0, 7, 100} extra bytes. (The letter C is kept for the program-size budget below.)
 
 ## 2. PAIR and PAIR-HB
 
-**PAIR** compares adjacent marked words in pairs: loop `p+=1; u=M[p]; p+=1; v=M[p]; if u==v loop`; on exit it accepts iff v = 0, or the next word is 0 and u equals the first marked word. It has 11 stored instructions (JNL). On the audit layout it decides every suite file in 5m/2 + 7 steps for even m and 5m/2 + 8.5 for odd m. It is correct whenever there are m ≥ 2 equal marked words, then exactly one trailer word T ∉ {0, A}, then zero words, under single-word replacements by words ∉ {0, T}; on the audit layout every ASCII replacement word satisfies this. On the padded layout PAIR rejects the satisfiable base on most layouts: it is wrong somewhere on 546 of the 648 padded layouts run, and in the failing layouts sampled during review the base was the only misclassified file.
+**PAIR** compares adjacent marked words in pairs: loop `p+=1; u=M[p]; p+=1; v=M[p]; if u==v loop`; on exit it accepts iff v = 0, or the next word is 0 and u equals the first marked word. It has 11 stored instructions (JNL) when the public prefix is one word (`first = 1`, as at every width run); a longer prefix adds one `mov`. On the audit layout it decides every suite file in 5m/2 + 7 steps for even m and 5m/2 + 8.5 for odd m. It is correct whenever there are m ≥ 2 equal marked words, then exactly one trailer word T ∉ {0, A}, then zero words, under single-word replacements by words ∉ {0, T}; on the audit layout every ASCII replacement word satisfies this. On the padded layout PAIR rejects the satisfiable base on most layouts: it is wrong somewhere on 546 of the 648 padded layouts run, and in the failing layouts sampled during review the base was the only misclassified file.
 
-**PAIR-HB** (found during review in an independent interpreter, re-encoded in the scripts here) keeps PAIR's loop and changes the exit test. It accepts iff the high byte of v is neither '4' nor '5', and either u = x1 (the first marked word) or the high byte of u is neither '4' nor '5'. It uses the public w to compute the shift and has 14 stored instructions. Why it works for any placement of the space padding:
+**PAIR-HB** (found during review in an independent interpreter, re-encoded in the scripts here) keeps PAIR's loop and changes the exit test. It accepts iff the high byte of v is neither '4' nor '5', and either u = x1 (the first marked word) or the high byte of u is neither '4' nor '5'. It uses the public w to compute the shift and has 14 stored instructions at `first = 1` (one more otherwise). Why it works for any placement of the space padding:
 - every marked or edited word has '4' or '5' as its high byte, and no trailer word does (their high bytes are space, newline, a digit of the trailer, or zero padding);
 - a word holding a trailer byte never equals its pair partner, so the loop halts no later than that pair;
 - an edit inside the block makes its pair unequal with v or u marked, so the test rejects. For odd m an edit to the last word fails u = x1 (this needs m ≥ 3), and an edit to word 0 exits at the first pair with v = A.
@@ -37,7 +37,7 @@ PAIR wrong somewhere on 0/27 audit layouts, 546/648 padded layouts
 PAIR-HB size: 16 entries = 14 stored instructions + 2 verdicts (first=1)
 ```
 
-So PAIR-HB decides every file of every layout run within 5m/2 + 24 steps (JNL; 5m/2 + 14 on the audit layout). The extra passes over all-space tail words cost O(C).
+So PAIR-HB decides every file of every layout run within 5m/2 + 24 steps (JNL; 5m/2 + 14 on the audit layout). The extra passes over all-space tail words cost O(c).
 
 **Base-file steps on the audit layout** (SIM; JNL is one less), from `python3 pair_scan_suite_calibration.py 120 121 300 301` and identical at the three widths run (abridged to w = 32768, m = 300 and 301): [pair_scan_suite_calibration.py](../audits/pair_scan_suite_calibration.py)
 
@@ -65,7 +65,7 @@ two-edit file (pair 1,2 both B) w=32768 m=7: sat=False, PAIR verdict=False -> ok
 two-edit file (pair 1,2 both B) w=32768 m=40: sat=False, PAIR verdict=True -> PAIR WRONG (expected: suite-correct only)
 ```
 
-PAIR-HB keeps the same loop and does the same (at m = 7 both reject, by an accident of the odd-m exit). At m = 1 PAIR accepts the edited file. The 5/2 theorem for globally correct programs, with upper bound 3m + o(m), is untouched.
+PAIR-HB keeps the same loop, so it accepts that file too; a separate check, not among the scripts linked here, confirmed this at m = 6 and 40. (At m = 7 PAIR rejects, by an accident of the odd-m exit test.) At m = 1 PAIR accepts the edited file. The 5/2 theorem for globally correct programs, with upper bound 3m + o(m), is untouched.
 
 **Other families with o(m) instructions** (the constructive test, audit layout). `python3 pair_scan_unroll_and_shared_stride.py` and the calibration script run four families, every program correct on every suite file. Base steps at m = 300 and 301 (SIM): [pair_scan_unroll_and_shared_stride.py](../audits/pair_scan_unroll_and_shared_stride.py)
 

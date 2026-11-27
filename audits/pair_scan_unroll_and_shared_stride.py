@@ -1,7 +1,7 @@
 """Constructive test for five-halves-per-word-is-tight-on-the-single-edit-suite.md:
 program families with o(m) stored instructions on the
 5/2 suite (base + m single-word B' edits + m one-bit B edits), looking for a
-deadline K*m with K < 5/2.  Mechanisms named by the candidate: loop unrolling
+deadline K*m with K < 5/2.  Mechanisms tried: loop unrolling
 and shared address updates.  Reuses the suite, RAM and PAIR from pair_scan_suite_calibration.py.
 
 UNROLL(k):  PAIR loop body repeated k times per iteration (k-1 exit branches,
