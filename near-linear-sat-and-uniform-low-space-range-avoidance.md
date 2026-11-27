@@ -4,6 +4,8 @@ Li and Tell revised their quantifiers on 26 November 2026. In their Theorem 1.3,
 
 **Conditional lower bound.** Under the simultaneous low-space, polynomial-time range-avoidance hardness premise of the revised Theorem 1.3, there exists a constant $\eta>0$ for which ordinary explicit 3-SAT has no deterministic $O(N^{1+\eta})$-time solver on the standard logarithmic-word RAM with unrestricted workspace. Here $N$ counts encoded bits. The independent circuit-hardness premise in that theorem can be omitted for this implication. The value of $\eta$ is unspecified.
 
+For the linear milestone a stronger consequence is available under the literal linear SAT hypothesis. It gives a near-linear clock for the whole output and reaches linear evaluator workspace. [Whole-output prediction at the linear-workspace endpoint](near-linear-avoidance-with-linear-evaluator-space.md)
+
 ## Put every eligible bit evaluator under the same clock
 
 Suppose instead that for **each** rational $\eta>0$ there exists a deterministic SAT RAM with worst-case time $O_\eta(N^{1+\eta})$. Distinct exponents may use different programs. Fix a rational $0<\epsilon<1$ in the range of the avoidance premise and write $s=\lfloor n^{\epsilon^2}\rfloor$, $m=\lfloor n^\epsilon\rfloor$. For an $n$-bit index $x$ and $s$-bit seed $u$, one fixed machine for the family computes bit $i$ of $C_x(u)$ in simultaneous polynomial time and $O(n^{\epsilon^2})$ space. The tuple $(x,u,i)$ has length $\Theta(n)$ using an ordinary self-delimiting length field. Rounding or finitely many exceptional lengths do not affect the argument.
