@@ -1,0 +1,59 @@
+# Recursive queries between the two ends of a butterfly edge
+
+One way to try to collect several hard suffixes in a single SAT run is to make an edge of one butterfly query depend on further source–sink queries to the same data. There is an exact cutoff when those inner calls can use either end of the outer edge as source or sink. Rules may choose successive calls adaptively, use both directions of an edge, and change from edge to edge.
+
+Let $D$ be the initial Boolean database on a degree-$B$, depth-$d$ butterfly, with $U=B^d$ labels and $E=dBU$ possible edges. Write $R_D(x,y)$ for the AND of the $d$ bits on the unique route between labels $x,y$. At an edge $e=(i,x,y)$ the two labels differ only in coordinate $i$, if at all. Write $\bar e=(i,y,x)$. One simultaneous substitution computes the new bit of $e$ by any fixed local Boolean rule with these six input bits:
+$$
+       D_e,\quad D_{\bar e},\quad R_D(x,x),\quad R_D(y,y),
+                  \quad R_D(x,y),\quad R_D(y,x).
+$$
+The rules and the initial bits are part of the data. A decision tree with adaptive choice among the four queries has exactly such a truth table. The same rules apply at every substitution. For the resulting transformation $F$, every database satisfies
+$$
+                  F^{h+72}(D)=F^h(D)\qquad(h\ge22).
+$$
+The **smallest universal eventual period is exactly 72**. A single fixed source–sink verdict on a two-dimensional binary butterfly of 16 edges attains it. The bound 22 on the transient is sufficient; its optimality is unestablished.
+
+Given $h$ in binary, one can compute the requested verdict in $O(E+\operatorname{bitlength}(h))$ native steps from ordinary indexed edge records and rule tables. The proof below also gives proper DIMACS instances of $O(E\log(E+2))$ bits after reducing $h$, with an $O(N)$ algorithm on the resulting files of length $N$. On a final-word endpoint query the solver can precompute the whole reduced database before that word arrives. This construction leaves one routed path to evaluate. [Single-suffix lower bound and physical model](processing-butterfly-queries-after-the-last-physical-word.md) · [Charges for distinct numerical values](one-overwritten-address-after-the-last-sat-word.md)
+
+## Plain substitution stabilizes after one inner query level
+
+First take the unsigned rule $T(D)_e=R_D(x,y)$. Write $x_0=s,\ldots,x_d=t$ for any outer route, and $L_D(v)=R_D(v,v)$ for the AND of all straight edges at label $v$. The inner route for the edge at level $i$ consists of straight edges at $x_i$ before $i$, that same edge at $i$, and straight edges at $x_{i+1}$ after $i$. At every intermediate label $x_j$ the straight suffix of the preceding edge and the straight prefix of the next one cover all $d$ layers. Consequently
+$$
+ R_{T(D)}(s,t)=R_D(s,t)\ \wedge\!
+                   \bigwedge_{1\le j<d}L_D(x_j).
+$$
+Every straight bit at $v$ in $T(D)$ now equals $L_D(v)$. Applying the identity again adds no condition. All root answers have stabilized after one substitution, and $T^3=T^2$ on the full database. Of the 65,536 graph databases on the two-dimensional binary butterfly, 44,800 have $T(D)\ne T^2(D)$.
+
+## The adaptive ceiling
+
+At a fixed label $x$, let $s\in\{0,1\}^d$ be its vector of straight bits. On a straight edge the two edge inputs coincide and all four queries equal $L_D(x)$. Whenever $s$ differs from the all-ones state $p$, the local update is therefore
+$$
+                      Z(s)_i=z_i(s_i)
+$$
+for fixed unary Boolean maps $z_i$. At $s=p$ the next state is a fixed vector $u$. Every unary Boolean map satisfies $z_i^3=z_i$, so $Z^3=Z$. Starting from any state, if ordinary iteration reaches $p$ at all, it first does so in at most two steps. From $p$, the exceptional step goes to $u$. If ordinary iteration from $u$ reaches $p$, the resulting cycle through $p$ has length at most three. Otherwise, from its first ordinary update at $u$ the period divides two. Allowing two steps for the first arrival at $p$, the exceptional step, and one further ordinary update, every straight row repeats with period six from time four onwards.
+
+For a nonstraight edge pair $e,\bar e$ the two cross routes each use one of those two edges. All their remaining factors are straight bits at $x$ and $y$. The two straight queries also depend only on these rows. With those rows fixed, the pair updates by a function on four states. From time four its changing update function is six-periodic. Sample at times $4,10,16,22,\ldots$. The composition of six consecutive updates is one fixed function on four states at these sample points. Every orbit of a four-state map has reached a cycle by the third iterate, and its period divides $\mathrm{lcm}(1,2,3,4)=12$. Thus the pair states at times 22 and 94 coincide. This holds for all pairs and all straight edges simultaneously. Determinism now gives the asserted equality for every later time. Lean verifies the generic exceptional-configuration and four-state driven-system arguments. [Finite dynamical lemmas](NestedButterflyPeriod.lean)
+
+Only the straight rows at the $d+1$ labels along an outer route and the forward and reverse bits of its $d$ edges can influence its verdict at **any** recursion depth. This already bounds its original database support by $d(d+1)+2d$, counting repetitions once. For the entire database, precompute at every label all prefix and suffix ANDs of its $d$ straight bits. This takes $O(dU)$ steps. Every cross query then uses two table entries and one cross-edge bit, so all four queries and each six-bit rule evaluation take constant time per edge. Keep two successive snapshots. If $h\ge22$, replace it with $22+((h-22)\bmod72)$, using one scan of the depth bits. At most 93 ordinary iterations now suffice. Once the reduced database is tabulated, a query takes its usual $O(d)$ path steps. No input or adversarial response arrives between the nominal recursion levels.
+
+## A period of 72 in one verdict
+
+Take $B=d=2$, with labels $0,1,2,3$ in little-endian digit order. The route from 0 to 3 first uses $0\to1$ at layer zero, then $1\to3$ at layer one. At vertices 0 and 3 make the straight state alternate between 11 and 01, so it is all ones once every two steps. A local rule realizing this sends 11 to 01 and applies the constant-one map to each coordinate otherwise. At vertex 1 choose the cycle $11\to10\to01\to11$. Send 11 to 10, and on any other state negate coordinate zero and set coordinate one to one. The strings here list coordinate zero first. Start the rows at 11. For each of the two route edges both ends' straight-query bits are one exactly at times divisible by six.
+
+Use the forward and reverse bits of the first pair as the high and low bits of a counter modulo four. Use the corresponding second pair for a counter modulo three. Both counters start at zero, increment on the simultaneous all-ones tick, and hold between ticks. These are allowed local rules; the unused fourth state of the second pair may return to zero on a tick. The two forward bits on consecutive tick blocks have respective patterns 0011 and 001, up to a common cyclic shift. Their AND has least period twelve on the tick blocks: its ones occur at exactly two residues modulo twelve a distance three or nine apart. Between ticks the states hold for six consecutive times. The nonconstant root signal therefore has least period 72. The finite audit checks the complete cyclic word, including its boundary.
+
+## Ordinary SAT encoding
+
+Reserve Boolean variables for the $E$ initial bits and for the 64 truth-table entries of each edge, pinned by the data packets. A fixed library of fan-in-two gates computes all straight prefix and suffix products, both routed directions and each table lookup with a six-bit binary selector. It uses $O(E)$ gates per stage. Up to 93 stages and a selector for the reduced depth still use $O(E)$ gates. A compiler receiving an unreduced binary depth can calculate the depth pins itself. Alternatively a copy of its spelling can be retained in a comment, charging the additional input length. Give every gate its Tseitin equivalence, padding short clauses with false anchors to get proper ternaries on three distinct variables. Simplify identical literals and constants before padding. Decimal variable names take $O(\log(E+2))$ bits. The determined final graph can feed the original signed source–sink tester with a movable final packet. Its conditional implications use the computed edge presence bits; a missing edge switches the reached state to one. Only the final queried sink sign changes between the two tagged files.
+
+A fixed-template program can validate the canonical gates, pins and counts in $O(N)$ time, retain the edge bits and rule tables, and invoke a general SAT solver on malformed or unmatched files. If the query packet is withheld, this program computes the reduced database before receiving it. The audit also gives a proper-CNF implementation for a fixed source and sink, with both tag verdicts checked independently by CaDiCaL at binary depths up to $10^{50}$. It exhausts all $2^{16}$ unsigned databases and tests 6,528 snapshot equalities on randomized local rules in five butterfly sizes. [Construction and audit](nested_butterfly_period_audit.py)
+
+## One extra vertex changes the succinct problem
+
+Suppose each edge may additionally name one fixed label $z_e$, and its local rule can query between any of $x,y,z_e$. The succinct problem of computing a designated verdict after a **binary** number of substitutions is PSPACE-complete, even for a depth-one butterfly. This statement concerns the succinct iteration problem itself.
+
+In depth one, the routed answer from $a$ to $b$ is the single matrix bit $D[a,b]$. Give each bit $j$ of a synchronous binary Boolean network a distinct label $j>0$. Use $D[j,j]$ for its value and reserve a hub 0. At $(j,j)$ name the hub as the extra label and apply gate $j$ to the channel bits $D[j,0]$ and $D[0,j]$. At $(j,0)$ name the first predecessor $k$ as the extra label and copy $D[k,k]$; at $(0,j)$ do the same for the second predecessor. Keep unused entries fixed. Each pair of substitutions updates all diagonal bits by one exact network iteration. There are only quadratically many possible matrix cells.
+
+For completeness, the cells of a polynomial-space deterministic Turing machine have a constant-alphabet local successor rule on a fixed neighborhood if each head state is encoded with its current tape symbol. Build a polynomial-size layered binary circuit for one successor, padding paths with copies to an equal depth. Turn its gates into a synchronous network, feeding the new configuration back into the first layer. After the fixed number of ticks per completed layer cycle the configuration is exactly the next machine configuration, independently of transient values in the internal layers. Make halting states absorbing and propagate acceptance to a designated output bit, or have the machine return its answer at a designated tape position before halting. Polynomially many configuration bits give a binary clock of polynomial bit length exceeding the number of configurations. The hub simulation now reduces the machine's acceptance to one fixed diagonal query at the corresponding binary depth. Conversely, storing two explicit snapshots and a binary counter uses polynomial space. This is the usual circuit-iteration argument with the one-extra-label implementation above. [Primary source on iterated circuit computation](https://theoretics.episciences.org/12313/pdf)
+
+A polynomial-time translation of all those richer succinct queries to ordinary SAT would imply $\mathrm{NP}=\mathrm{PSPACE}$, and that equality would suffice for such a reduction. The endpoint-only construction has an explicit linear-time ceiling on its proper files. Neither statement gives the unrestricted SAT running-time lower bound.
