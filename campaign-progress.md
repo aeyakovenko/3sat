@@ -10,6 +10,7 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 |---|---:|---:|---|---:|---:|---:|---|
 | 2026-11-27 02:45:38 UTC | 0 | 1 | 4488 | 7 | 121 / 154 | 0 | active / active |
 | 2026-11-27 03:47:25 UTC | 2 | 2 | 1184 | 7 | 102 / 154 | 0 | active / active |
+| 2026-11-27 04:48:47 UTC | 3 | 4 | 11C4 | 7 | 90 / 154 | 0 | active / active |
 
 ## Completed finite searches
 
@@ -35,6 +36,20 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 - Base 116C, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 108 of 154.
 - Base 116E, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 97 of 154.
 - Base 1182, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 56 of 154.
+- Base 1184, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 108 of 154.
+- Base 1186, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 112 of 154.
+- Base 1188, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 110 of 154.
+- Base 118A, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 117 of 154.
+- Base 118C, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 109 of 154.
+- Base 118E, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 117 of 154.
+- Base 11A2, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 56 of 154.
+- Base 11A4, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 100 of 154.
+- Base 11A6, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 117 of 154.
+- Base 11A8, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 109 of 154.
+- Base 11AA, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 94 of 154.
+- Base 11AC, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
+- Base 11AE, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
+- Base 11C2, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 56 of 154.
 - Base 1248, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
 - Base 4488, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 127 of 154.
 - Base 8421, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 8 of 154.
@@ -42,15 +57,25 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 
 ## Independent checks of the eight-step question
 
-At base 5488 the instruction-by-instruction verifier has refuted 150 of 154 seven-step shapes; it has found 0 separating paths. The separate finite case analysis and bit-sliced enumeration are recorded in the main journal. [Finite proof and executable tests](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md)
+At base 5488 the instruction-by-instruction verifier has refuted 154 of 154 seven-step shapes; it has found 0 separating paths. The separate finite case analysis and bit-sliced enumeration are recorded in the main journal. [Finite proof and executable tests](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md)
 
-The eight-step shared-program search (four initial direct loads) has 60 test files, 7 independently refuted parameter regions, and 8 still open. It has made 39 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (four initial direct loads) has 60 test files, 21 independently refuted parameter regions, and 27 still open. It has made 86 calls. Its most recent outcome is split-inconclusive.
 
-The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 18 still open. It has made 26 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 51 still open. It has made 59 calls. Its most recent outcome is split-inconclusive.
 
 ## Coupled finite accepting leaves
 
-The independent layout census has completed 7,232 of 11,258 first-operation tables across 14 layouts. It tests eight-step, read-only native paths with four fresh loads, two arithmetic operations and two comparisons. It asks whether a single sound accepting path covers at least 19 of 64 specified satisfiable files. Its state is running and its service is active.
+The independent layout census has completed 11,258 of 11,258 first-operation tables across 14 layouts. It tests eight-step, read-only native paths with four fresh loads, two arithmetic operations and two comparisons. It asks whether a single sound accepting path covers at least 19 of 64 specified satisfiable files. Its state is exhausted and its service is inactive.
+
+## Residual one-comparison search
+
+Four disjoint native partitions test support of at least 37 of the 64 complementary inputs at an eight-step deadline. The store case checks a necessary certificate obtained by erasing a write. The two read-only cases test actual accepting paths. The numbers below count covered pairs of first-operation tables and syntactic second-operation choices. A completed pair includes its terminal guards and, where applicable, third operations.
+
+| Family | Refuted pairs | Assigned pairs |
+|---|---:|---:|
+| Erased store | 53,388,160 | 53,388,160 |
+| Final fresh read | 71,627,266 | 71,627,266 |
+| Final arithmetic operation | 77,680,300 | 77,680,300 |
 
 ## Reviewed mathematics from the run
 
