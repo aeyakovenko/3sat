@@ -1,0 +1,2 @@
+Hand-written nine-step path with five raw comparisons (not produced by cube_cycle_leaf_capacity); checked by cube_cycle_replay_paths.py.
+  sound d=5 steps=9 capacity=135 : r0=LOAD[0]; r1=LOAD[1]; r2=LOAD[2]; r3=LOAD[3]; lt(9,r0) & not eq(12,r0) & lt(12,r1) & lt(12,r2) & lt(12,r3)

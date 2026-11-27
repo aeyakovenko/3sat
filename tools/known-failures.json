@@ -45,6 +45,8 @@
     "audits/compact_product_projection_audit.py": "python-pycosat",
     "audits/compact_threshold_pair_audit.py": "python-pycosat",
     "audits/coupled_native_clock_census.py": "python-usage",
+    "audits/cube_cycle_pair_blocks.py": "python-usage",
+    "audits/cube_cycle_upper_program.py": "python-usage",
     "audits/cubic_parity_growth_audit.py": "python-pycosat",
     "audits/delayed_root_neighborhood_audit.py": "python-pycosat",
     "audits/dense_ascii_chunk_circuit_audit.py": "python-pycosat",
