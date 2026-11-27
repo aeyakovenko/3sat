@@ -10,4 +10,12 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 |---|---:|---:|---|---:|---:|---:|---|
 | 2026-11-27 02:45:38 UTC | 0 | 1 | 4488 | 7 | 121 / 154 | 0 | active / active |
 
+## Reviewed mathematics from the run
+
+On the positive four-word input `4488`, a computed address gives a seven-step accepting path. Flipping one bit produces the positive input `5488`, which requires eight steps on the same four-bit RAM by a case reduction and an exhaustive integer computation. This leaves a global eight-versus-nine question on sixteen-bit files. The common-prefix program search is running on two processor cores. [Finite proof](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md) · [Common-tree encoding](https://github.com/aeyakovenko/3sat/blob/main/coupling-the-branches-of-the-small-ram-census.md)
+
+For proper DIMACS, there is a short locally checkable certificate with exactly one passing string for each satisfying assignment to the occurring variable names. The corresponding clock argument now only needs a sufficiently short local compiler for uniquely accepting native histories. Constructing it remains open. A compiler with small local interfaces is available on restricted sources. [Canonical certificate](https://github.com/aeyakovenko/3sat/blob/main/a-canonical-short-witness-for-locally-indexed-sat.md) · [Block compiler](https://github.com/aeyakovenko/3sat/blob/main/compiling-native-blocks-from-short-boundaries.md)
+
+The first mathematical round gave a lower bound on actual operations after the final physical SAT word is first read, on an aligned single-memory RAM. A near-linear prefix still leaves a charge of order log N / log log N on both files of a one-bit pair, even allowing pure pointer following at no charge. One correctly implemented SAT solver takes O(N) on this family. [Proof, model and upper bound](https://github.com/aeyakovenko/3sat/blob/main/processing-butterfly-queries-after-the-last-physical-word.md) · [One-address and one-payload counterexamples](https://github.com/aeyakovenko/3sat/blob/main/one-overwritten-address-after-the-last-sat-word.md)
+
 Research notes are saved as rounds finish. This ledger reports checkpoints and does not certify a superlinear RAM theorem.
