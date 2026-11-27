@@ -8,7 +8,8 @@ it for 2, 3 and 4 branches (about 10 s) and checks against the table:
   1. the same class keys, and the same number of labeled graphs in every class;
   2. per opcode mix, the same numbers of labeled graphs in total, reduced and kept;
   3. the independent EXCLUDED set, after moving to REDUCES the rule-4 classes that contain a
-     graph with a prologue branch before a two-verdict cycle, is the table's EXCLUDED set;
+     graph with a prologue branch before a two-verdict cycle, except the four with schedule C:AL
+     (kept EXCLUDED by the prologue-regime rule), is the table's EXCLUDED set;
   4. the independent prologue-branch count equals the table's on every rule-4 class;
   5. the independent four-data six-instruction cycles are the table's OPEN simple cycles.
 Nothing is written outside the temporary directory.
@@ -63,7 +64,9 @@ def main():
         kept[k[0]] += v[0]
     checks.append(('2. per mix, total = reduced + kept and both equal (%d mixes)' % len(totals),
                    set(totals) == set(kept) and all(totals[a] == (table_reduced[a] + kept[a], table_reduced[a], kept[a]) for a in totals)))
-    moved = {k for k, v in mine.items() if v[1] == 'EXCL:rule4' and v[2] > 0}
+    # rule-4 classes with a prologue branch before a two-verdict cycle go to REDUCES, except the
+    # four with schedule C:AL, which the prologue-regime argument keeps EXCLUDED (27 November)
+    moved = {k for k, v in mine.items() if v[1] == 'EXCL:rule4' and v[2] > 0 and k[1] != ('C:AL',)}
     indep_excl = {k for k, v in mine.items() if v[1].startswith('EXCL')} - moved
     table_excl = {k for k, v in table.items() if v[2] == 'EXCLUDED'}
     checks.append(('3. EXCLUDED sets equal (%d, after moving %d rule-4 classes to REDUCES)' % (len(table_excl), len(moved)),

@@ -1,6 +1,6 @@
-# Six-instruction programs in the five-slot machine: 925 of 1,019 control classes are excluded and 14 are open
+# Six-instruction programs in the five-slot machine: 929 of 1,019 control classes are excluded and 14 are open
 
-For programs of six stored instructions in the five-slot machine, a generated list of 1,019 control classes has 925 classes excluded at every speed: 887 by cited journal theorems and 38 by the five-slot arguments extended to prologue tests and exit code. Beside the classes there are 50 rows of graphs that reduce to at most five instructions, to a constant answer or to bounded reads. Another 80 classes reduce to known cases with extra code (a five-slot schedule, a loop with one numerical site, or a LOAD loop beside a numerical loop) and are not yet checked. The remaining 14 are open: 12 simple six-instruction cycles with four data instructions, and 2 two-cycle classes with three branches. An independent enumeration written during review reproduces every class, every labeled count and the 925 exclusions. A zero-trap lemma, with a companion lemma for STOREs at the cursor (both manuscript), closes the 24 register-payload subrows of the additive parity row for the writable five-slot cycle with one prologue numerical instruction. The fixed-odd-marker subrows still need the journal's odd-marker proof with a length-dependent marker. This maps the open part of the six-instruction step and says nothing about time bounds; the linear, quadratic and cubic questions remain open. [Five instructions cannot decide DIMACS SAT](five-instructions-cannot-decide-dimacs-sat.md) · [The five-slot case split is exhaustive](the-five-slot-case-split-is-exhaustive.md) · [A 43-instruction SAT program](a-43-instruction-sat-program-in-the-five-slot-machine.md)
+For programs of six stored instructions in the five-slot machine, a generated list of 1,019 control classes has 929 classes excluded at every speed: 887 by cited journal theorems and 42 by the five-slot arguments extended to prologue tests and exit code. Beside the classes there are 50 rows of graphs that reduce to at most five instructions, to a constant answer or to bounded reads. Another 76 classes reduce to known cases with extra code (a five-slot schedule, a loop with one numerical site, or a LOAD loop beside a numerical loop) and are not yet checked. The remaining 14 are open: 12 simple six-instruction cycles with four data instructions, and 2 two-cycle classes with three branches. An independent enumeration written during review reproduces every class, every labeled count and the 929 exclusions. A zero-trap lemma, with a companion lemma for STOREs at the cursor (both manuscript), closes the 24 register-payload subrows of the additive parity row for the writable five-slot cycle with one prologue numerical instruction. The fixed-odd-marker subrows need the journal's odd-marker proof with a length-dependent marker; a round-four note supplies it at the standard width on near-top lengths, where the marker is odd, and the class keeps other open rows. This maps the open part of the six-instruction step and says nothing about time bounds; the linear, quadratic and cubic questions remain open. [Five instructions cannot decide DIMACS SAT](five-instructions-cannot-decide-dimacs-sat.md) · [The five-slot case split is exhaustive](the-five-slot-case-split-is-exhaustive.md) · [A 43-instruction SAT program](a-43-instruction-sat-program-in-the-five-slot-machine.md)
 
 ## What a class is
 
@@ -53,9 +53,9 @@ In the two divergence cases a correct decider never takes that side on valid inp
 ```
 allocation  classes(EXCL/REDUCES/OPEN)  labeled graphs (EXCL/REDUCES/OPEN)  reduced-labeled
 L1S0A1B4  76/0/0  2741112/0/0  233286792
-L1S0A2B3  86/19/1  196524/96912/51840  67091268
+L1S0A2B3  88/17/1  217044/76392/51840  67091268
 L1S0A3B2  53/4/1  19440/3600/2160  19242384
-L1S1A1B3  149/22/1  234720/58716/51840  67091268
+L1S1A1B3  151/20/1  244980/48456/51840  67091268
 L1S1A2B2  112/8/3  20160/2880/2160  19242384
 L1S2A1B2  115/5/3  21360/1680/2160  19242384
 L2S0A1B3  106/0/0  345276/0/0  67091268
@@ -77,12 +77,12 @@ The enumerator's last column counts, in each class, the labeled graphs that have
 - the prologue-branch counts on the classes of rule 4;
 - the 12 four-data cycles.
 
-Its rule 4 is the rule as first stated. The 7 classes in which it finds a prologue branch before a two-verdict cycle are exactly the 7 moved to REDUCES below. The cross-check prints:
+Its rule 4 is the rule as first stated. The 7 classes in which it finds a prologue branch before a two-verdict cycle are exactly the 7 of the length-regime gap below; the cross-check keeps the four `C:AL` classes among them EXCLUDED and moves the other 3 to REDUCES. The cross-check prints:
 
 ```
 ok    1. same class keys (1019) and labeled counts
 ok    2. per mix, total = reduced + kept and both equal (10 mixes)
-ok    3. EXCLUDED sets equal (925, after moving 7 rule-4 classes to REDUCES)
+ok    3. EXCLUDED sets equal (929, after moving 3 rule-4 classes to REDUCES)
 ok    4. prologue-branch counts equal on all 45 rule-4 classes
 ok    5. four-data cycles equal the OPEN simple cycles (12)
 ```
@@ -95,13 +95,15 @@ The rules are applied by `six_slot_control_class_marking.py`, and the class tabl
 1. **No LOAD in a recurrent part.** Each LOAD then runs at most once, while the sensitive family needs unboundedly many original reads. [Control graph and accessible data](five-instruction-loops-on-dimacs-sat.md#the-control-graph-and-accessible-data) · [Bounded RAM programs](bounded-ram-programs-and-separate-sat-witnesses.md)
 2. **No numerical site in a recurrent part.** At most n_A new words are made per run, so on the periodic base the value set and the address set are bounded. The citations are the same.
 3. **Read-only with exactly one numerical site in the whole program**, under any control flow. This is the one-site theorem as written, which allows any number of LOADs, branches and jumps. [One arithmetic site](read-only-ram-with-one-arithmetic-site.md)
-4. **A single simple recurrent cycle with at most three data instructions (38 classes).** These form a five-slot data schedule. The rule applies under three conditions: no data instruction comes before the cycle, no LOAD comes after it, and no prologue branch comes before a cycle that reaches both verdicts. Extra branches then only test public initial registers or act as exits.
+4. **A single simple recurrent cycle with at most three data instructions (42 classes).** These form a five-slot data schedule. The rule applies under three conditions: no data instruction comes before the cycle, no LOAD comes after it, and no prologue branch comes before a cycle that reaches both verdicts unless the schedule is `C:AL` (see the length-regime gap below). Extra branches then only test public initial registers or act as exits.
    - **What the rule rests on** (a manuscript observation). After the control-graph step, the cited proofs use only three things: the fixed turn order, exits that cannot rejoin the cycle, and a verdict that is a function of the registers at exit. They use b = 2 only to get one simple recurrent cycle, which the enumeration supplies here. Post-exit numerical instructions or STOREs with no later LOAD only change the verdict function.
-   - **The length-regime gap**, found during review. A prologue branch can test only 0, n, w and literals, but such tests are not eventually constant in n: a signed test of n against 0 decides n ≥ 2^(w−1), and the answer flips inside every width block. A six-slot program can therefore behave like a five-slot program with entry point e only on one length regime. The five-slot theorem as stated gives some failing input, not one in that regime. This matters only when a prologue branch comes before a cycle that can still reach both verdicts; with two branches the cycle then has a single verdict and the program is wrong anyway. Such graphs occur in exactly 7 classes, which are therefore REDUCES, not EXCLUDED:
+   - **The length-regime gap**, found during review. A prologue branch can test only 0, n, w and literals, but such tests are not eventually constant in n: a signed test of n against 0 decides n ≥ 2^(w−1), and the answer flips inside every width block. A six-slot program can therefore behave like a five-slot program with entry point e only on one length regime. The five-slot theorem as stated gives some failing input, not one in that regime. This matters only when a prologue branch comes before a cycle that can still reach both verdicts; with two branches the cycle then has a single verdict and the program is wrong anyway. Such graphs occur in exactly 7 classes:
      - L1S0A2B3: `C:AL post:A`, `C:AAL`, `C:AL none:A`;
      - L1S1A1B3: `C:AL post:S`, `C:ALS`, `C:ASL`, `C:AL none:S`.
+
+     On 27 November a round-four note closed the gap for the four `C:AL` classes, which are now EXCLUDED: their prologue tests reduce to [n ≥ Q/2], [n ≥ Q−c] and [n = Q−c], and the one-site theorem fails the program on every regime, so only `C:AAL`, `C:ALS` and `C:ASL` stay REDUCES. [Length-dependent markers and the prologue-branch classes](length-dependent-markers-and-the-prologue-branch-classes.md)
    - **Citations, per schedule** (as in the class table):
-     - **20 classes, `C:AL` or `C:ALL`:** the one-site theorem, used with exit code after the last LOAD. The theorem as written allows no STORE and no second numerical site; the extension is part of this note's manuscript argument.
+     - **24 classes, `C:AL` or `C:ALL`:** the one-site theorem, used with exit code after the last LOAD. The theorem as written allows no STORE and no second numerical site; the extension is part of this note's manuscript argument. The four `C:AL` classes with a prologue branch also cite the round-four note: `post:A` uses this extension, `post:S` and `none:S` need only reduction R-d of the case-split note and the theorem as written, and `none:A` the theorem as written.
      - **6 classes, `C:AAL`:** the read-only five-instruction theorem. [Read-only five instructions](read-only-five-instructions-on-ordinary-sat.md)
      - **12 classes, `C:ALS` or `C:ASL`:** the writable five-slot theorem. These rest on its row W5, "Writing through the raw word", and so on the private-probe lemma for the writable machine proved in Section 4 of the case-split note. That lemma says: every STORE destination lies in a bounded set B of words, the private addresses are translated outside B, and |B| mark bits, one per cell of B, together with the input determine the whole memory, so a context and a reply determine the continuation. It carries over unchanged, as checked during review. In each of these classes the sixth instruction is either a STORE or numerical instruction after the exit with no later LOAD, an instruction on a bypass path, or an extra branch. So every STORE executed before the last private probe is the cycle STORE, whose destination lies in B. [Writable five slots](writable-five-slots-without-a-clock.md#writing-through-the-raw-word) · [The two clarified points](the-five-slot-case-split-is-exhaustive.md#4-the-two-clarified-points)
 
@@ -111,9 +113,9 @@ Rules 1–3 cover 887 classes: 556 with no recurrent LOAD, 286 with no recurrent
 - A recurrent part made only of branches cannot be traversed twice on a halting run, so it is treated as acyclic code.
 - A recurrent part whose only data instructions are STOREs repeats its full state after one traversal. Its STOREs are treated as one-time STOREs. This can move a class only to REDUCES, never to EXCLUDED.
 
-**REDUCES (80 classes).**
+**REDUCES (76 classes).**
 - **33:** a five-slot data schedule with a data instruction before the cycle, or a LOAD on an exit path.
-- **7:** a five-slot data schedule with a prologue branch before a two-verdict cycle (the length-regime gap of rule 4).
+- **3:** a five-slot data schedule (`C:AAL`, `C:ALS` or `C:ASL`) with a prologue branch before a two-verdict cycle (the length-regime gap of rule 4).
 - **22:** a read-only loop with one recurrent numerical site, plus one-time numerical instructions, LOADs or STOREs (3 classes have a STORE) or a computation-only loop. The one-site theorem as written forbids STOREs and a second numerical site.
 - **18:** a LOAD loop with no numerical site beside a separate loop that has one. These need a value-set argument across phases.
 
@@ -293,7 +295,7 @@ VIOLATION (4096, 100, ('x-y', 'LAS', 'xx'), 'S', 79, 66, [79, 95])
 - the unary scan y←y+z with a length-dependent stride;
 - the unary reverse-link row.
 
-So it stays REDUCES, and the totals stay 925/80/14. What is newly closed, at every speed (manuscript), is an operand subclass: the register-payload part of the additive parity row of that class. The same lemmas hold for any public initial cursor. So they also close this subrow wherever a prologue makes the starting registers public but arbitrary.
+So it stays REDUCES, and Lemmas A and B change no total. What is newly closed, at every speed (manuscript), is an operand subclass: the register-payload part of the additive parity row of that class. The same lemmas hold for any public initial cursor. So they also close this subrow wherever a prologue makes the starting registers public but arbitrary.
 
 ## 5. The three standard tests
 
@@ -317,9 +319,9 @@ No time lower bound is claimed; this is a statement about program size.
 ## 7. What is not proved
 
 - No six-slot class is newly excluded.
-- The 925 EXCLUDED marks rest on the cited manuscript theorems. They also rest on this note's manuscript contraction and exit-test arguments: dead branch sides, self-loops, branch-only and STORE-only loops, extra exit branches. Rule 4 alone accounts for 38 classes. That every row of the writable and read-only five-slot proofs tolerates any exit function, extra exit tests and public entry points was checked during review in the shape of the argument, not row by row.
-- Twelve of the 38 rule-4 classes, and the 12 contraction rows of the four mixes with a STORE (L1S1A2B2, L1S2A1B2, L2S1A1B2, L1S1A1B3), rest on row W5 of the writable split. W5 holds by the private-probe lemma for the writable machine in Section 4 of the case-split note. The 887 classes of rules 1–3, the other 26 rule-4 classes and Lemmas A and B do not depend on W5.
-- The 80 REDUCES classes are unchecked. They include the 7 classes with a length-dependent entry point.
+- The 929 EXCLUDED marks rest on the cited manuscript theorems. They also rest on this note's manuscript contraction and exit-test arguments: dead branch sides, self-loops, branch-only and STORE-only loops, extra exit branches. Rule 4 alone accounts for 42 classes; four of them also rest on the round-four note's argument (manuscript), where only `post:A` uses the exit-code extension. That every row of the writable and read-only five-slot proofs tolerates any exit function, extra exit tests and public entry points was checked during review in the shape of the argument, not row by row.
+- Twelve of the 42 rule-4 classes, and the 12 contraction rows of the four mixes with a STORE (L1S1A2B2, L1S2A1B2, L2S1A1B2, L1S1A1B3), rest on row W5 of the writable split. W5 holds by the private-probe lemma for the writable machine in Section 4 of the case-split note. The 887 classes of rules 1–3, the other 30 rule-4 classes and Lemmas A and B do not depend on W5.
+- The 76 REDUCES classes are unchecked. They include the 3 classes with a length-dependent entry point.
 - The enumeration is a computation. An independent enumeration written during review reproduces its classes, labeled counts and exclusions, but the marking rules themselves are manuscript arguments. Operands, opcodes and literals were not enumerated, except within the class of Section 3.
 - In the table of Section 3, only the multiplication and parity rows were re-checked during review. The orbit-prefix, reverse-link and coincident-destination rows with an odd start were not.
 - Lemmas A and B, and the even-payload parity remark, are manuscript proofs with no Lean check. They were tested only on synthetic bases (w = 16, and also w = 12 in the independent check), not on the journal's exact DIMACS layout; that property 1 implies the Setting was checked by reading. They close an operand subclass, not a control class. The odd fixed marker, the length-dependent stride rows and the unary reverse-link row of the class of Section 3 remain unchecked.

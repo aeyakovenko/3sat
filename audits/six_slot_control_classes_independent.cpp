@@ -8,7 +8,8 @@
 // notes/six-instruction-control-classes-in-the-five-slot-machine.md (EXCL / NONEXCL), and,
 // for the classes of rule 4, the number of graphs with a prologue branch before a
 // two-verdict cycle. Rule 4 is applied as first stated, so it still includes the 7 classes
-// that such graphs move to REDUCES; six_slot_control_class_cross_check.py makes that move.
+// that have such graphs; six_slot_control_class_cross_check.py moves to REDUCES the 3 of them
+// that the marking rules leave there (all but the four C:AL classes).
 // Run: ./enumerator 2|3|4 (the number of branches); per-mix totals on standard error.
 #include <bits/stdc++.h>
 using namespace std;

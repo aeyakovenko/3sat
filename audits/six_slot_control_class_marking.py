@@ -33,6 +33,7 @@ import argparse, collections, io, os, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 N = "notes/"
 NOTE = N + "six-instruction-control-classes-in-the-five-slot-machine.md"
+NOTE_Y6 = N + "length-dependent-markers-and-the-prologue-branch-classes.md"
 CIT = {
     'five': N + "five-instructions-cannot-decide-dimacs-sat.md (step 1)",
     'ctrl': N + "five-instruction-loops-on-dimacs-sat.md#the-control-graph-and-accessible-data; "
@@ -47,6 +48,16 @@ CIT = {
     'r4_w5': N + "writable-five-slots-without-a-clock.md (recurrent schedule L,S,A; extra branches are exit tests),"
              " with the private-probe lemma for the writable machine used by row W5, "
              + N + "the-five-slot-case-split-is-exhaustive.md (Section 4)",
+    # rule 4 for the four C:AL classes with a prologue branch before a two-verdict cycle
+    # (added 27 November): the prologue's tests reduce to length regimes, and the one-site
+    # theorem fails the program on every regime (NOTE_Y6, Section 4)
+    'r4_reg_postA': NOTE_Y6 + " (Section 4: the prologue's tests reduce to length regimes); "
+                    + N + "read-only-ram-with-one-arithmetic-site.md on every regime, with the exit-code extension of "
+                    + NOTE + " (manuscript)",
+    'r4_reg_noneA': NOTE_Y6 + " (Section 4); " + N + "read-only-ram-with-one-arithmetic-site.md as written"
+                    " on the cycle side (the bypass reads nothing)",
+    'r4_reg_S': NOTE_Y6 + " (Section 4); reduction R-d of " + N + "the-five-slot-case-split-is-exhaustive.md"
+                " deletes the STORE, then " + N + "read-only-ram-with-one-arithmetic-site.md as written",
 }
 
 
@@ -127,6 +138,12 @@ def mark(alloc, crs, offs, preb=0):
     pre = [o for o in off if o.startswith('pre:') or o.startswith('mid:')]
     postL = [o for o in off if o == 'post:L']
     if not pre and not postL:
+        if preb > 0 and parts == 'C:AL' and off in (['post:A'], ['none:A'], ['post:S'], ['none:S']):
+            # the four C:AL classes: the prologue's tests reduce to [n >= Q/2], [n >= Q-c] and
+            # [n = Q-c], and the one-site theorem fails the program on every regime (NOTE_Y6)
+            cit = {'post:A': CIT['r4_reg_postA'], 'none:A': CIT['r4_reg_noneA']}.get(off[0], CIT['r4_reg_S'])
+            return 'EXCLUDED', ('five-slot schedule C:AL + prologue branch before a two-verdict cycle;'
+                                ' the prologue tests reduce to length regimes (rule 4)'), cit
         if preb > 0:
             # a prologue branch (tests of 0, n, w, literals only) before a cycle that reaches
             # both verdicts: the entry point may depend on the length regime (a signed test of
