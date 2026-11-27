@@ -20,6 +20,7 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 | 2026-11-27 11:49:25 UTC | 8 | 13 | 146A | 7 | 88 / 154 | 0 | active / active |
 | 2026-11-27 12:49:30 UTC | 8 | 14 | 15AA | 7 | 40 / 154 | 0 | active / active |
 | 2026-11-27 13:49:35 UTC | 8 | 16 | 1669 | 7 | 56 / 154 | 0 | active / active |
+| 2026-11-27 14:43:39 UTC | 8 | 16 | 1728 | 7 | 97 / 154 | 0 | inactive / inactive |
 
 ## Completed finite searches
 
@@ -123,15 +124,15 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 - Base 12ED, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
 - Base 1324, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 35 of 154.
 - Base 1328, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
-- The local state contains 200 completed search records in total.
+- The local state contains 213 completed search records in total.
 
 ## Independent checks of the eight-step question
 
 At base 5488 the instruction-by-instruction verifier has refuted 154 of 154 seven-step shapes; it has found 0 separating paths. The separate finite case analysis and bit-sliced enumeration are recorded in the main journal. [Finite proof and executable tests](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md)
 
-The eight-step shared-program search (four initial direct loads) has 60 test files, 157 independently refuted parameter regions, and 180 still open. It has made 511 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (four initial direct loads) has 60 test files, 170 independently refuted parameter regions, and 196 still open. It has made 553 calls. Its most recent outcome is split-inconclusive.
 
-The eight-step shared-program search (unrestricted prefix) has 33 test files, 21 independently refuted parameter regions, and 306 still open. It has made 356 calls. Its most recent outcome is refuted-cube.
+The eight-step shared-program search (unrestricted prefix) has 33 test files, 33 independently refuted parameter regions, and 312 still open. It has made 386 calls. Its most recent outcome is split-inconclusive.
 
 ## Coupled finite accepting leaves
 
