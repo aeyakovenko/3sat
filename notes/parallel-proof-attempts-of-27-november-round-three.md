@@ -8,6 +8,7 @@ On 27 November, a third round of parallel attempts took up the open steps left b
 | --- | --- |
 | Mechanical check of the five-slot case split | [The five-slot case split is exhaustive](the-five-slot-case-split-is-exhaustive.md) |
 | The landmark chart left as a sketch in the seed note | [A landmark shared-bank chart for the seed note's runs](the-seed-note-runs-have-a-landmark-shared-bank-chart.md) |
+| Games whose first move describes memory, inside the reductio | [Description-first games fail on one hard-table opponent](description-first-games-fail-on-one-hard-table-opponent.md) |
 
 ## Attempts recorded here
 

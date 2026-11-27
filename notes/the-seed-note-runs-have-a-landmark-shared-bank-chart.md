@@ -77,7 +77,7 @@ decoder alone, m=8, h=1..8: 2580480 inversions correct, probes <= 2h-1, K*h < 2m
 2606792 decodes (m = 2,4,6,8; every permutation; h = 1..m): all correct, probes <= h; 1303180 decodes use exactly h probes
 ```
 
-**An independent checker, written during review,** shares no code with these scripts. Its file generators are the journal audit's own, and it has its own interpreter and program text, bank encoder, evaluator written from the snapshot table, and decoder. It checks the initial condition, every gap replay and the terminal condition at every coordinate, including all 2^W addresses, and compares every row with direct simulation.
+**An independent checker, written during review,** ([script](../audits/landmark_chart_independent_check.py)) shares no code with these scripts. Its file generators are the journal audit's own, and it has its own interpreter and program text, bank encoder, evaluator written from the snapshot table, and decoder. It checks the initial condition, every gap replay and the terminal condition at every coordinate, including all 2^W addresses, and compares every row with direct simulation.
 - For m ∈ {2, 4, 6}, both families, every permutation and every (h, g) ∈ [1..m]²: 52,624 charts, all sound, with decode probes ≤ h.
 - For m = 8 and h = g = 2, every permutation on both families: 2 × 40,320 charts, all sound at all 32 addresses.
 - The two machines agree at every instruction step (165,200 steps over all permutations at m ≤ 6), and the two evaluators agree on all 14,710,400 (row, coordinate) values.
