@@ -11,6 +11,7 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 | 2026-11-27 02:45:38 UTC | 0 | 1 | 4488 | 7 | 121 / 154 | 0 | active / active |
 | 2026-11-27 03:47:25 UTC | 2 | 2 | 1184 | 7 | 102 / 154 | 0 | active / active |
 | 2026-11-27 04:48:47 UTC | 3 | 4 | 11C4 | 7 | 90 / 154 | 0 | active / active |
+| 2026-11-27 05:48:53 UTC | 4 | 5 | 1245 | 7 | 35 / 154 | 0 | active / active |
 
 ## Completed finite searches
 
@@ -50,6 +51,28 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 - Base 11AC, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
 - Base 11AE, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
 - Base 11C2, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 56 of 154.
+- Base 11C4, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 103 of 154.
+- Base 11C6, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 8 of 154.
+- Base 11C8, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 9 of 154.
+- Base 11CA, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
+- Base 11CC, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 110 of 154.
+- Base 11CE, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 118 of 154.
+- Base 11E2, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 56 of 154.
+- Base 11E4, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 102 of 154.
+- Base 11E6, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 75 of 154.
+- Base 11E8, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 103 of 154.
+- Base 11EA, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 108 of 154.
+- Base 11EC, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 108 of 154.
+- Base 11EE, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 78 of 154.
+- Base 1221, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 35 of 154.
+- Base 1224, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 52 of 154.
+- Base 1225, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 36 of 154.
+- Base 1228, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 35 of 154.
+- Base 1229, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 46 of 154.
+- Base 122C, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 37 of 154.
+- Base 122D, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 71 of 154.
+- Base 1241, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
+- Base 1244, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 45 of 154.
 - Base 1248, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
 - Base 4488, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 127 of 154.
 - Base 8421, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 8 of 154.
@@ -59,9 +82,9 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 
 At base 5488 the instruction-by-instruction verifier has refuted 154 of 154 seven-step shapes; it has found 0 separating paths. The separate finite case analysis and bit-sliced enumeration are recorded in the main journal. [Finite proof and executable tests](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md)
 
-The eight-step shared-program search (four initial direct loads) has 60 test files, 21 independently refuted parameter regions, and 27 still open. It has made 86 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (four initial direct loads) has 60 test files, 37 independently refuted parameter regions, and 43 still open. It has made 134 calls. Its most recent outcome is refuted-cube.
 
-The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 51 still open. It has made 59 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 84 still open. It has made 92 calls. Its most recent outcome is split-inconclusive.
 
 ## Coupled finite accepting leaves
 
