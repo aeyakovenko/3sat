@@ -1,0 +1,84 @@
+# A sharp time cost for reading only initialized zeros across a SAT input cut
+
+There are explicit pairs of proper 3-CNF input blocks of total bit length $N=\Theta(m\log m)$ on which the following deterministic RAM tradeoff is sharp. Read the left block before the right. On equal pairs, suppose at most $\beta m$ work words contain nonzero values at the boundary, and the remainder of the computation retrieves **no nonzero word from that boundary**. It may make arbitrary writes, use all subsequently written values, compute without a space bound and probe any addresses. For each fixed rational $\beta>0$, the optimal worst-case number of distinct zero-valued boundary words inspected is
+$$
+  \Theta_\beta\!\left(m^{1+1/\beta}\right)
+$$
+when the host address range suffices for the upper construction. The lower bound already holds outside an exponentially small fraction of the equal pairs. For $\beta=1$, $1/2$ and $1/3$ the orders are quadratic, cubic and quartic in $m$. Even the quartic example has a standard word-RAM test spending $O(m)$ steps on the packed layout when reads may return earlier marks. The result identifies the cost of a restriction on native runs.
+
+There is an unrestricted form of the lower bound below. It applies to **every cut a solver might choose on an actual run**, including random input rereads, arbitrary stores before and after the cut, and data-dependent addresses. It charges these operations explicitly. No SAT time hypothesis or imported circuit lower bound enters the proof.
+
+## The files and the set pairs
+
+Choose arbitrary $f,g\in[m]^m$. The left clauses enforce $z_i=u_{f_i}$ for each $i$. The right clauses force a bit $b_i$ to be $z_i$ XOR $u_{g_i}$, and require the OR of these bits. These constraints are unsatisfiable for $f=g$. For $f\ne g$, choose one differing row, assign different values to its two $u$ variables, then set each $z_i$ and each gate. Each half can be written independently, including its copy of the public constants. Equivalence CNFs, an OR chain and a fixed bank of false padding variables give proper ternaries with dense names. Pad records and the boundary so each input word depends on at most one private side. Fixed-width binary and fixed-layout decimal DIMACS both have $N=\Theta(m\log m)$. The full $m^m$ diagonals can consequently be used. [Earlier layout and mixed-input proof](semantic-cut-permutations.md)
+
+Fix a deterministic program correct on all these files. For a cut on the run on $(x,x)$ let $A_x$ be its nonzero work addresses at the cut, and $B_x$ the distinct addresses at which its suffix retrieves an incoming zero before a local overwrite. Ignore later reads of the suffix's own values. In the left-to-right setting with no incoming nonzero reads, partition the diagonals by controller at the boundary. For distinct $x,y$ in one class, $A_x\cap B_y$ cannot be empty. Otherwise run the prefix for $x$ and the suffix for $y$ on $(x,y)$. Every required boundary value appears as the same zero as on $(y,y)$. Own stores, input words and register operations then also agree by induction. The program would reject the satisfiable hybrid. Likewise $A_y\cap B_x\ne\varnothing$, while $A_x\cap B_x=\varnothing$.
+
+Bollobás's set-pairs inequality gives the sharp counting step,
+$$
+ \sum_{x\ \mathrm{in\ class}} \binom{|A_x|+|B_x|}{|A_x|}^{-1}\le1 .
+$$
+Indeed, choose a uniform random total order of the finitely many involved addresses. The displayed summand is the probability that all marks of $x$ precede all its tests. The events for $x$ and $y$ are disjoint: the two cross-intersection witnesses would each have to precede the other. A fixed number of logarithmic registers and a fixed PC give only $m^{O_A(1)}$ boundary controllers. [Bollobás, *On generalized graphs*](https://doi.org/10.1007/BF01904851) · [Lean proof of the hybrid query and exclusive-order steps](../lean/ZeroReadSetPairs.lean)
+
+## A bound for arbitrary cuts, exceptions and rereads
+
+Let $U$ be the work address range (including bank tags) and $v$ the word alphabet size, both polynomial in $m$. Let $I$ bound the number of side-tagged private input word positions. Define $P$ as the cap on the sum of distinct right private words inspected before the cut and distinct left private words inspected after it. Define $R$ as the cap on the distinct **nonzero** work words retrieved from the cut before a local overwrite. The work RAM is initially zero, with a separate immutable input bank. Allow any cut that meets these budgets on each diagonal and take just one such cut per qualifying diagonal. There is no need to send its time. Put
+$$
+ C=\#\{\text{controllers}\}\!
+       \left(\sum_{p=0}^P\binom Ip v^p\right)
+       \left(\sum_{r=0}^R\binom Ur(v-1)^r\right).
+$$
+If there are at most $S$ nonzero cut cells and at most $Q$ distinct incoming zero queries at the selected cut, then **at most** $C\binom{S+Q}{S}$ diagonals qualify.
+
+To prove this, also group the runs by the maps of off-side input words and nonzero incoming work words to their genuine values. Within one class the chosen prefix on $(x,y)$ agrees with the original prefix on $(x,x)$, including every off-side read. Start $y$'s suffix there. The left input words it consults agree by its catalog. Every cataloged nonzero work address has the correct cut value in both runs. Remove these addresses from $A_x$. Until a zero query by $y$ first meets a remaining mark of $x$, the rest of the suffix is identical. The mixed verdict forces such a meeting, in each orientation. Apply the same inequality in each class. The proof also works relative to a fixed public predictor of the incoming word at each address, by replacing “nonzero” by “different from the predicted value” throughout. The ordinary zero predictor suffices for the time examples. The earlier many-phase theorem charges switches between several successive input phases. [Many-phase comparison](phase-ordered-zero-reads.md)
+
+Put $S=\lfloor\beta m\rfloor$. Even allowing any fixed number of off-side input words or retrieved positive words, $C=m^{O_A(1)}$. In fact $\log C=o(m)$ whenever $P+R=o(m/\log m)$. For every fixed $\eta>0$ and sufficiently large $m$, the fraction admitting a cut as above with
+$$
+ Q\le (1-\eta)\frac{\beta}{e}m^{1+1/\beta}
+$$
+is $e^{-\Omega_{\eta,\beta}(m)}$. Use $\binom{S+Q}{S}\le(e(1+Q/S))^S$ and divide by $m^m$. Its natural logarithm after division is at most $\beta m\ln(1-\eta)+o(m)$ for $0<\eta<1$. A native instruction makes constantly many accesses, so the same power law lower-bounds elapsed time. For $\beta=1/3$ this gives $\Omega(N^4/\log^4 N)$ time if the required cut exists throughout the family. The unrestricted machine can avoid those cuts.
+
+## Attaining the exponent and the query constant
+
+For any fixed rational $\beta>0$ choose a fixed group size $d$ with $b=\beta d$ integral. Group $d$ consecutive left entries into a symbol in $[m^d]$. Let $h$ be the smallest integer with $\binom hb\ge m^d$, and encode each symbol by a distinct $b$-subset of $[h]$ in lexicographic order. The left phase sets precisely its $b$ marks in that group's fresh address range. No extra work cells are needed at the cut. For each right group, query the complement of its own $b$-subset. Every reply is zero precisely if the two subsets agree, because they have equal size. The groups are independent. Fewer than $d$ leftover entries fit in fixed registers. A rank among $b$-subsets and its inverse use fixed-width multiple-word binomial arithmetic and binary search in time polynomial in $\log m$ for fixed $b,d$. Emit the complement in order with a counter and the fixed list of excluded values. The total native time is $O_{\beta,d}(m^{1+1/\beta})$, and numerical addresses up to $O_{\beta,d}(m^{1+1/\beta})$ suffice. The journal's 12-log-bit host covers all three sample exponents. Bytewise decimal parsing takes $O(m\log m)$ time and fits the same upper bound.
+
+The zero-probe count on a diagonal is
+$$
+ \left\lfloor\frac md\right\rfloor(h-b)
+  =\left(\frac{(b!)^{1/b}}{d}+o(1)\right)m^{1+1/\beta}.
+$$
+By Stirling's formula this leading coefficient approaches $\beta/e$ as the fixed group size grows. For every desired slack one fixed program attains that slack at every sufficiently large scale. This is an infimum across fixed programs for the distinct-probe count; the native instruction bound is up to constant factors.
+
+The upper construction is already a solver on the promised layouts. To make it globally correct without changing its equal-file runs, validate each public field and the repeated names of each row as the input advances. If the first unexpected field or unequal group appears, the prefix can be recovered: the left marks determine each completed left group, and every previously verified right group equaled its left group. Retain the partial current group in registers. Reconstruct earlier canonical records and save the remaining raw input for an ordinary complete SAT solver. This fallback may use unrestricted time and memory. In the packed input format the simple positive-read alternative writes one mark at $(i,f_i)$ and then probes $(i,g_i)$ in increasing address order. The equal diagonal produces $m$ ones and takes $O(m)$ steps. Each of the two methods can therefore validate equality, yet only one needs the complementary scan. [Finite audit of the cut bound and both encodings](../audits/zero_read_set_pairs_audit.py)
+
+## An exact finite capacity and a positive fraction of genuine hits
+
+For one cut with no incoming positive queries and a fixed controller, the abstract capacity of $s$ marks and $q$ negative probes is exactly $\binom{s+q}{s}$ different diagonal labels. Use all the $s$-subsets of $[s+q]$, mark the chosen subset and test the complement of the right subset. Distinct equal-size sets give a forbidden intersection in either cross direction. Together with the lower bound this gives the literal successor rule $K(s,q)=K(s-1,q)+K(s,q-1)$ for positive $s,q$, with boundary capacity one. A controller chosen from $H$ distinct transferable states multiplies this capacity by $H$ under free local encoding and decoding. The rule exhausts the indicated resource budgets; one positive membership query can already distinguish a different family of labels.
+
+For a quantitative version that **permits positive replies on equal inputs**, retain the cataloged map $D$ of $j$ incoming nonzero addresses. Removing them from the support leaves at most $S-j$ marks. With a strict left/right input cut, the sharper bound on the number of qualifying diagonals is
+$$
+ \#\{\mathrm{controllers}\}
+ \sum_{j\le \min(R,S)} \binom Uj(v-1)^j
+                 \binom{S-j+Q}{S-j}.
+$$
+The off-side input catalog from the preceding section can multiply this bound.
+
+For example, let at most $m$ cut cells be marked, all by **one-valued** stores, in an address universe of $m^3$ possible cells. Allow up to $m/4$ distinct positive incoming reads on every diagonal. The optimum worst-case time and number of distinct incoming zero probes now both have order **$m^{5/3}$**. To see the lower bound, for $j\le m/4$ use $\binom{m^3}j\le e^{O(m)}m^{2j}$. For $Q=c m^{5/3}\ge m$ the other binomial is at most $(8ec/3)^{m-j}m^{2(m-j)/3}$. The combined power of $m$ is at most $m$, attained at $j=m/4$. Choosing $c$ small absorbs the uniform $e^{O(m)}$ and the controller count, again leaving an exponentially small fraction of $m^m$ diagonals. For an upper bound group four entries at a time. One positive mark encodes their first two values in one of $m^2$ slots of that group's private range. The right group must retrieve this mark. Encode the remaining two values by three base-$\lceil m^{2/3}\rceil$ digits, one mark per digit, and test the three complements. Thus the group costs at most four marks, one positive query and $O(m^{2/3})$ zero queries. Over all groups the required address range is less than $m^3$ eventually. A partial group can travel in the controller. The physical layout, validation and fallback are as above.
+
+More generally let $S=\lfloor\beta m\rfloor$, $R=\lfloor\rho m\rfloor$ with fixed rational $0\le\rho<\beta$, $U=m^{u+o(1)}$ with $u>1$ and $v-1=m^{\nu+o(1)}$. The optimal zero-query exponent in the open regime $1<t<u$ is
+$$
+ t=1+\frac{1-\rho(u-1+\nu)}{\beta-\rho}.
+$$
+Here the ranges describe usable addresses and cut payloads and have simple word-computable sizes (integer powers or rounded powers with fixed rational exponents suffice for the constructions). Indeed, for $Q=m^{z+o(1)}$, $1<z<u$, the base-$m$ logarithm of a summand is at most $j(u-1+\nu)+(\beta m-j)(z-1)+o(m)$, uniformly in $j$. The possible $j\log(m/j)$ natural-log correction is $O(m)$. The expression is largest at $j=\lfloor\rho m\rfloor$, giving $z\ge t$ to cover all diagonals. For the matching exponent group a fixed $d$ inputs so that $\rho d$ and $\beta d$ are integers. Reserve $\rho d$ independent positive-mark ranges per group, each of size $m^{u-1+o(1)}$, using a fixed fraction of the universe. Each positive mark has that many choices of address times $v-1$ choices of payload. For the remaining $(\beta-\rho)d$ marks use digit alphabets of size $m^{t-1+o(1)}$ and test complements. Mixed-radix encoding covers all $m^d$ symbols by the displayed exponent identity, rounding the negative alphabets up to cover the exact residual quotient. Their total address demand is $m^{t+o(1)}=o(U)$. The right group compares each expected positive payload and checks every negative alternative. These are fixed-register operations apart from the specified word probes, with polylogarithmic group setup. This proves the exponent for both queries and time under the stated cut convention.
+
+## A sharp transition when the number of marks is free
+
+Now keep one-valued marks at a strict input cut and let the address universe have $m^3$ cells. Allow $R=\lfloor\rho m\rfloor$ distinct positive incoming reads on an equal pair, with fixed $0\le\rho\le 1/2$. For a program take the maximum of $S_x+Q_x$ on the diagonals, where $S_x$ counts the nonzero cut cells and $Q_x$ the distinct incoming zero probes. Every fixed correct program needs at least
+$$
+ (1-2\rho)m\log_2 m-O_A(m).
+$$
+One fixed program attains $(1-2\rho)m\log_2 m+o(m\log m)$ for rational $\rho$. At $\rho=1/2$ the optimum is $\Theta(m)$. In particular, a computation with a linear number of available steps **in the encoded bit length** can avoid every positive incoming retrieval on the equal files. A computation with a linear number of steps **in the number of entries** must instead retrieve at least $m/2-O_A(m/\log m)$ distinct positives there in the worst case.
+
+For the lower bound, let $D$ bound $S_x+Q_x$ even when the split between them varies across inputs. In each bucket with a fixed controller and $j$ genuine positives, each diagonal's set-pair event has probability at least $2^{-D}$, since $\binom{|A_x|+|B_x|}{|A_x|}\le 2^D$ after removing cataloged marks. There are at most $\sum_{j\le R}\binom{m^3}{j}\le 2^{O(m)}m^{2R}$ positive catalogs. Include the polynomially many controllers and use the $m^m$ different diagonals. This gives the stated lower bound and, for an $O(m)$-time program, the constraint on its worst positive retrieval count. At the endpoint $D=o(m)$ would imply $j\le D=o(m)$ throughout and hence $m^m\le 2^{O(m)+D}m^{2D}$, a contradiction. The same calculation bounds the fraction of diagonals with smaller budgets.
+
+For the upper bound, pair the first $2R$ left entries. Each pair marks its value in a private range of $m^2$ addresses. On equal files the right phase retrieves precisely these $R$ ones. For the remaining entries serialize each in $\lceil\log_2 m\rceil$ bits. Take blocks of $b=\max(1,\lfloor(\log_2 m)/4\rfloor)$ bits, padding the last one with zeros. For each block use the least even $d$ with $\binom{d}{d/2}\ge 2^b$. The bounds $2^d/(d+1)\le\binom{d}{d/2}\le2^d$ give $d=b+O(\log(b+2))$. Unrank the block into a $d/2$-subset of a private $d$-slot range. The first phase marks that subset and the second probes its complement. Each block contributes exactly $d$ to $S_x+Q_x$, and rank or unrank takes $O(d)$ native steps: maintain the relevant binomial coefficient while advancing through slots, updating it by multiplication and exact division by an integer at most $d$. All intermediate products fit a native word. The $R$ positive banks use at most $m^3/2$ cells, leaving room for the $O(m\log m)$ other slots. With $R=0$ the running time is $\Theta(m\log m)$ even when every incoming reply is zero. At $R=\lfloor m/2\rfloor$ there are only the positive marks and possibly one leftover entry, which can travel in a register. The validation and fallback for a solver on all SAT inputs work as above. Exact constants in this paragraph measure cut cells plus distinct zero probes. Ordinary RAM instructions used for decoding also take time.

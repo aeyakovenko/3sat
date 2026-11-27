@@ -1,0 +1,37 @@
+# What dense restriction tests ask of a SAT refuter
+
+**Research journal, 24 November 2026.** Even a single fixed linear-time program can encode the task of finding a satisfying input to an arbitrary dense Boolean circuit in the pattern of its SAT answers after restriction. This gives a precise limit on a deterministic strategy for finding errors in clocked RAM solvers. A separate family has exponentially rare local defects after random pinning despite having more than half its assignments satisfying.
+
+## A certified defect at a descendant
+
+Let $A$ give total Boolean verdicts on explicit CNFs. A rooted certificate records a path of variable pinnings from $F$. It exhibits either a terminal with the wrong verdict, or a nonterminal on that path with a specified variable at which the parent verdict differs from the OR of the two child verdicts. Deleting satisfied clauses and false literals gives the two restrictions. Identify a CNF containing an empty clause with the false terminal, and the empty conjunction with the true terminal. Such a certificate proves $A$ wrong on at least one of the displayed related inputs. [Single-candidate descent](checking-a-solver-with-its-own-verdicts.md)
+
+The **dense restriction problem** supplies $F$, a list of distinct designated variables $X$, and a candidate $A$ with $A(F)=0$. For at least a $\delta$ fraction of assignments $s$ to $X$, the candidate returns one on $F|_{X=s}$. The task is to produce a rooted certificate. A uniformly sampled assignment succeeds with probability at least $\delta$. Given a successful assignment, binary search on its prefix length finds consecutive verdicts zero and one, independent of whether intermediate verdicts are monotone. Fixing an absent variable has no effect and cannot give this transition. At most $O(\log(|X|+1))$ further evaluations are needed. For a deterministic upper bound, compile $s\mapsto A(F|_{X=s})$ into a circuit. Any deterministic search algorithm that finds a satisfying input to every $\delta$-dense circuit gives a refuter by the same prefix search. The circuit compilation is polynomial for polynomial-clock RAMs with logarithmic word size.
+
+**One fixed candidate gives the reverse reduction.** Define $U$ to perform unit propagation, returning one exactly when propagation deletes every clause without finding a conflict. Recording the propagated literals and assigning the unconstrained variables arbitrarily supplies a satisfying assignment for every positive verdict. No units and remaining clauses give a zero verdict. An occurrence list per literal, a queue of forced values, and counts of remaining literals implement this in $O(N)$ word operations for encoded length $N$. One can retain the XOR of the live occurrence indices to locate the final literal of a clause in constant time. Each variable is set once and each occurrence is charged a constant number of times. Binary variable names can first be indexed in a trie in total time linear in their encoding length.
+
+Given an explicit fan-in-two Boolean circuit $C(x)$, build its gate-equivalence CNF and force the output true. For example $g=a\land b$ uses $(\neg g\lor a)$, $(\neg g\lor b)$, and $(g\lor\neg a\lor\neg b)$. Use the dual clauses for OR and the two equivalence clauses for NOT. Append the independent guard $(\neg z\lor w)\land(z\lor\neg w)$ on two fresh variables. The designated list consists of the primary inputs $x$ and the guard variable $z$. The encoding has width at most three and $O(S\log(S+2))$ bits for $S$ wires and gates with consecutive identifiers. [Gate equivalences and unit propagation](https://www.cs.utexas.edu/~marijn/publications/BCE.pdf)
+
+The root always receives zero. Unless propagation already finds a conflict, the independent guard still has two clauses and no unit. After fixing $(x,z)$, the guard propagates $w=z$ and forward evaluation forces every gate in topological order, or detects conflict with the required output. Thus $U$ is **exact on every designated restriction**, and its positive fraction there is exactly $\Pr_x[C(x)=1]$.
+
+Any rooted certificate for $U$ yields a satisfying input for $C$. This solver gets both terminals right, so the certificate must include an accepted parent or child. Recover a model there from its propagation run and combine it with the recorded pinnings. The resulting assignment to the original primary inputs satisfies $C$. If $C$ has no satisfying input, every descendant of the guarded root is unsatisfiable, and $U$ is correct throughout that tree. This reverse reduction allows an arbitrary deterministic algorithm inspecting the entire circuit and formula; it does not impose an oracle query model.
+
+At fixed $\delta=1/2$, a deterministic polynomial-time refuter on the promised roots would therefore find an accepting computation of every positive RP input by applying the reduction to its Boolean circuit on random coins. This entails $\mathrm{RP}=\mathrm P$. The search formulation also applies to promise circuits. A hitting set independent of the input circuit imposes an additional requirement. [Goldreich, Vadhan and Wigderson on efficient hitting sets](https://www.wisdom.weizmann.ac.il/~oded/COL/gvw.pdf)
+
+## A random residual can be locally consistent almost everywhere
+
+For $m$ disjoint pairs take the irredundant monotone 3-CNF
+$$
+F_m=\bigwedge_{i=1}^m(s\lor x_i\lor y_i).
+$$
+It has no units, and its satisfying fraction is $(1+(3/4)^m)/2$. Independently pin each variable with probability $p$ to a fair bit. Consider the event that the residual admits **any** one-variable local defect of $U$, allowing the tester to choose the variable after seeing the residual.
+
+If some private pair $x_i,y_i$ was pinned to $0,0$, then $s=0$ gives a false terminal, $s=1$ gives the true terminal, and an unpinned $s$ becomes a forced unit satisfying all remaining clauses. In the last case either a further private-variable pinning preserves the unit or the branch $s=1$ solves the residual. There is no local defect in these cases. Thus its probability is bounded by $(1-p^2/4)^m$.
+
+In fact set $q=p/2$, $a=2q-q^2$, $b=q^2$ and $d=(1-p)^2$. For one private pair, $a$ is the probability of a true pin, $b$ is the probability that both variables were fixed false, and $d$ is the probability that both are unpinned. When $s$ is free, a defect exists precisely if no pair was fixed false and at least one pair has no true pin. In that case branching on $s$ exposes it. When $s=0$, unit propagation leaves unsolved disjoint binary clauses exactly on the fully unpinned pairs unless there is already a conflict. A one-variable defect then requires exactly one fully unpinned pair and no conflict. This gives the exact probability
+$$
+(1-p)\big[(1-b)^m-a^m\big]+qm d(1-b-d)^{m-1}.
+$$
+For fixed $0<p<1$ it is asymptotic to $(1-p)(1-p^2/4)^m$. Yet a deterministic tester at the original root can immediately expose the defect by choosing the common variable $s$. Thus sampling local recurrences of random residuals can lose an exponential factor despite a dense witness set and an easy rooted defect.
+
+A finite check compared every designated verdict for all 256 Boolean functions on three bits (4,096 pinnings) with evaluation of its source truth table. It also checked the exact defect formula at $p=1/2$ by enumerating all partial assignments and next variables for $1\le m\le4$. [Reproduce the checks](../audits/unit_restriction_experiment.py)

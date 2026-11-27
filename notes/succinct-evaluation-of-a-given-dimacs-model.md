@@ -1,0 +1,36 @@
+# A short, evaluable seed for a given DIMACS model
+
+Let an ordinary ASCII DIMACS file of $N$ bits have $v$ distinct occurring variable names. Given any specified values on those names, one can construct, in expected polynomial time, a seed of $O(v+\log(N+2))$ bits for a **total assignment** matching every specified value. The seeded value of any positive decimal identifier can be evaluated deterministically in polynomial time in its spelling length and $N$. In particular a supplied satisfying model has such an extension. The input to the interpolation algorithm is the model on the occurring names.
+
+The small-bias and almost-independent constructions are classical. The powering step below is the trace-pairing form of Alon–Goldreich–Håstad–Peralta's finite-field Construction 3. An earlier journal note interpolates labels of a list of entire files by the same power-vector rank method. Here the inputs to the assignment are individual variable names, and full-rank interpolation gives an efficient constructor once a diagonal model has been supplied. [Naor and Naor](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/bias.pdf) · [Alon, Goldreich, Håstad and Peralta, section 5](https://johanhastad.se/almostindep.pdf) · [Earlier whole-file interpolation](three-files-for-the-unrestricted-sat-clock.md)
+
+## Reducing long decimal identifiers
+
+A variable name means its positive numerical identifier. Remove any leading zeros before encoding the decimal digits; the sign of a literal is handled separately. Write an initial 1 followed by the four-bit decimal nibbles in their printed order, interpreting the resulting bit string as coefficients of a polynomial over $\mathbb F_2$, highest degree first. Different names give different polynomials, each of degree at most $N$ on the supplied file. The largest declared variable can be exponentially larger than $N$.
+
+Write $v\ge1$; the empty case permits any fixed assignment. Pick $k=O(\log(N+2))$, $k\ge1$, with $2^k>(N+1)v^2$. In $K=\mathbb F_{2^k}$ evaluate each name polynomial at one uniformly chosen $\alpha$. Each pair collides with probability at most $N/2^k$ by the root bound for a nonzero polynomial. The probability that any pair collides is less than $1/2$. Check that the $v$ results are distinct and retry if necessary. Read their polynomial-basis bit strings as distinct integers $i_j$ between 0 and $M-1$, where $M=2^k$. Horner evaluation processes the decimal nibbles directly, including names much longer than a native word.
+
+## Bias and prescribed values
+
+Let $e=v+k+1$, $E=\mathbb F_{2^e}$, and let $\operatorname{Tr}:E\to\mathbb F_2$ be the absolute field trace. For $x,y\in E$, set the value at an index $i$ to
+$$
+                  B_i(x,y)=\operatorname{Tr}(y x^i),\qquad x^0=1.
+$$
+The trace is an $\mathbb F_2$-linear map. Its polynomial $T(Z)=Z+Z^2+\cdots+Z^{2^{e-1}}$ is nonzero of degree below $|E|$, so the map takes the value one. For each $a\ne0$, multiplication by $a$ permutes $E$, making $y\mapsto\operatorname{Tr}(ya)$ a nonzero linear functional. This proves nondegeneracy of the pairing in every degree, including even $e$ when $\operatorname{Tr}(1)=0$.
+
+For a nonempty subset $J$ of the distinct indices, the polynomial $p_J(X)=\sum_{j\in J}X^{i_j}$ is nonzero of degree at most $M-1$. At every $x$ where $p_J(x)\ne0$, the parity of the corresponding $B_{i_j}$ is balanced over uniform $y$. At its roots the parity is always zero. Thus, for uniform $x,y$, the bias of this parity is exactly the fraction of roots of $p_J$ and is at most $(M-1)2^{-e}$. For any prescribed $v$-bit vector, expanding its indicator in parity characters gives probability at least
+$$
+                2^{-v}\bigl(1-(2^v-1)(M-1)2^{-e}\bigr)>0.
+$$
+
+The constructor avoids random search for an entire matching assignment. Draw $x$ alone. Dependence among the $v$ vectors $x^{i_j}$ is equivalent to the vanishing of some nonempty $p_J(x)$. The union bound gives failure probability at most $(2^v-1)(M-1)2^{-e}<1/2$. Test rank by ordinary binary Gaussian elimination; no subsets need to be enumerated. For any surviving $x$, the $v$ functionals $y\mapsto\operatorname{Tr}(yx^{i_j})$ are independent by nondegeneracy. Their joint evaluation map $E\to\mathbb F_2^v$ is surjective. Write those trace functionals in a polynomial basis and solve for $y$ with the desired right-hand side. Every right-hand side has exactly $2^{e-v}$ preimages for this $x$.
+
+Monic irreducible polynomials of degrees $k,e$ give the field representations. They can be supplied with the seed. Random monic binary polynomials of degree $d$ are irreducible with probability $\Omega(1/d)$, and deterministic polynomial-time irreducibility testing permits a Las Vegas selection. For example, one can test $X^{2^d}=X$ modulo the candidate and reject a nontrivial gcd with $X^{2^j}-X$ for $1\le j\le\lfloor d/2\rfloor$. The arithmetic uses polynomially many bit operations, with modular squaring instead of expanding these polynomials. The degree, coefficients of the two moduli, $\alpha,x,y$ together cost $2k+3e+O(\log(N+2))$ bits with self-delimiting degree fields. [Rabin, *Probabilistic Algorithms in Finite Fields*](https://epubs.siam.org/doi/10.1137/0209024) · [AGHP addendum on field representations](https://www.wisdom.weizmann.ac.il/~oded/PSX/aghp-add.pdf)
+
+A lookup canonically hashes the queried name to $i$, exponentiates $x^i$ by repeated squaring using at most $k$ exponent bits, and returns the trace after multiplication by $y$. The same seed supplies consistent values for names absent from the original file. If $v$ distinct names occur, the shortest available $v$ distinct decimal spellings already use $\Omega(v\log(v+2))$ bits. Hence $v=O(N/\log(N+2))$ and the worst-case seed has that same bit bound. At the other extreme, every total-assignment family representing all signed pin patterns on a fixed set of $v$ names needs at least $2^v$ members.
+
+## The separated equality query
+
+Suppose $F(a,x)=P(a,h_a)\land Q(x,h_a)$ is satisfiable exactly when $x=a$, with $h_a$ fixed while $x$ varies. Take a model of $F(a,a)$ and construct its seeded extension. For query $x=a$ the extension satisfies $Q(a,h_a)$. For any $x\ne a$, if it satisfied $Q(x,h_a)$, its already satisfied $P(a,h_a)$ would give a model of $F(a,x)$, contradicting the reduction. Reading $h_a$ and the seed therefore suffices to answer every query. This is a deterministic $O(1+(|h_a|+N/\log(N+2))/W)$-probe algorithm with $W$-bit cells after preprocessing. Seed construction uses a previously obtained model. The probe measure permits unlimited computation to find a diagonal model in preprocessing and to generate the specified query clauses. Polynomial-time single-name lookup does not bound either of those costs. [Static separated-equality ceiling](the-static-ceiling-for-equality-encoded-as-sat.md)
+
+The audit checks 15 character-bias identities over all field-element pairs in a field of order 64 and solves 3,858 full-rank interpolation systems. CaDiCaL independently checks the decoder's verdict on all 256 generated DIMACS equality queries. The audit also queries a 5,001-digit identifier, coalesces consistent aliases with leading zeros, rejects aliases with conflicting prescribed bits, and covers the empty partial model. [Finite-field interpolation and physical queries](../audits/succinct_dimacs_model_audit.py)
