@@ -13,6 +13,7 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 | 2026-11-27 04:48:47 UTC | 3 | 4 | 11C4 | 7 | 90 / 154 | 0 | active / active |
 | 2026-11-27 05:48:53 UTC | 4 | 5 | 1245 | 7 | 35 / 154 | 0 | active / active |
 | 2026-11-27 06:48:59 UTC | 6 | 6 | 1441 | 7 | 104 / 154 | 0 | active / active |
+| 2026-11-27 07:49:05 UTC | 7 | 8 | 1443 | 7 | 126 / 154 | 0 | active / active |
 
 ## Completed finite searches
 
@@ -116,15 +117,15 @@ The census examines all 65,536 inputs of a particular four-word selector encodin
 - Base 12ED, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
 - Base 1324, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 35 of 154.
 - Base 1328, depth 7. Worker verdict pointwise-certificate. Fully eliminated shapes 2 of 154.
-- The local state contains 129 completed search records in total.
+- The local state contains 131 completed search records in total.
 
 ## Independent checks of the eight-step question
 
 At base 5488 the instruction-by-instruction verifier has refuted 154 of 154 seven-step shapes; it has found 0 separating paths. The separate finite case analysis and bit-sliced enumeration are recorded in the main journal. [Finite proof and executable tests](https://github.com/aeyakovenko/3sat/blob/main/eight-steps-on-one-four-word-sat-input.md)
 
-The eight-step shared-program search (four initial direct loads) has 60 test files, 53 independently refuted parameter regions, and 60 still open. It has made 183 calls. Its most recent outcome is refuted-cube.
+The eight-step shared-program search (four initial direct loads) has 60 test files, 68 independently refuted parameter regions, and 77 still open. It has made 230 calls. Its most recent outcome is split-inconclusive.
 
-The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 116 still open. It has made 124 calls. Its most recent outcome is split-inconclusive.
+The eight-step shared-program search (unrestricted prefix) has 33 test files, 0 independently refuted parameter regions, and 149 still open. It has made 157 calls. Its most recent outcome is split-inconclusive.
 
 ## Coupled finite accepting leaves
 
@@ -171,5 +172,7 @@ The actual twenty-bit tightly packed sign-selector optimum is nine. Two independ
 The least positive support-certificate size on complete signed 3-CNF is eventually exactly binomial(v,3)−h with a fixed 10≤h≤62, and every chosen set of 63 supports admits local edits forcing UNSAT. A separate fixed unary nondeterministic hierarchy source forces quadratic physical preparation time for an equivalent ordinary SAT file in both verdicts. The former is a certificate result with a matching packed-scan solver; the latter prices the compilation of a different language. [Certificates](https://github.com/aeyakovenko/3sat/blob/main/every-affirmative-run-reads-almost-every-complete-sat-support.md) · [Physical compiler obstruction](https://github.com/aeyakovenko/3sat/blob/main/a-fixed-unary-ram-source-for-physical-sat-compilers.md)
 
 For physical DIMACS encodings of a fixed hard unary source, every uniform polylog-bit-access encoding of O(t) physical bits must sometimes reach GF(2) degree Ω(log t) in its file-address bits. A candidate enabling cubic SAT exclusion via verified piecewise descriptions is documented in 01c9ceb, but no such source encoding is known. A separate positive file family in 2c813f3 gives an unconditional negative test: the input bits are piecewise low-degree, whereas every affine arrangement of the forced model parameters needs at least 2^{ell−d}/poly(d+8) individual errors and interval cuts at degree d. Its assignments still have a polynomial-time evaluator in the name length. Main 1e9d008 also gives (5/2−o(1))N/w native steps for every fixed correct SAT program with a 3N/w+o(N/w) program on the same files. R6 is reviewed on main f92e2ea: repeated original-word or previously stored reads contribute Ω(N/w²) loads past a scan, under a fixed roster on common positive files. A global O(N/w)-time program handles every input in this family. The full superlinear bound in encoded N remains open.
+
+Recent checked results through 035a895 (07:47 UTC): a single recursive two-word opcode rules out near-linear transcript-verification savings in the specified oracle model, including private coins. Native repairs cover wrong-value writes with authenticated later matches; an explicit nine-bit native run clock is 524303 (exact), and its last read is cheap even when a complete polynomial cover charges a constant fraction of all stores. Unknown word XOR shifts now have locally positioned proper 3-CNF of O(v(log v)^{3/2+epsilon}) physical bits using the November Fourier upper theorem. The November equal-order batched lower theorem implies an Omega(2^k sqrt(k)) arbitrary-XOR circuit bound for subset zeta. Neither constitutes superlinear deterministic time for ordinary SAT. [Journal](https://github.com/aeyakovenko/3sat/blob/main/half-the-address-bits-and-the-boolean-zeta-transform.md)
 
 Research notes are saved as rounds finish. This ledger reports checkpoints and does not certify a superlinear RAM theorem.
