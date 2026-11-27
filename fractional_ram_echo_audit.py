@@ -33,6 +33,69 @@ def logs(length):
     return cpu, mem
 
 
+def equalities(trace):
+    mass = difference = moment = 0
+    repeated = []
+    endpoint = 0
+    for i in range((len(trace) - 1) // 3):
+        old, a, b = trace[3*i:3*i+3]
+        mass += 2*old-a-b
+        difference += a-b
+        moment += i*(a-b)
+        repeated.append(a ^ b)
+        endpoint ^= old ^ a
+    return (mass, difference, moment), (*repeated, endpoint)
+
+
+def several_loads(length, width, prime):
+    all_rows = list(product((0, 1), repeat=width))
+    checked = 0
+    for rows in product(all_rows, repeat=length):
+        if not any(rows[-1]):
+            continue
+        old = mass = 0
+        moments = [0]*width
+        for i, row in enumerate(rows):
+            mass += width*old-sum(row)
+            delta = sum(row[:-1]) - (width-1)*row[-1]
+            for h in range(width):
+                moments[h] = (moments[h] + pow(i, h, prime)*delta) % prime
+            old = int(any(row))
+        assert mass or any(moments)
+        checked += 1
+    return checked
+
+
+def first_switch(length, initial_reads, later):
+    """Full logs implementing the binary quotient argument for A_0 and B_0."""
+    pairs = [initial_reads] + [(int(i not in later), 1) for i in range(1, length)]
+    return cpu_log(pairs), memory_log([0] + [1]*length)
+
+
+def check_binary_obstruction(length):
+    # When the later A_i are independent in dimension length, a change of
+    # basis sends them to the first length-1 standard coordinate vectors.
+    # Enumerate all choices of A_0,B_0 and construct the actual colliding logs.
+    high_bit = 1 << (length-1)
+    for a, b in product(range(2*high_bit), repeat=2):
+        candidates = [(a, (1, 0)), (b, (0, 1)), (a ^ b, (1, 1))]
+        element, initial = next((v, pair) for v, pair in candidates if v < high_bit)
+        later = {i for i in range(1, length) if element & (1 << (i-1))}
+        cpu, memory = first_switch(length, initial, later)
+        residue = 0
+        for slot, (x, y) in enumerate(zip(cpu, memory)):
+            if x == y:
+                continue
+            if slot == 1:
+                residue ^= a
+            elif slot == 2:
+                residue ^= b
+            else:
+                assert slot % 3 == 1
+                residue ^= 1 << (slot//3-1)
+        assert cpu[-1] == 1 and residue == 0
+
+
 def rational_errors(length, tied_stages):
     """Exact marginals of the construction, using one shared uniform dyadic draw."""
     repeats = length - len(tied_stages)
@@ -89,6 +152,9 @@ def main():
         cpu, memory = logs(length)
         assert set(map(score, cpu)) == set(range(1, (1 << length)+1))
         assert set(map(score, memory)) == {0}
+        assert all(any(z) for c in cpu for z in equalities(c))
+        assert all(not any(z) for m in memory for z in equalities(m))
+        check_binary_obstruction(length)
         kept = 0
         for tie_bits in product((False, True), repeat=length):
             tied = {i for i, value in enumerate(tie_bits) if value}
@@ -99,6 +165,11 @@ def main():
             kept += 1
         print(f'{length} stages: {len(cpu)} false CPU and {len(memory)} memory logs, '
               f'{kept} tie patterns; baseline distance 1/{1 << length}')
+
+
+    for width, length, prime in [(3, 4, 5), (4, 3, 5)]:
+        checked = several_loads(length, width, prime)
+        print(f'{width} loads per stage: rejected all {checked} false logs across {length} stages')
 
 
 if __name__ == '__main__':

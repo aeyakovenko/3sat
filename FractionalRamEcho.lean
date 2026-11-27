@@ -65,6 +65,34 @@ theorem all_false_scores (n v : Nat) (h : v < 2^(n+1)) :
   · rfl
   · rw [chronological_score, bonus_reads _ _ h]; rfl
 
+def defectCount : List (Bool × Bool) → Int
+  | [] => 0
+  | (a,b) :: ps => val (a != b) + defectCount ps
+
+def massScore : List Row → Int
+  | [] => 0
+  | r :: rs => 2 * val r.oldWrite - val r.first - val r.second + massScore rs
+
+theorem mass_cpu (ps : List (Bool × Bool)) :
+    massScore (cpuRows ps) = defectCount ps - 2 * val (finalBit ps) := by
+  induction ps with
+  | nil => rfl
+  | cons p ps ih =>
+    rcases p with ⟨a,b⟩
+    cases a <;> cases b <;> simp [cpuRows, finalBit, massScore, defectCount, ih, val] <;> omega
+
+theorem mass_memory (ws : List Bool) :
+    massScore (ws.map (fun b => ⟨b,b,b⟩)) = 0 := by
+  induction ws with
+  | nil => rfl
+  | cons b bs ih => simp [massScore, ih]; omega
+
+theorem remaining_moment (i j s t : Int) (indices : i ≠ j)
+    (first : s = 1 ∨ s = -1) (second : t = 1 ∨ t = -1)
+    (cancel : s+t=0) : i*s+j*t ≠ 0 := by
+  rcases first with h | h <;> rcases second with k | k <;> subst s <;> subst t <;>
+    simp_all <;> omega
+
 /-- Scaled marginals: deviations of all three event frequencies from the
 memory-valid frequencies imply a one-step bound for the false CPU population. -/
 theorem marginal_step (old next a b memory ew ea eb : Nat)
@@ -112,6 +140,8 @@ theorem negative_first (ds : List Int) (z : Int) (hz : z ≤ -1)
     have hd := tailBound d (List.mem_cons_self ..)
     exact ih (4 * z + d) (by omega) (fun t ht => tailBound t (List.mem_cons_of_mem _ ht))
 
+#print axioms mass_cpu
+#print axioms remaining_moment
 #print axioms positive_first
 #print axioms negative_first
 #print axioms chronological_score
