@@ -177,7 +177,56 @@ def inspect_anchors(sheets, num_layers, pin_layer_index, left_pin, right_pin, fr
     return anchor_rows
 
 
-def compile_two_layers(variables, clauses):
+def double_relay_groups(groups, boxes, pins, next_occurrence):
+    """Split each logical name into clones with exactly two slots on each side."""
+    def fresh():
+        nonlocal next_occurrence
+        token = next_occurrence
+        next_occurrence += 1
+        return token
+
+    # A duplicate of each old job uses the same logical names. The copy of
+    # the pin box is fully crossed and gives the identity D(ONE,ONE)=D(ZERO,ZERO).
+    duplicate = {}
+    old_groups = list(groups.values())
+    for pair in old_groups:
+        for side in pair:
+            for token in side.copy():
+                duplicate[token] = fresh()
+                side.append(duplicate[token])
+    boxes.extend(tuple(duplicate[t] for t in box) for box in boxes.copy())
+    h, other_h, r_one, r_zero = (duplicate[t] for t in pins)
+    boxes.append((h, r_zero, r_one, other_h))
+
+    groups.clear()
+    unused_left, unused_right = [], []
+    extra_relays = []
+    for group_number, (old_left, old_right) in enumerate(old_groups):
+        count = max(len(old_left), len(old_right))
+        for slots, unused in ((old_left, unused_left), (old_right, unused_right)):
+            padding = [fresh() for _ in range(count - len(slots))]
+            assert len(padding) % 2 == 0
+            unused.extend(zip(padding[::2], padding[1::2]))
+            slots.extend(padding)
+        outgoing = [fresh() for _ in range(count)]
+        incoming = [fresh() for _ in range(count)]
+        for i in range(count):
+            groups["copy", group_number, i] = ([old_left[i], outgoing[i]], [old_right[i], incoming[i]])
+            self_left, self_right = fresh(), fresh()
+            extra_left, extra_right = fresh(), fresh()
+            groups["relay", group_number, i] = ([self_left, extra_left], [self_right, extra_right])
+            extra_relays.append((extra_left, extra_right))
+            boxes.append((outgoing[i], self_right, incoming[(i + 1) % count], self_left))
+
+    assert len(unused_left) == len(unused_right) and len(extra_relays) % 2 == 0
+    for (c, z), (a, b) in zip(unused_left, unused_right):
+        boxes.append((c, a, b, z))  # Same source and target logical names on both descents.
+    for (c, b), (z, a) in zip(extra_relays[::2], extra_relays[1::2]):
+        boxes.append((c, a, b, z))  # Both descents are self-loops on logical names.
+    return next_occurrence
+
+
+def compile_two_layers(variables, clauses, *, double_relays=False):
     """One equality cycle per logical symbol, then disjoint four-sheet clause boxes."""
     groups = defaultdict(lambda: ([], []))
     next_occurrence = 0
@@ -214,10 +263,15 @@ def compile_two_layers(variables, clauses):
         occurrence(one, left), occurrence(zero, left),
         occurrence(one, right), occurrence(zero, right),
     )
+    original_side_size = sum(max(len(l), len(r)) for l, r in groups.values())
+    if double_relays:
+        next_occurrence = double_relay_groups(groups, boxes, pins, next_occurrence)
+        assert all(len(l) == len(r) == 2 for l, r in groups.values())
     side_size = sum(max(len(l), len(r)) for l, r in groups.values())
     sheets = 2 * side_size
     names = range(1, sheets + 1)
-    assert sheets <= 2 * (4 * (2 * variables + len(clauses)) + 4)
+    assert original_side_size <= 4 * (2 * variables + len(clauses)) + 4
+    assert side_size == original_side_size * (8 if double_relays else 1)
     first_plus, first_minus = {}, {}
     label = {}
     offset = 0
@@ -257,6 +311,8 @@ def compile_two_layers(variables, clauses):
     free_left = [x for x in names if x <= side_size and x not in second_plus]
     free_right = [x for x in names if x > side_size and x not in second_plus]
     assert set(second_plus) == set(second_minus) and len(free_left) == len(free_right)
+    if double_relays:
+        assert not free_left
     for a, b in zip(free_left, free_right):
         match(second_plus, a, b)
         match(second_minus, a, b)
@@ -292,7 +348,7 @@ def compile_two_layers(variables, clauses):
     return sheets, fresh, result, selectors
 
 
-def check_selector_cube(sheets, variables, emitted, selectors, original_sat, executable):
+def selector_renaming(variables, selectors):
     # Give the two anchors dense decimal names 10 and 11; each identifier
     # switch then changes one actual ASCII bit. Other names are permuted.
     left, right = (x for _, x in selectors)
@@ -301,7 +357,12 @@ def check_selector_cube(sheets, variables, emitted, selectors, original_sat, exe
     for v in range(1, variables + 1):
         if v not in remap:
             remap[v] = next(ordinary)
-    signed = {**remap, **{-k: -v for k, v in remap.items()}}
+    return {**remap, **{-k: -v for k, v in remap.items()}}
+
+
+def check_selector_cube(sheets, variables, emitted, selectors, original_sat, executable):
+    left, right = (x for _, x in selectors)
+    signed = selector_renaming(variables, selectors)
     files = []
     for a, b in product(range(2), repeat=2):
         clauses = list(emitted)
