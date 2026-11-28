@@ -34,6 +34,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 N = "notes/"
 NOTE = N + "six-instruction-control-classes-in-the-five-slot-machine.md"
 NOTE_Y6 = N + "length-dependent-markers-and-the-prologue-branch-classes.md"
+NOTE_Z6 = N + "prologue-branches-are-fixed-jumps-at-each-length.md"
 CIT = {
     'five': N + "five-instructions-cannot-decide-dimacs-sat.md (step 1)",
     'ctrl': N + "five-instruction-loops-on-dimacs-sat.md#the-control-graph-and-accessible-data; "
@@ -58,6 +59,10 @@ CIT = {
                     " on the cycle side (the bypass reads nothing)",
     'r4_reg_S': NOTE_Y6 + " (Section 4); reduction R-d of " + N + "the-five-slot-case-split-is-exhaustive.md"
                 " deletes the STORE, then " + N + "read-only-ram-with-one-arithmetic-site.md as written",
+    # rule 4 for the other three classes with a prologue branch before a two-verdict cycle
+    # (added 28 November): a prologue of branches is one fixed jump at each length (Lemma P),
+    # and each cited five-slot row fails the program at every large member of its family
+    'r4_lemmaP': NOTE_Z6 + " (Lemma P: a prologue of branches is one fixed jump at each length); ",
 }
 
 
@@ -144,6 +149,13 @@ def mark(alloc, crs, offs, preb=0):
             cit = {'post:A': CIT['r4_reg_postA'], 'none:A': CIT['r4_reg_noneA']}.get(off[0], CIT['r4_reg_S'])
             return 'EXCLUDED', ('five-slot schedule C:AL + prologue branch before a two-verdict cycle;'
                                 ' the prologue tests reduce to length regimes (rule 4)'), cit
+        if preb > 0 and parts in ('C:AAL', 'C:ALS', 'C:ASL') and not off:
+            # the other three classes: the prologue is branches only, so at each fixed length it is
+            # one fixed jump and the program is a five-slot program there (Lemma P, NOTE_Z6)
+            sched = parts.replace('C:', '')
+            cit = CIT['r4_lemmaP'] + (CIT['r4_ro5'] if sched == 'AAL' else CIT['r4_w5'])
+            return 'EXCLUDED', ('five-slot schedule ' + parts + ' + prologue branch before a two-verdict cycle;'
+                                ' the prologue is one fixed jump at each length (rule 4)'), cit
         if preb > 0:
             # a prologue branch (tests of 0, n, w, literals only) before a cycle that reaches
             # both verdicts: the entry point may depend on the length regime (a signed test of

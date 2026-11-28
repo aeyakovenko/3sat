@@ -7,9 +7,9 @@ It compiles the independent enumerator into a temporary directory (with $CXX, or
 it for 2, 3 and 4 branches (about 10 s) and checks against the table:
   1. the same class keys, and the same number of labeled graphs in every class;
   2. per opcode mix, the same numbers of labeled graphs in total, reduced and kept;
-  3. the independent EXCLUDED set, after moving to REDUCES the rule-4 classes that contain a
-     graph with a prologue branch before a two-verdict cycle, except the four with schedule C:AL
-     (kept EXCLUDED by the prologue-regime rule), is the table's EXCLUDED set;
+  3. the independent EXCLUDED set is the table's EXCLUDED set: the seven rule-4 classes that
+     contain a graph with a prologue branch before a two-verdict cycle are all EXCLUDED, four by
+     the prologue-regime rule and three by Lemma P;
   4. the independent prologue-branch count equals the table's on every rule-4 class;
   5. the independent four-data six-instruction cycles are the table's OPEN simple cycles.
 Nothing is written outside the temporary directory.
@@ -64,12 +64,12 @@ def main():
         kept[k[0]] += v[0]
     checks.append(('2. per mix, total = reduced + kept and both equal (%d mixes)' % len(totals),
                    set(totals) == set(kept) and all(totals[a] == (table_reduced[a] + kept[a], table_reduced[a], kept[a]) for a in totals)))
-    # rule-4 classes with a prologue branch before a two-verdict cycle go to REDUCES, except the
-    # four with schedule C:AL, which the prologue-regime argument keeps EXCLUDED (27 November)
-    moved = {k for k, v in mine.items() if v[1] == 'EXCL:rule4' and v[2] > 0 and k[1] != ('C:AL',)}
-    indep_excl = {k for k, v in mine.items() if v[1].startswith('EXCL')} - moved
+    # the seven rule-4 classes with a prologue branch before a two-verdict cycle stay EXCLUDED:
+    # four by the prologue-regime argument (27 November), three by Lemma P (28 November)
+    prologue = {k for k, v in mine.items() if v[1] == 'EXCL:rule4' and v[2] > 0}
+    indep_excl = {k for k, v in mine.items() if v[1].startswith('EXCL')}
     table_excl = {k for k, v in table.items() if v[2] == 'EXCLUDED'}
-    checks.append(('3. EXCLUDED sets equal (%d, after moving %d rule-4 classes to REDUCES)' % (len(table_excl), len(moved)),
+    checks.append(('3. EXCLUDED sets equal (%d, including the %d rule-4 classes with a prologue branch)' % (len(table_excl), len(prologue)),
                    indep_excl == table_excl))
     checks.append(('4. prologue-branch counts equal on all %d rule-4 classes' % sum(v[1] == 'EXCL:rule4' for v in mine.values()),
                    all(table[k][1] == v[2] for k, v in mine.items() if v[1] == 'EXCL:rule4')))

@@ -1,8 +1,8 @@
 allocation  classes(EXCL/REDUCES/OPEN)  labeled graphs (EXCL/REDUCES/OPEN)  reduced-labeled
 L1S0A1B4  76/0/0  2741112/0/0  233286792
-L1S0A2B3  88/17/1  217044/76392/51840  67091268
+L1S0A2B3  89/16/1  230436/63000/51840  67091268
 L1S0A3B2  53/4/1  19440/3600/2160  19242384
-L1S1A1B3  151/20/1  244980/48456/51840  67091268
+L1S1A1B3  153/18/1  258372/35064/51840  67091268
 L1S1A2B2  112/8/3  20160/2880/2160  19242384
 L1S2A1B2  115/5/3  21360/1680/2160  19242384
 L2S0A1B3  106/0/0  345276/0/0  67091268
@@ -14,7 +14,6 @@ non-excluded class groups (allocation, status, reason) : number of coarse classe
 ('L1S0A2B3', 'OPEN', 'bicyclic:theta/figure-eight') 1
 ('L1S0A2B3', 'REDUCES', 'LOAD-SCC-without-numerical-site (value-set argument across phases; notes/six-instruction-control-classes-in-the-five-slot-machine.md)') 8
 ('L1S0A2B3', 'REDUCES', 'bicyclic:theta/figure-eight; read-only with one recurrent numerical site + one-time numerical results') 3
-('L1S0A2B3', 'REDUCES', 'five-slot schedule C:AAL + prologue branch before a two-verdict cycle (length-regime entry points; unchecked)') 1
 ('L1S0A2B3', 'REDUCES', 'read-only LOAD loop with one numerical site + computation-only loop (public word or exit function)') 2
 ('L1S0A2B3', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {mid:A}') 1
 ('L1S0A2B3', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {pre:A}') 2
@@ -28,8 +27,6 @@ non-excluded class groups (allocation, status, reason) : number of coarse classe
 ('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL + off-cycle {mid:S}') 1
 ('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL + off-cycle {pre:S}') 2
 ('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL C:S + off-cycle {pre:S}') 2
-('L1S1A1B3', 'REDUCES', 'five-slot schedule C:ALS + prologue branch before a two-verdict cycle (length-regime entry points; unchecked)') 1
-('L1S1A1B3', 'REDUCES', 'five-slot schedule C:ASL + prologue branch before a two-verdict cycle (length-regime entry points; unchecked)') 1
 ('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {none:S} (one-site theorem allows any control flow but no STORE)') 1
 ('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {post:S} (one-site theorem allows any control flow but no STORE)') 1
 ('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {pre:S} (one-site theorem allows any control flow but no STORE)') 1
