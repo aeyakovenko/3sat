@@ -42,7 +42,7 @@ Overlap with the journal:
 
 What is new here is only the application to G_d over F_3, with the high-bit pinning.
 
-**Lemma 2 (ceiling).** For every r = 2^m there is a fixed trivalent topology with 3r(2m−1) = O(r log r) vertices that meets (H-np) for **every** permutation of r bits. Hence no lower bound derived from (H-np) alone can exceed O(r log r).
+**Lemma 2 (ceiling).** For every r = 2^m there is a fixed trivalent topology with 3r(2m−1) = O(r log r) vertices that meets (H-np) for **every** permutation of r bits. Hence no lower bound derived from (H-np) alone can exceed O(r log r). The general form of this cap, for every N-leg target, every spectral point and every field, covers the price inequality itself and its table-reading single-vertex dual: [the price-inequality note](the-price-inequality-and-its-table-reading-dual-cannot-certify-more-than-n-log-n.md).
 - Scope: the cap covers restrictions, where r is at most the number of inputs. It also covers gadget reductions that use a constant number of copies and route r = O(n) bits, such as the preprint's own two-copy D_w construction in `list.tex`. It is not shown for embeddings that route r ≫ n bits.
 - Overlap: the cap generalizes the σ ≤ 1 remark in the list-and-matrix-costs note. The Beneš construction itself appears in the fixed-routing note. A search of the journal's notes during review found no note stating that a Beneš topology meets the lemma's hypothesis. [List and matrix costs](list-and-matrix-costs-for-ram-and-tapes.md) · [Fixed routing controls](fixed-routing-controls-and-the-unrestricted-sat-clock.md)
 
