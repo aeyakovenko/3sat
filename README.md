@@ -18,6 +18,7 @@
 | The exact worst-case clock of the 16-bit sign-plane SAT catalog on the four-bit RAM is nine executed instructions. It is still exactly nine at 20 bits and in one 21-bit variant; the other 21-bit variant has upper bound nine. | Finite. No growth at the first extension. | [Exact nine](notes/exact-nine-step-clock-for-four-sat-words.md) · [Twenty bits](notes/nine-steps-at-twenty-tightly-packed-selector-bits.md) · [Fifth word](notes/the-first-fifth-word-does-not-increase-the-nine-step-upper-bound.md) |
 | Cube-cycle clause banks: at most five omitted labels per bank is linear-time; one fixed six-omission pattern encodes arbitrary 3-SAT. | A sharp tractability threshold, not a time lower bound. | [Threshold](notes/shuffled-four-cube-cycle-banks-in-ordinary-sat.md) |
 | One physical bit switches a proper 3-CNF file from accepting the entire radius-two ball on its data variables to deciding an arbitrary 3-SAT instance. Requiring radius three in the same guard construction gives a linear-time algorithm for the edited file. | Linear-time, linear-length reductions on ordinary files. | [Sharp radius and affine insertion](notes/affine-insertion-at-a-clause-of-an-ordinary-3cnf.md) |
+| Above an explicit normalized model density every proper one-bit name edit stays satisfiable. At exact equality a single edit can encode arbitrary 3-SAT. | Ordinary ternary DIMACS, with complete easy-model descriptions. | [Exact density and reduction](notes/a-sharp-density-threshold-for-one-physical-sat-edit.md) |
 
 ### The finite-exhaustion approach and its ceiling
 
