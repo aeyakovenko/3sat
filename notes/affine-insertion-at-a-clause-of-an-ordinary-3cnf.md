@@ -14,6 +14,8 @@ For any $(b,z)$ satisfying $H$, the substitution must take the prescribed values
 
 More generally, it suffices that the models at $b=0$ affinely span the entire $z$-space. Computing affine approximations to propositional model sets has an established literature. The question here concerns a concrete two-clause substitution, a guaranteed Hamming ball of satisfying assignments, and the physical length of its representation. [Zanuttini, *Approximating Propositional Knowledge with Affine Formulas*](https://frontiersinai.com/ecai/ecai2002/pdf/p0287.pdf)
 
+For context, robust satisfiability asks whether a small partial assignment can be extended by choosing the other variables. The promise in this theorem explicitly gives the value zero to every other data variable in each required model. A claim of historical priority for the edit and radius boundary would require a separate review. [Abramsky, Gottlob and Kolaitis on robust constraints](https://ijcai.org/proceedings/2013/73)
+
 ## Radius two can carry arbitrary 3-SAT
 
 Start with a 3-CNF $F$ whose clauses each have three distinct variables. For each occurring variable introduce two bits $p_i,q_i$. At $b=1$ they indicate, respectively, that the positive or negative literal on variable $i$ is false. For every input variable impose

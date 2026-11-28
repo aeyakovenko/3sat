@@ -118,11 +118,27 @@ There is a degree-three map on **all 64** six-bit selectors that preserves the c
 $$
     \{22,29,35,53,54,59,62,70,77,83,85,86,93,123,124,126\}.
 $$
-A six-step program cannot classify these sixteen rows even with all writable cells and all word operations. The full seven-step program classifies them. The exact worst-case clocks on the **same sixteen ancestors** are therefore $4,6,6,7$ at four, five, six and seven input bits. The three successive maps have degrees two, two and three. All are defined on their full source cubes. This cubic construction leaves the first two previously published maps unchanged. Two different choices of the middle map give the stronger degree bounds below.
+A six-step program cannot classify these sixteen rows even with all writable cells and all word operations. The full seven-step program classifies them. The exact worst-case clocks on the **same sixteen ancestors** are therefore $4,6,6,7$ at four, five, six and seven input bits. The three successive maps have degrees two, two and three. All are defined on their full source cubes. This cubic construction leaves the first two previously published maps unchanged. The next construction does so with a quadratic final map and characterizes what happens under repetition.
 
 To find the last map, prescribe the allowed seven-bit outputs at the sixteen special rows and require distinct equal-verdict outputs everywhere. In the Boolean polynomial representation, degree at most three is equivalent to 22 vector-valued XOR equations: for every monomial mask of weight greater than three, the XOR of the table entries on its submasks is zero. Gaussian elimination chose 22 independent columns outside the fixed suite, all belonging to noncovers. For a proposed permutation of the special outputs and choices for the free rows, the pivot outputs follow by XOR. Keeping two free words as parameters allowed the output-label and distinctness tests to reject choices before specializing both parameters. The surviving table's coefficient at mask 7 is nonzero. Every coefficient of degree greater than three vanishes. [Full coefficient list, injectivity and verdict checks](../lean/CompleteSevenCycleClock.lean)
 
 Lean also checks that the composed image is literally the same list given to the six-step census. This prevents a bound on a larger set from being used as a bound on its subset. The result still concerns a bounded word width and a fixed-size suite. [Composition and failed six-step census](../upstream-checks/cycle-clock/SevenImageCompact.lean)
+
+### A quadratic replacement valid inside loops of arbitrary length
+
+Keep **both** original maps. There is now an exact-degree-two continuation on the historical sixteen six-bit inputs. Its image is
+$$
+\{21,27,38,42,51,53,59,63,82,85,86,91,92,99,105,106\}.
+$$
+Every one of the 84 globally verdict-preserving affine maps admits six instructions on the image of this same six-bit source suite. The new quadratic image excludes six and has an explicit seven-step classifier. This proves degree two is the minimum needed on the original suite. In the subset-indexed coefficient notation of the first map, the twelve nonzero mask/coefficient pairs are
+$$
+(0,7),(1,29),(2,14),(3,6),(4,1),(8,3),(12,5),(16,46),(24,4),(32,96),(33,43),(48,43).
+$$
+Equivalently take affine map 54 in the [enumeration](../upstream-checks/cycle-clock/QuadraticOrSeparation.lean) and XOR the respective offsets $6,0,5,4,43,43$ for every uncovered old edge, in increasing cyclic order starting with edge $(0,1)$.
+
+This very map extends to every cycle length $n\ge6$. Read six consecutive source bits as a path in physical-index order $(2,3,4,5,0,1)$ of the six-bit example, and its seven outputs in order $(2,1,0,6,5,4,3)$ of the seven-bit example. Over every one of the 64 blocks the internal edges of the first path are all covered exactly when the internal edges of the second path are all covered. When these conditions hold the ordered endpoint values agree. Therefore joining any exterior path gives the same verdict, including an empty exterior where the closing edge joins the two endpoints directly. Keeping the exterior unchanged preserves injectivity. The path order specifies the serialization for this all-length statement. The six- and seven-instruction counts refer to the original packed masks in the displayed finite suites. The construction changes a six-bit block by the same quadratic rule at every length. [Map, finite deadlines and boundary proof](../upstream-checks/cycle-clock/HistoricalQuadraticContinuation.lean)
+
+There is an exact test of the simplest proposed induction. Repeatedly replace the leftmost six bits in this path order. If $T(s)$ is the first six output bits and $e(s)$ the seventh, a step prepends $e(s)$ to the old exterior. All 64 states satisfy $T^{21}s=T^{15}s$ and $e(T^{17}s)=e(T^{15}s)$. Applying the latter identity to later states makes the emitted sequence periodic with period dividing two after 15 steps, for every initial state. Initial path word 32 witnesses $e(T^{16}s)\ne e(T^{14}s)$, so no smaller uniform onset works. The newly added bits eventually repeat even as the file length grows without bound. This explains why iterating this particular local replacement does not propagate the measured clock increase.
 
 ### An XOR succeeds on one suite and every affine map fails to raise another
 

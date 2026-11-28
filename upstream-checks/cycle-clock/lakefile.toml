@@ -1,6 +1,6 @@
 name = "finiteclock"
 version = "0.1.0"
-defaultTargets = ["QuadraticVerify", "CycleEncodingDegrees", "SevenImageVerify", "SevenImageCompact", "QuadraticFixedChain", "QuadraticOrSeparation"]
+defaultTargets = ["QuadraticVerify", "CycleEncodingDegrees", "SevenImageVerify", "SevenImageCompact", "QuadraticFixedChain", "QuadraticOrSeparation", "HistoricalQuadraticContinuation"]
 
 [[lean_lib]]
 name = "CycleImageClock"
@@ -36,3 +36,6 @@ name = "QuadraticFixedChain"
 
 [[lean_lib]]
 name = "QuadraticOrSeparation"
+
+[[lean_lib]]
+name = "HistoricalQuadraticContinuation"
