@@ -1,0 +1,18 @@
+name = "finiteclock"
+version = "0.1.0"
+defaultTargets = ["QuadraticVerify", "CycleEncodingDegrees"]
+
+[[lean_lib]]
+name = "CycleImageClock"
+srcDir = "../../lean"
+precompileModules = true
+
+[[lean_lib]]
+name = "QuadraticDefs"
+precompileModules = true
+
+[[lean_lib]]
+name = "QuadraticVerify"
+
+[[lean_lib]]
+name = "CycleEncodingDegrees"
