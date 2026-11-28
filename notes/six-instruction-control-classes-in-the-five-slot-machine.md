@@ -129,7 +129,8 @@ Rules 1–3 cover 887 classes: 556 with no recurrent LOAD, 286 with no recurrent
 
 Within the open cycles, journal theorems already cover some members at the operand level:
 - the two-ahead lock is an any-speed member of L1S1A2B2 `ALAS`; one realization is L, A(q←p+2d), S, A(p←p+d);
-- the one-accumulator scan with an arbitrary public unary orbit covers some read-only operand choices.
+- the one-accumulator scan with an arbitrary public unary orbit covers some read-only operand choices;
+- even literal multipliers (and a = w) with an odd literal stride, under native initialization, are any-speed members of L1S1A2B2 `AALS`, `AASL` and `ALAS` ([covered swaps](even-multiplier-scans-with-odd-strides-fail-at-every-speed.md)).
 
 These cover operand subcases, not whole classes. [Six-slot two-ahead lock](six-slot-two-ahead-lock.md) · [Two-ahead stores in a six-slot scan](two-ahead-stores-in-a-six-slot-scan.md) · [Any unary orbit](one-accumulator-scan-without-a-clock.md#any-unary-orbit-of-public-read-addresses)
 
