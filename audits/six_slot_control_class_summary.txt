@@ -1,41 +1,33 @@
 allocation  classes(EXCL/REDUCES/OPEN)  labeled graphs (EXCL/REDUCES/OPEN)  reduced-labeled
 L1S0A1B4  76/0/0  2741112/0/0  233286792
-L1S0A2B3  89/16/1  230436/63000/51840  67091268
-L1S0A3B2  53/4/1  19440/3600/2160  19242384
-L1S1A1B3  153/18/1  258372/35064/51840  67091268
-L1S1A2B2  112/8/3  20160/2880/2160  19242384
-L1S2A1B2  115/5/3  21360/1680/2160  19242384
+L1S0A2B3  101/4/1  264204/29232/51840  67091268
+L1S0A3B2  54/3/1  19728/3312/2160  19242384
+L1S1A1B3  166/5/1  278604/14832/51840  67091268
+L1S1A2B2  114/6/3  20352/2688/2160  19242384
+L1S2A1B2  116/4/3  21456/1584/2160  19242384
 L2S0A1B3  106/0/0  345276/0/0  67091268
-L2S0A2B2  62/10/2  14784/8256/2160  19242384
-L2S1A1B2  108/12/3  17712/5328/2160  19242384
+L2S0A2B2  67/5/2  17904/5136/2160  19242384
+L2S1A1B2  111/9/3  17952/5088/2160  19242384
 L3S0A1B2  58/0/0  25200/0/0  19242384
 
 non-excluded class groups (allocation, status, reason) : number of coarse classes
 ('L1S0A2B3', 'OPEN', 'bicyclic:theta/figure-eight') 1
-('L1S0A2B3', 'REDUCES', 'LOAD-SCC-without-numerical-site (value-set argument across phases; notes/six-instruction-control-classes-in-the-five-slot-machine.md)') 8
-('L1S0A2B3', 'REDUCES', 'bicyclic:theta/figure-eight; read-only with one recurrent numerical site + one-time numerical results') 3
-('L1S0A2B3', 'REDUCES', 'read-only LOAD loop with one numerical site + computation-only loop (public word or exit function)') 2
-('L1S0A2B3', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {mid:A}') 1
+('L1S0A2B3', 'REDUCES', 'bicyclic:theta/figure-eight; read-only with one recurrent numerical site + one-time numerical results') 1
+('L1S0A2B3', 'REDUCES', 'read-only LOAD loop with one numerical site + computation-only loop (public word or exit function)') 1
 ('L1S0A2B3', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {pre:A}') 2
 ('L1S0A3B2', 'OPEN', 'six-slot cycle, data order C:AAAL') 1
 ('L1S0A3B2', 'REDUCES', 'five-slot schedule C:AAL + off-cycle {pre:A}') 1
-('L1S0A3B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {none:A,pre:A}') 1
 ('L1S0A3B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {post:A,pre:A}') 1
 ('L1S0A3B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {pre:A,pre:A}') 1
 ('L1S1A1B3', 'OPEN', 'bicyclic:theta/figure-eight') 1
-('L1S1A1B3', 'REDUCES', 'LOAD-SCC-without-numerical-site (value-set argument across phases; notes/six-instruction-control-classes-in-the-five-slot-machine.md)') 10
 ('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL + off-cycle {mid:S}') 1
 ('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL + off-cycle {pre:S}') 2
-('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL C:S + off-cycle {pre:S}') 2
-('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {none:S} (one-site theorem allows any control flow but no STORE)') 1
-('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {post:S} (one-site theorem allows any control flow but no STORE)') 1
+('L1S1A1B3', 'REDUCES', 'five-slot schedule C:AL C:S + off-cycle {pre:S}') 1
 ('L1S1A1B3', 'REDUCES', 'one numerical site in the program, recurrent part read-only, one-time STORE(s) {pre:S} (one-site theorem allows any control flow but no STORE)') 1
 ('L1S1A2B2', 'OPEN', 'six-slot cycle, data order C:AALS') 1
 ('L1S1A2B2', 'OPEN', 'six-slot cycle, data order C:AASL') 1
 ('L1S1A2B2', 'OPEN', 'six-slot cycle, data order C:ALAS') 1
 ('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AAL + off-cycle {pre:S}') 1
-('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:A,pre:S}') 1
-('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:S,pre:A}') 1
 ('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:A,pre:S}') 1
 ('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:S,pre:A}') 1
 ('L1S1A2B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {pre:A,pre:S}') 1
@@ -44,7 +36,6 @@ non-excluded class groups (allocation, status, reason) : number of coarse classe
 ('L1S2A1B2', 'OPEN', 'six-slot cycle, data order C:ALSS') 1
 ('L1S2A1B2', 'OPEN', 'six-slot cycle, data order C:ASLS') 1
 ('L1S2A1B2', 'OPEN', 'six-slot cycle, data order C:ASSL') 1
-('L1S2A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:S,pre:S}') 1
 ('L1S2A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:S,pre:S}') 1
 ('L1S2A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {pre:S,pre:S}') 1
 ('L1S2A1B2', 'REDUCES', 'five-slot schedule C:ALS + off-cycle {pre:S}') 1
@@ -53,20 +44,12 @@ non-excluded class groups (allocation, status, reason) : number of coarse classe
 ('L2S0A2B2', 'OPEN', 'six-slot cycle, data order C:ALAL') 1
 ('L2S0A2B2', 'REDUCES', 'five-slot schedule C:AAL + off-cycle {post:L}') 1
 ('L2S0A2B2', 'REDUCES', 'five-slot schedule C:AAL + off-cycle {pre:L}') 1
-('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {none:A,post:L}') 1
-('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {none:A,pre:L}') 1
-('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {none:L,pre:A}') 1
-('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {post:A,post:L}') 1
-('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {post:A,pre:L}') 1
 ('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {post:L,pre:A}') 1
 ('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {pre:A,pre:L}') 1
 ('L2S0A2B2', 'REDUCES', 'read-only, one recurrent numerical site, off-cycle {pre:A}') 1
 ('L2S1A1B2', 'OPEN', 'six-slot cycle, data order C:ALLS') 1
 ('L2S1A1B2', 'OPEN', 'six-slot cycle, data order C:ALSL') 1
 ('L2S1A1B2', 'OPEN', 'six-slot cycle, data order C:ASLL') 1
-('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:L,pre:S}') 1
-('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:S,post:L}') 1
-('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {none:S,pre:L}') 1
 ('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:L,post:S}') 1
 ('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:L,pre:S}') 1
 ('L2S1A1B2', 'REDUCES', 'five-slot schedule C:AL + off-cycle {post:S,pre:L}') 1

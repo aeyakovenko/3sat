@@ -110,4 +110,4 @@ python3 -B prologue_branch_family_lengths_check.py
 python3 -B six_slot_control_class_marking.py
 python3 -B six_slot_control_class_cross_check.py
 ```
-The split takes about 3 seconds, the length check under a second, and the map's marking script and cross-check about 40 and 12 seconds; the last two now report the 932/73/14 table. [Rule split](../audits/prologue_branch_rule_split.py) · [Length check](../audits/prologue_branch_family_lengths_check.py) · [Marking](../audits/six_slot_control_class_marking.py) · [Cross-check](../audits/six_slot_control_class_cross_check.py)
+The split takes about 3 seconds, the length check under a second, and the map's marking script and cross-check about 40 and 12 seconds; the last two reported the 932/73/14 table after this note, and report 969/36/14 since a round-six note on one-verdict loops, exit code and LOAD loops without arithmetic. [Rule split](../audits/prologue_branch_rule_split.py) · [Length check](../audits/prologue_branch_family_lengths_check.py) · [Marking](../audits/six_slot_control_class_marking.py) · [Cross-check](../audits/six_slot_control_class_cross_check.py)

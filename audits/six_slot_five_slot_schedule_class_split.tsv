@@ -1,0 +1,34 @@
+allocation	recurrent_parts	off_cycle_data	labeled	single_verdict_graphs	two_verdict_graphs	all_single_verdict
+L1S0A3B2	C:AAL	pre:A,	1440	576	864	False
+L1S1A1B3	C:- C:AL |seq	mid:S,	216	144	72	False
+L1S1A1B3	C:- C:AL |seq	pre:S,	216	144	72	False
+L1S1A1B3	C:AL	pre:S,	5328	2448	2880	False
+L1S1A1B3	C:AL C:S |par	-	144	144	0	True
+L1S1A1B3	C:AL C:S |seq	-	2232	864	1368	False
+L1S1A2B2	C:AAL	pre:S,	480	192	288	False
+L1S1A2B2	C:AL	none:A,pre:S,	96	96	0	True
+L1S1A2B2	C:AL	none:S,pre:A,	96	96	0	True
+L1S1A2B2	C:AL	post:A,pre:S,	360	96	264	False
+L1S1A2B2	C:AL	post:S,pre:A,	360	96	264	False
+L1S1A2B2	C:AL	pre:A,pre:S,	528	288	240	False
+L1S1A2B2	C:ALS	pre:A,	480	192	288	False
+L1S1A2B2	C:ASL	pre:A,	480	192	288	False
+L1S2A1B2	C:AL	none:S,pre:S,	96	96	0	True
+L1S2A1B2	C:AL	post:S,pre:S,	360	96	264	False
+L1S2A1B2	C:AL	pre:S,pre:S,	264	144	120	False
+L1S2A1B2	C:ALS	pre:S,	480	192	288	False
+L1S2A1B2	C:ASL	pre:S,	480	192	288	False
+L2S0A2B2	C:AAL	post:L,	1440	192	1248	False
+L2S0A2B2	C:AAL	pre:L,	960	384	576	False
+L2S1A1B2	C:AL	none:L,pre:S,	96	96	0	True
+L2S1A1B2	C:AL	none:S,post:L,	48	48	0	True
+L2S1A1B2	C:AL	none:S,pre:L,	96	96	0	True
+L2S1A1B2	C:AL	post:L,post:S,	960	96	864	False
+L2S1A1B2	C:AL	post:L,pre:S,	360	96	264	False
+L2S1A1B2	C:AL	post:S,pre:L,	360	96	264	False
+L2S1A1B2	C:AL	pre:L,pre:S,	528	288	240	False
+L2S1A1B2	C:ALL	pre:S,	480	192	288	False
+L2S1A1B2	C:ALS	post:L,	720	96	624	False
+L2S1A1B2	C:ALS	pre:L,	480	192	288	False
+L2S1A1B2	C:ASL	post:L,	720	96	624	False
+L2S1A1B2	C:ASL	pre:L,	480	192	288	False

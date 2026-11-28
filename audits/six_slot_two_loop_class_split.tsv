@@ -1,0 +1,19 @@
+allocation	recurrent_parts	off_cycle_data	labeled	phase_lemma_graphs	single_verdict_graphs	store_location	order
+L1S0A2B3	C:A C:L |par	post:A,	192	192	192	noS=192	parallel;=192
+L1S0A2B3	C:A C:L |par	pre:A,	288	288	288	noS=288	parallel;=288
+L1S0A2B3	C:A C:L |seq	mid:A,	1536	1536	672	noS=1536	R-first;=768; num-first;=768
+L1S0A2B3	C:A C:L |seq	none:A,	192	192	192	noS=192	R-first;=96; num-first;=96
+L1S0A2B3	C:A C:L |seq	post:A,	2592	2592	960	noS=2592	R-first;=1296; num-first;=1296
+L1S0A2B3	C:A C:L |seq	pre:A,	1536	1536	768	noS=1536	R-first;=768; num-first;=768
+L1S0A2B3	C:AA C:L |par	-	144	144	144	noS=144	parallel;=144
+L1S0A2B3	C:AA C:L |seq	-	2232	2232	1008	noS=2232	R-first;=1080; num-first;=1152
+L1S1A1B3	C:A C:L |par	post:S,	96	96	96	S-onetime(none)=48; S-onetime(post)=48	parallel;=96
+L1S1A1B3	C:A C:L |par	pre:S,	144	144	144	S-onetime(none)=48; S-onetime(pre)=96	parallel;=144
+L1S1A1B3	C:A C:L |seq	mid:S,	768	768	336	S-onetime(post)=384; S-onetime(pre)=384	R-first;=384; num-first;=384
+L1S1A1B3	C:A C:L |seq	none:S,	96	96	96	S-onetime(none)=96	R-first;=48; num-first;=48
+L1S1A1B3	C:A C:L |seq	post:S,	1296	1296	480	S-onetime(none)=192; S-onetime(post)=1104	R-first;=648; num-first;=648
+L1S1A1B3	C:A C:L |seq	pre:S,	768	768	384	S-onetime(pre)=768	R-first;=384; num-first;=384
+L1S1A1B3	C:A C:LS |par	-	144	144	144	S-in-R=144	parallel;=144
+L1S1A1B3	C:A C:LS |seq	-	2232	2232	864	S-in-R=2232	R-first;=1152; num-first;=1080
+L1S1A1B3	C:AS C:L |par	-	144	144	144	S-in-numSCC(A1,S1,L0)=144	parallel;=144
+L1S1A1B3	C:AS C:L |seq	-	2232	2232	1008	S-in-numSCC(A1,S1,L0)=2232	R-first;=1080; num-first;=1152

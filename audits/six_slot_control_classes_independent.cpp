@@ -9,7 +9,10 @@
 // for the classes of rule 4, the number of graphs with a prologue branch before a
 // two-verdict cycle. Rule 4 is applied as first stated, so it includes the 7 classes that have
 // such graphs; the marking rules now keep all 7 EXCLUDED (four by the prologue-regime rule, three
-// by Lemma P), so six_slot_control_class_cross_check.py moves none of them.
+// by Lemma P), so six_slot_control_class_cross_check.py moves none of them. The 37 classes that
+// the round-six note on one-verdict loops, exit code and LOAD loops without arithmetic excludes
+// by a per-graph argument are NONEXCL:other here; the cross-check adds them from that note's
+// class lists.
 // Run: ./enumerator 2|3|4 (the number of branches); per-mix totals on standard error.
 #include <bits/stdc++.h>
 using namespace std;

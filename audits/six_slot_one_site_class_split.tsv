@@ -1,0 +1,23 @@
+allocation	recurrent_parts	off_cycle_data	labeled	E_graphs	single_verdict_graphs	PRE_graphs	status	U_positions_rel_R(graph counts)
+L1S0A2B3	C:- C:AL |seq	mid:A,	432	144	288	0	MOVES(E+1V)	post:A;=144; pre:A;=288
+L1S0A2B3	C:- C:AL |seq	pre:A,	432	0	288	144	STAYS(mixed)	pre:A;=432
+L1S0A2B3	C:A C:AL |par	-	288	0	288	0	MOVES(1V only)	none:A(rec);=288
+L1S0A2B3	C:A C:AL |seq	-	4464	2016	1728	720	STAYS(mixed)	post:A(rec);=2304; pre:A(rec);=2160
+L1S0A2B3	C:AL	pre:A,	10656	0	4896	5760	STAYS(mixed)	pre:A;=10656
+L1S0A2B3	G{LA}	none:A,	2016	0	2016	0	MOVES(1V only)	none:A;=2016
+L1S0A2B3	G{LA}	post:A,	22320	20304	2016	0	MOVES(E+1V)	post:A;=22320
+L1S0A2B3	G{LA}	pre:A,	13680	0	4032	9648	STAYS(mixed)	pre:A;=13680
+L1S0A3B2	C:AL	none:A,pre:A,	288	0	288	0	MOVES(1V only)	none:A;pre:A;=144; pre:A;none:A;=144
+L1S0A3B2	C:AL	post:A,pre:A,	1080	0	288	792	STAYS(mixed)	post:A;pre:A;=540; pre:A;post:A;=540
+L1S0A3B2	C:AL	pre:A,pre:A,	792	0	432	360	STAYS(mixed)	pre:A;pre:A;=792
+L1S1A1B3	G{LA}	none:S,	1008	0	1008	0	MOVES(1V only)	none:S;=1008
+L1S1A1B3	G{LA}	post:S,	11160	10152	1008	0	MOVES(E+1V)	post:S;=11160
+L1S1A1B3	G{LA}	pre:S,	6840	0	2016	4824	STAYS(mixed)	pre:S;=6840
+L2S0A2B2	C:AL	none:A,post:L,	96	0	96	0	MOVES(1V only)	none:A;=96
+L2S0A2B2	C:AL	none:A,pre:L,	192	0	192	0	MOVES(1V only)	none:A;=192
+L2S0A2B2	C:AL	none:L,pre:A,	192	0	192	0	MOVES(1V only)	pre:A;=192
+L2S0A2B2	C:AL	post:A,post:L,	1920	1728	192	0	MOVES(E+1V)	post:A;=1920
+L2S0A2B2	C:AL	post:A,pre:L,	720	528	192	0	MOVES(E+1V)	post:A;=720
+L2S0A2B2	C:AL	post:L,pre:A,	720	0	192	528	STAYS(mixed)	pre:A;=720
+L2S0A2B2	C:AL	pre:A,pre:L,	1056	0	576	480	STAYS(mixed)	pre:A;=1056
+L2S0A2B2	C:ALL	pre:A,	960	0	384	576	STAYS(mixed)	pre:A;=960

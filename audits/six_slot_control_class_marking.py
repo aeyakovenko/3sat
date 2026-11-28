@@ -21,8 +21,10 @@ off-cycle data instructions).  Branch positions are dropped at this level; the f
 codes (with branch positions) are counted in column n_fine.
 
 Statuses:
-  EXCLUDED   : excluded at every speed by a journal theorem whose hypotheses the
-               whole class satisfies (citation given), or by a reduction to <=5 slots.
+  EXCLUDED   : excluded at every speed by journal theorems whose hypotheses every
+               graph of the class satisfies (citation given; where two lemmas share a
+               class, the citation says which graphs each covers), or by a reduction
+               to <=5 slots.
   REDUCES    : the recurrent schedule is one the five-slot case split treats, but the
                class adds off-cycle code (prologue data instruction, or an exit-path
                LOAD) that breaks a hypothesis some five-slot row uses; unchecked.
@@ -35,6 +37,7 @@ N = "notes/"
 NOTE = N + "six-instruction-control-classes-in-the-five-slot-machine.md"
 NOTE_Y6 = N + "length-dependent-markers-and-the-prologue-branch-classes.md"
 NOTE_Z6 = N + "prologue-branches-are-fixed-jumps-at-each-length.md"
+NOTE_AA7 = N + "one-verdict-loops-exit-code-and-load-loops-without-arithmetic.md"
 CIT = {
     'five': N + "five-instructions-cannot-decide-dimacs-sat.md (step 1)",
     'ctrl': N + "five-instruction-loops-on-dimacs-sat.md#the-control-graph-and-accessible-data; "
@@ -63,7 +66,63 @@ CIT = {
     # (added 28 November): a prologue of branches is one fixed jump at each length (Lemma P),
     # and each cited five-slot row fails the program at every large member of its family
     'r4_lemmaP': NOTE_Z6 + " (Lemma P: a prologue of branches is one fixed jump at each length); ",
+    # the 37 classes excluded by the round-six note (added 28 November); Lemma V and the phase
+    # lemma use only property 1 of five-instruction-loops-on-dimacs-sat.md, Lemma E opens the
+    # proof of the one-site theorem
+    'r6_phase': NOTE_AA7 + " (phase lemma: a LOAD loop with no numerical instruction reads a bounded set of"
+                " cells; property 1 only)",
+    'r6_V': NOTE_AA7 + " (Lemma V: in every graph the LOAD loop reaches one verdict; property 1 only)",
+    'r6_V_Rd': NOTE_AA7 + " (Lemma V: in every graph the LOAD loop reaches one verdict; property 1 only); also"
+               " reduction R-d of " + N + "the-five-slot-case-split-is-exhaustive.md deletes the STORE, then "
+               + N + "read-only-ram-with-one-arithmetic-site.md as written",
+    'r6_Rd': "reduction R-d of " + N + "the-five-slot-case-split-is-exhaustive.md deletes the STORE, which no LOAD"
+             " follows, then " + N + "read-only-ram-with-one-arithmetic-site.md as written (every graph; "
+             + NOTE_AA7 + ", Section 7)",
+    'r6_EV': NOTE_AA7 + " (Lemma E: " + N + "read-only-ram-with-one-arithmetic-site.md with the one-time code"
+             " after the exit or on a bypass and no later LOAD, on those graphs; Lemma V on the others)",
+    'r6_E1V': NOTE_AA7 + " (Lemma E: " + N + "read-only-ram-with-one-arithmetic-site.md with the one-time code"
+              " after the exit and at most one later LOAD, on those graphs; Lemma V on the others)",
 }
+
+# The 19 classes that the round-six note (NOTE_AA7, added 28 November) excludes by a per-graph
+# argument; the class key does not decide them.  Its split of every labeled graph
+# (six_slot_control_class_split.py, and six_slot_control_class_split_independent_check.py with
+# the review's enumerator) shows that in each of them every graph has a LOAD loop that reaches
+# only one verdict (Lemma V), or its one-time code only after the exit or on a bypass (Lemma E,
+# or reduction R-d for the STORE).  Rules 1-4 leave all 19 REDUCES.  The 18 two-loop classes,
+# which the note excludes by the phase lemma, are a shape rule in mark_by_rules.
+ROUND_SIX = {
+    # one-site classes in which every graph has a single-verdict LOAD loop
+    ('L1S0A2B3', 'C:A C:AL |par', '-'): 'V',
+    ('L1S0A2B3', 'G{LA}', 'none:A,'): 'V',
+    ('L1S0A3B2', 'C:AL', 'none:A,pre:A,'): 'V',
+    ('L1S1A1B3', 'G{LA}', 'none:S,'): 'V_Rd',
+    ('L2S0A2B2', 'C:AL', 'none:A,post:L,'): 'V',
+    ('L2S0A2B2', 'C:AL', 'none:A,pre:L,'): 'V',
+    ('L2S0A2B2', 'C:AL', 'none:L,pre:A,'): 'V',
+    # one-site classes in which every graph has exit or bypass code, or a single-verdict LOAD loop
+    ('L1S0A2B3', 'C:- C:AL |seq', 'mid:A,'): 'EV',
+    ('L1S0A2B3', 'G{LA}', 'post:A,'): 'EV',
+    ('L1S1A1B3', 'G{LA}', 'post:S,'): 'Rd',
+    ('L2S0A2B2', 'C:AL', 'post:A,pre:L,'): 'EV',
+    ('L2S0A2B2', 'C:AL', 'post:A,post:L,'): 'E1V',
+    # five-slot-schedule classes in which every graph has a single-verdict LOAD loop
+    ('L1S1A1B3', 'C:AL C:S |par', '-'): 'V',
+    ('L1S1A2B2', 'C:AL', 'none:A,pre:S,'): 'V',
+    ('L1S1A2B2', 'C:AL', 'none:S,pre:A,'): 'V',
+    ('L1S2A1B2', 'C:AL', 'none:S,pre:S,'): 'V',
+    ('L2S1A1B2', 'C:AL', 'none:L,pre:S,'): 'V',
+    ('L2S1A1B2', 'C:AL', 'none:S,post:L,'): 'V',
+    ('L2S1A1B2', 'C:AL', 'none:S,pre:L,'): 'V',
+}
+ROUND_SIX_RULE = {
+    'V': 'the LOAD loop reaches one verdict in every graph (Lemma V)',
+    'Rd': 'the STORE is after the exit in every graph and no LOAD follows it (reduction R-d)',
+    'EV': ('every graph has its one-time code after the exit or on a bypass, or a LOAD loop that reaches'
+           ' one verdict (Lemmas E and V)'),
+}
+ROUND_SIX_RULE['V_Rd'] = ROUND_SIX_RULE['V']
+ROUND_SIX_RULE['E1V'] = ROUND_SIX_RULE['EV']
 
 
 def parse_scc(code):
@@ -78,6 +137,16 @@ def parse_scc(code):
 
 
 def mark(alloc, crs, offs, preb=0):
+    """Return (status, rule, citation) of one coarse class: rules 1-4, then the round-six classes."""
+    st, rule, cit = mark_by_rules(alloc, crs, offs, preb)
+    why = ROUND_SIX.get((alloc, crs, offs))
+    if why is None:
+        return st, rule, cit
+    assert st == 'REDUCES', (alloc, crs, offs, st)
+    return 'EXCLUDED', rule + '; ' + ROUND_SIX_RULE[why], CIT['r6_' + why]
+
+
+def mark_by_rules(alloc, crs, offs, preb=0):
     nL, nS, nA, nB = (int(alloc[i + 1]) for i in range(0, 8, 2))
     parts = crs.strip()
     rel = ''
@@ -117,9 +186,15 @@ def mark(alloc, crs, offs, preb=0):
     # rule 3: read-only with one numerical site in the whole program
     if nS == 0 and nA == 1:
         return 'EXCLUDED', 'read-only-one-numerical-site', CIT['ro1']
-    # (not a rule of the note) LOAD's SCC has no numerical site (only with >=2 recurrent parts)
+    # LOAD's SCC has no numerical site (only with >=2 recurrent parts).  With one LOAD, and no
+    # STORE or a single numerical instruction, memory at the LOAD loop's entry holds original
+    # words, own addresses and boundedly many stored values, so the loop reads a bounded set of
+    # cells: the phase lemma of NOTE_AA7 (added 28 November), checked there for the 18 classes.
     lscc = [m for _, m in sccs if 'L' in m][0]
     if 'A' not in lscc:
+        if nL == 1 and (nS == 0 or nA == 1):
+            return 'EXCLUDED', ('LOAD-SCC-without-numerical-site; the LOAD loop reads a bounded set of cells'
+                                ' (phase lemma)'), CIT['r6_phase']
         return 'REDUCES', 'LOAD-SCC-without-numerical-site (value-set argument across phases; ' + NOTE + ')', ''
     # computation-only loops (numerical sites and branches, no memory access) beside a
     # read-only LOAD loop with one numerical site: they compute a public word before the
@@ -202,6 +277,8 @@ def build(outputs):
     summ = collections.defaultdict(lambda: collections.Counter())
     summl = collections.defaultdict(lambda: collections.Counter())
     opentags = collections.Counter()
+    missing = set(ROUND_SIX) - set(rows)
+    assert not missing, missing
     for (alloc, crs, offs), (cnt, nf, pb) in rows.items():
         st, rule, cit = mark(alloc, crs, offs, pb)
         out.write(f'{alloc}\t{crs}\t{offs}\t{cnt}\t{nf}\t{pb}\t{st}\t{rule}\t{cit}\n')
