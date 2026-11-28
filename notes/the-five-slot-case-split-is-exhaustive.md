@@ -201,7 +201,7 @@ Without an argument the script runs sections 1–3 and a smoke test of the sweep
 
 ## 8. The three standard tests
 
-- **(a) Does the hard family have a fast globally correct solver?** Yes. This is a code-size exclusion in one ISA, not a time bound. A 43-instruction solver exists, and larger programs decide the families trivially.
+- **(a) Does the hard family have a fast globally correct solver?** Yes. This is a code-size exclusion in one ISA, not a time bound. A 43-instruction solver exists, and larger programs decide the families trivially; [explicit linear-time programs](linear-time-programs-decide-several-five-slot-fooling-families.md) of 4 to 28 instructions decide several of them, some only in restricted forms.
 - **(b) Does the same argument give the same bound for 2-SAT?** Plausibly yes. The sign-edit and equality families do not depend on SAT being hard, so a five-slot exclusion for 2-SAT is to be expected. This was not checked.
 - **(c) Does it survive the oracles?** Not applicable. No time lower bound is claimed, so no step is subject to the packed oracle of the relativized-clock note or to the multilinear oracle. [Relativized clock](relativized-clock.md) · [Multilinear oracle](multilinear-oracle-clock.md)
 
