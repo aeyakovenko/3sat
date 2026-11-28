@@ -163,7 +163,7 @@ Each doubling of B adds +1.44, +0.89, +0.62 and +0.27 to upd/level, and +0.74, +
 
 The merge cost levels off at about 17 per update and the read cost at about 2.84 per level, below the proved 19 and 5. Selection rounds per output key are 1.63, close to 1 + Pr[Poisson(1) ≥ 1].
 
-**Many more operations than cells.** The main runs have n ≤ 4m, so the capped levels from ℓ₀ + 2 on never execute there. During review both simulators were run with n up to 1024·m, and the cost per operation stays flat in n, while each level's update cost above the top uncapped level falls by a factor of about B:
+**Many more operations than cells.** The main runs have n ≤ 4m, so the capped levels from ℓ₀ + 2 on never execute there. During review both simulators were run with n up to 1024·m, and the cost per operation stays flat in n, and from ℓ₀ + 2 on each level's update cost falls by a factor of about B (the lines below start at ℓ₀, so their first two values are levels ℓ₀ and ℓ₀ + 1):
 
 ```
 mu=8 B=4: per op 36.84 (Nu=1024) / 35.83 (Nu=16384) / 35.61 (Nu=262144)
@@ -221,7 +221,7 @@ The first updates a presence table in place, the second reads past a directory's
    - With a hash seed of O(1) words, drawn independently of the sequence, the computation of Sections 3 and 4 goes through for every fixed sequence if the family is 3-wise independent. Examples are a degree-2 polynomial over a prime field, with runs sorted by (h(x), x), or keys taken as full w-bit addresses with log_B t levels. The read's term E[n·1(flag)] and the merge's cross term are three-point events (x, y, q).
    - Multiply-shift (a·x mod 2^μ with a random odd a, bucket = top bits) is universal only up to a factor 2: collision probability at most 2^{1−ℓ} for ℓ output bits, a bound recalled during review from Dietzfelbinger et al. and not checked at source. It is not 2- or 3-wise independent. The proof here does not cover it, although it passed the two sequences above.
    - For a fixed sequence the capped-level read argument changes, as noted during review: a never-updated q visits every nonempty capped level, which is log_B(n/m) + O(1) of them. That is inside the O(log_B n + 1) of the next lemma.
-   - **Next lemma** (a sketch, unchecked): for every fixed sequence of n operations on w-bit addresses, and h from a 3-wise independent family held in O(1) registers, the expected amortized cost is O(log_B n + 1).
+   - **Next lemma** (a sketch, unchecked): for every fixed sequence of n operations on w-bit addresses, and h from a 3-wise independent family held in O(1) registers, the expected amortized cost is O(log_B n + 1). On 28 November a round-six note proved it, with a degree-2 polynomial seed modulo a prime and levels that never cap ([seeded write-once array](ram-time-t-in-word-priced-alternating-time-t-over-log-log-t.md)).
 2. **Worst case per operation.** The bounds are amortized. A merge at the top level touches Θ(m) cells in one operation. A route that counts total steps may not need more; deamortization was not tried.
 3. **Constants.** At feasible sizes the scheme loses to path copying by a factor of about 2 at w = 64.
    - The measured slope is about 9.2 per operation per level of the scheme, against about 1.37 per bit for path copying (F = 4, two pointers per cell). So the scheme wins only when log₂ B ≳ 7, that is B ≳ 128 and w = B² ≳ 2^14.
