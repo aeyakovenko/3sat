@@ -254,7 +254,8 @@ static Boolset common_unary_domain(int m, int base, int tail, int address) {
 }
 
 static void check_unary(int m, int base, int tail, int active_bits,
-                        int first_address, int past_address, Boolset domain) {
+                        int first_address, int past_address, Boolset domain,
+                        bool one_guard_only = false) {
   vector<Single> operands(K);
   Single X1;
   Boolset truth = 0;
@@ -274,6 +275,12 @@ static void check_unary(int m, int base, int tail, int active_bits,
         atomic.insert(c);
         atomic.insert(universe ^ c);
       }
+  if (one_guard_only) {
+    for (auto c : atomic)
+      require_no(((c ^ truth) & domain) == 0, "single tail guard");
+    cout << "No single guard decides the common tail domain.\n";
+    return;
+  }
   for (auto c : atomic) {
     bool yes = false, no = false;
     for (auto d : atomic) {
@@ -367,7 +374,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (argc != 4 && argc != 5 && argc != 6) {
-    cerr << "usage: verifier WORDS BASE 'SPACE-SEPARATED-ALPHABET' [suite89 | partial TAIL_BASE | common TAIL_BASE]\n";
+    cerr << "usage: verifier WORDS BASE 'SPACE-SEPARATED-ALPHABET' [suite89 | partial TAIL_BASE | common TAIL_BASE | common-late TAIL_BASE]\n";
     return 2;
   }
   const int m = atoi(argv[1]), base = atoi(argv[2]);
@@ -382,7 +389,10 @@ int main(int argc, char **argv) {
   const int holes = (K - 1) ^ base;
   assert((base & 1) && !(base & SIGN) && !(holes & (holes >> 1)));
   const bool partial = argc == 6;
-  const bool common = partial && string(argv[4]) == "common";
+  const bool late = partial && string(argv[4]) == "common-late";
+  const bool common = partial && (string(argv[4]) == "common" || late);
+  if (late && (W != 5 || (m != 5 && m != 6) || base != 13))
+    throw invalid_argument("common-late uses five or six width-five words and base 13");
   const int tail = partial ? atoi(argv[5]) : base;
   if (partial) {
     const int tail_holes = ((1 << (W - 1)) - 1) ^ tail;
@@ -412,7 +422,9 @@ int main(int argc, char **argv) {
   if (partial) {
     const Boolset tail_domain = common ? common_unary_domain(m, base, tail, m - 1)
                                        : (uint64_t(1) << (1 << (W - 1))) - 1;
-    check_unary(m, base, tail, W - 1, m - 1, m, tail_domain);
+    // At m+2 a late tail leaves two instructions on a tail/full pair;
+    // cube_cycle_delayed_tail.py verifies that separate obstruction.
+    check_unary(m, base, tail, W - 1, m - 1, m, tail_domain, late);
   }
   for (int i = 0; i < K; i++) {
     C[i].fill(i);
