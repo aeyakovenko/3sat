@@ -2,7 +2,7 @@
 
 Pack a cyclic selector mask low bit first into words of width $w=\lceil\log_2 L\rceil$ at physical selector length $L$. The catalog is SAT if some adjacent bits are both zero, including the wraparound. A *cover* is the opposite verdict. Each result below concerns the minimum, over all programs correct on the indicated domain, of their worst-case number of executed instructions. The native instruction set has separate loads, stores, 24 binary numerical operations, and two-operand comparisons with fixed successor labels. Scratch is initially zero and every address representable by the word is writable. Programs may use arbitrary text, register destinations, dynamic addresses and embedded word literals. The fixed cyclic clause template realizes these verdicts as satisfiability. The measured input length counts the selectors. [Catalog, physical encoding and opcodes](a-shared-nine-step-obstruction-and-the-next-native-width.md)
 
-Three injective, verdict-preserving Boolean polynomial maps on their full source cubes carry the same sixteen four-bit inputs through lengths five, six, and seven. At these four lengths the exact worst-case instruction counts are **4, 6, 6, and 7**. On the complete seven-bit catalog, indirect loads and comparisons suffice for seven instructions, while direct loads and comparisons require eight. The maps and their finite limits appear below.
+Three injective, verdict-preserving Boolean polynomial maps on their full source cubes carry the same sixteen four-bit inputs through lengths five, six, and seven. At these four lengths the exact worst-case instruction counts are **4, 6, 6, and 7**. On the complete seven-bit catalog, indirect loads and comparisons suffice for seven instructions, while direct loads and comparisons require eight. The last increase can be attained by inserting the XOR of two neighboring bits. There is also a sixteen-input example on which every globally affine extension takes at most six instructions on its image, while inserting OR gives seven.
 
 The four-bit catalog has exact clock **4**. Insert the XOR of two adjacent bits, keeping all four original bits, and consider just the sixteen resulting masks. The exact clock becomes **5** for three of the four insertion positions. The fourth position retains clock **4**. The full catalog of all 32 five-bit masks has exact clock **6**. Thus a depth-five program fails on a valid five-bit mask, and the restriction to one sixteen-mask image makes a measurable difference.
 
@@ -118,11 +118,26 @@ There is a degree-three map on **all 64** six-bit selectors that preserves the c
 $$
     \{22,29,35,53,54,59,62,70,77,83,85,86,93,123,124,126\}.
 $$
-A six-step program cannot classify these sixteen rows even with all writable cells and all word operations. The full seven-step program classifies them. The exact worst-case clocks on the **same sixteen ancestors** are therefore $4,6,6,7$ at four, five, six and seven input bits. The three successive maps have degrees two, two and three. All are defined on their full source cubes. Whether a quadratic map can achieve the third transition on those ancestors remains open in this calculation.
+A six-step program cannot classify these sixteen rows even with all writable cells and all word operations. The full seven-step program classifies them. The exact worst-case clocks on the **same sixteen ancestors** are therefore $4,6,6,7$ at four, five, six and seven input bits. The three successive maps have degrees two, two and three. All are defined on their full source cubes. This cubic construction leaves the first two previously published maps unchanged. Two different choices of the middle map give the stronger degree bounds below.
 
 To find the last map, prescribe the allowed seven-bit outputs at the sixteen special rows and require distinct equal-verdict outputs everywhere. In the Boolean polynomial representation, degree at most three is equivalent to 22 vector-valued XOR equations: for every monomial mask of weight greater than three, the XOR of the table entries on its submasks is zero. Gaussian elimination chose 22 independent columns outside the fixed suite, all belonging to noncovers. For a proposed permutation of the special outputs and choices for the free rows, the pivot outputs follow by XOR. Keeping two free words as parameters allowed the output-label and distinctness tests to reject choices before specializing both parameters. The surviving table's coefficient at mask 7 is nonzero. Every coefficient of degree greater than three vanishes. [Full coefficient list, injectivity and verdict checks](../lean/CompleteSevenCycleClock.lean)
 
 Lean also checks that the composed image is literally the same list given to the six-step census. This prevents a bound on a larger set from being used as a bound on its subset. The result still concerns a bounded word width and a fixed-size suite. [Composition and failed six-step census](../upstream-checks/cycle-clock/SevenImageCompact.lean)
+
+### An XOR succeeds on one suite and every affine map fails to raise another
+
+Keep the first map fixed in all three constructions. The replacement middle maps below are quadratic and preserve the verdict on the entire five-bit cube. Each row of the table gives the sorted image of the same sixteen original inputs.
+
+| Six-bit descendants, each suite of exact clock six | Last map | Seven-bit descendants, each suite of exact clock seven |
+| --- | --- | --- |
+| 10, 15, 21, 26, 27, 30, 31, 33, 34, 42, 47, 50, 56, 58, 60, 62 | Insert XOR between bits 1 and 2 | 22, 27, 45, 54, 55, 58, 59, 65, 70, 86, 91, 102, 112, 118, 122, 124 |
+| 15, 18, 19, 20, 23, 26, 27, 31, 39, 42, 44, 47, 50, 55, 56, 58 | Insert OR between bits 3 and 4 | 31, 50, 51, 52, 55, 58, 59, 63, 71, 90, 92, 95, 114, 119, 120, 122 |
+
+Bits are numbered from zero. On the first suite, the exact clocks for XOR insertion in gap order are **6, 7, 6, 6, 5, 5**. Thus moving the same XOR around the same cyclic family can raise, preserve, or lower the optimal clock. A globally quadratic correction to the successful XOR gives the same rows pointwise on this suite. The Lean module includes the coefficient tables, full-domain injectivity and verdict checks, and five- and six-instruction exclusion replays on the two actual images. [First suite and its maps](../upstream-checks/cycle-clock/QuadraticFixedChain.lean)
+
+On the second suite, *every* affine map from six to seven bits that preserves the verdict on the full cube has a six-instruction classifier on its image. There are 84 such maps by the earlier affine classification, including permutations of the old positions. Lean checks that the 84 tabulated maps are globally valid and distinct, and replays the six-instruction search on the image under each map. The OR insertion still gives an exact seven-instruction clock. Thus degree two is the minimum possible for this particular transition even when all nonsystematic affine alternatives are allowed. Combining the two quadratic maps before it with OR gives exact clocks **4, 6, 6, 7** through three genuinely quadratic maps. [Second suite and affine checks](../upstream-checks/cycle-clock/QuadraticOrSeparation.lean) · [Classification of all affine one-bit maps](affine-successors-of-cycle-cover-selectors.md)
+
+For any fixed gap in a cycle of length $n\ge5$, the full set of preserving quadratic-or-lower insertion rules has size $2^{n+3}$. All rules in higher degrees have an explicit monomial basis after an affine change of coordinates. These classifications apply to the whole source cube at every length. They do not force a clock increase on a chosen suite. [All-degree rule classification for cycles and arbitrary edges](polynomial-rules-for-subdividing-a-vertex-cover-edge.md)
 
 In particular the entire six-bit catalog of clock six has both an affine XOR extension and a genuinely quadratic OR extension at gap zero with image clock seven. These statements concern the 64 actual images, not just the larger ambient catalog. The same cycle predicate still has a uniform constant-work-per-word scan.
 
@@ -133,5 +148,12 @@ This proves a limitation of growing just the sixteen original files. Adding inde
 The full cyclic predicate itself has a uniform constant-work-per-word scan. Its strict increase is a finite RAM result. It leaves superlinear time for ordinary explicit SAT with unrestricted workspace open.
 
 ## Reproducing the finite calculations
+
+The C++ checker also accepts a suite explicitly. These invocations should both return `feasible=false` for the OR construction.
+
+```sh
+/tmp/small-cycle 6 3 5 rows 15 18 19 20 23 26 27 31 39 42 44 47 50 55 56 58
+/tmp/small-cycle 7 3 6 rows 31 50 51 52 55 58 59 63 71 90 92 95 114 119 120 122
+```
 
 Run `python3 audits/small_cyclic_selector_clock.py` for the independent register-column search. Compile the bit-parallel check with `c++ -O3 -std=c++20 audits/small_cycle_word_ram_census.cpp -o /tmp/small-cycle`. For example, `/tmp/small-cycle 7 3 6 xor 0` excludes six instructions on the 64-mask gap-zero image. For each gap and operation in the seven-bit table, supply one less than its stated clock to reproduce the corresponding lower bound. The upper programs, the cubic-map check, the direct-load comparison theorem and the finite decision-tree ceiling run as standalone Lean 4.19 files. The independent depth-five calculation on the quadratic five-bit image uses native evaluation. From the repository root run `cd upstream-checks/cycle-clock && lake build`. [Depth-five Lean theorem](../upstream-checks/cycle-clock/QuadraticVerify.lean)

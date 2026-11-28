@@ -5,7 +5,8 @@
 //   ./small-cycle 7 3 6 xor 0
 // The last command checks the full 64-row image of the six-to-seven-bit XOR
 // insertion. A false result excludes cost six on the full seven-bit catalog.
-// A separate explicit eight-instruction program gives its current upper bound.
+// A separate explicit seven-instruction program attains this lower bound.
+// To check a custom subfamily, use "rows" followed by up to 64 distinct masks.
 //
 // Finite native model: arithmetic and comparisons take two register/immediate
 // operands; arithmetic, LOAD and STORE each cost one tick. Free terminal
@@ -381,7 +382,7 @@ int integer(string_view text, int low, int high) {
 
 int main(int argc, char **argv) {
   try {
-    if (argc < 5 || argc > 6)
+    if (argc < 5)
       throw invalid_argument("argument count");
     int n = integer(argv[1], 2, 7);
     width = integer(argv[2], 1, 3);
@@ -407,9 +408,14 @@ int main(int argc, char **argv) {
         int z = mode == "xor" ? (a ^ b) : (a | b);
         rows.push_back((v & lo) | (z << (gap + 1)) | ((v & ~lo) << 1));
       }
+    } else if (mode == "rows" && argc >= 6 && argc <= 69) {
+      for (int i = 5; i < argc; ++i)
+        rows.push_back(integer(argv[i], 0, (1 << n) - 1));
     } else
       throw invalid_argument("suite or gap");
     sort(rows.begin(), rows.end());
+    if (adjacent_find(rows.begin(), rows.end()) != rows.end())
+      throw invalid_argument("duplicate input mask");
     M domain = 0;
     Reg regs;
     Mem memory{};
@@ -444,8 +450,8 @@ int main(int argc, char **argv) {
   } catch (const invalid_argument &error) {
     fprintf(stderr,
             "Invalid census: %s\nUsage: %s BITS WIDTH BUDGET full | %s BITS "
-            "WIDTH BUDGET {xor|or} GAP\n",
-            error.what(), argv[0], argv[0]);
+            "WIDTH BUDGET {xor|or} GAP | %s BITS WIDTH BUDGET rows MASK...\n",
+            error.what(), argv[0], argv[0], argv[0]);
     return 2;
   }
 }
