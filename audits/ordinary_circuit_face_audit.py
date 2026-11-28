@@ -267,6 +267,59 @@ def large_parity_checks():
     return statistics
 
 
+def parity_name_blocks(widths, bits):
+    """Each selected identifier is printed once; it chooses an entire block."""
+    false_one, false_two = 1, 2
+    out = [tuple(-v if b else v for v, b in zip((1, 2, 3), row))
+           for row in product((0, 1), repeat=3) if any(row)]
+    block_vars = []
+    cursor = 0
+    for i, width in enumerate(widths):
+        block_vars.append(4 + i)
+        local = bits[cursor:cursor + width]
+        cursor += width
+        for u in product((0, 1), repeat=width):
+            name = int(str(11 + i) + ''.join('3' if b else '2' for b in u))
+            z = block_vars[-1] if sum(u) % 2 else -block_vars[-1]
+            out.extend([(-name, z, false_one), (name, -z, false_one)])
+            if u == local:
+                selected = name
+        out.append((selected, false_one, false_two))
+    acc = block_vars[0]
+    fresh = 4 + len(widths)
+    for z in block_vars[1:]:
+        for a, b in product((0, 1), repeat=2):
+            out.append((-acc if a else acc, -z if b else z,
+                        fresh if a ^ b else -fresh))
+        acc = fresh
+        fresh += 1
+    out.append((acc, false_one, false_two))
+    return dumps(out)
+
+
+def check_parity_name_blocks():
+    cases = 0
+    for widths in ((1, 1), (2, 1, 2), (3, 2, 1), (1, 2, 1, 2)):
+        count = sum(widths)
+        origin = parity_name_blocks(widths, (0,) * count)
+        positions = []
+        for i in range(count):
+            choice = tuple(int(j == i) for j in range(count))
+            data = parity_name_blocks(widths, choice)
+            pos, = changed_bytes(origin, data)
+            assert (origin[pos] ^ data[pos]) == 1
+            positions.append(pos)
+        assert len(set(positions)) == count
+        for bits in product((0, 1), repeat=count):
+            data = parity_name_blocks(widths, bits)
+            assert set(changed_bytes(origin, data)) == {positions[i] for i, b in enumerate(bits) if b}
+            # PicoSAT checks the actual printed file, including every pin.
+            decoded_clauses, _ = parse(data)
+            assert (pycosat.solve(decoded_clauses) != 'UNSAT') == bool(sum(bits) % 2)
+            cases += 1
+    return cases
+
+
 if __name__ == '__main__':
     truth_table_checks = sum(face_check(2, [(0, 1, t)]) for t in range(16))
     repeated_checks = sum(face_check(1, [(0, 0, t)]) for t in range(16))
@@ -276,3 +329,4 @@ if __name__ == '__main__':
     print('parity (independent bits, encoded bits, minimum selector spacing in bytes):',
           large_parity_checks())
     print('cycle coordinate faces at consecutive physical byte lengths:', consecutive_lengths())
+    print('complete multibit-name parity faces:', check_parity_name_blocks())
