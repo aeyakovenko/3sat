@@ -1,5 +1,7 @@
 # Clock bounds for the 16-bit cube-cycle catalog on the four-bit native RAM: at most fourteen, at least eight, and at least nine with literal first reads
 
+**Subsequent result.** A fixed suite of 89 masks rules out eight steps with arbitrary computed addresses. This places the unrestricted optimum in $[9,14]$. The bounds below record the earlier enumeration. [Shared nine-step obstruction](a-shared-nine-step-obstruction-and-the-next-native-width.md)
+
 This is a finite result about one four-word instance, with no asymptotic content. On the 65,536 one-bank files of the 16-bit cube-cycle catalog, the worst-case native clock T of the four-bit RAM satisfies 8 ≤ T ≤ 14 in the full model and 9 ≤ T ≤ 14 for the programs that read every input cell for the first time through a literal address (class (F) below), which includes the explicit 14-step program. The optimum is not determined. The one-bank predicate has a constant-work-per-word scan at every length (Section 4), so these constants carry no information about superlinear time for SAT, and the linear, quadratic and cubic questions remain open.
 
 ## Result
@@ -289,7 +291,7 @@ RESULT max_steps=8 comparisons=4  capacity(<=8 steps)=81  capacity(<=7 steps)=0
 
 Nothing asymptotic. The one-bank predicate is a local cyclic condition: at any length L and word width w, a word x of the mask is fine iff `x | (x << 1) | (top bit of the previous word)` is all ones, so a scan with a constant number of word operations per word (here: load, shift, or, shift of the previous word, or, compare) decides it in O(L/w) steps, and conversely every cover forces all L/w words to be read. The numbers above (between 8 or 9 and 14 instructions for four words, about 2 to 3.5 per word) are constants of this instruction set and of the four-word size; they do not grow faster than the input and carry no information about superlinear time for SAT. The hardness results of the shuffled-bank note concern many banks with unknown positions, not this fixed-position catalog. [Cube-cycle banks](shuffled-four-cube-cycle-banks-in-ordinary-sat.md)
 
-## 5. What is not proved
+## 5. What the earlier census left open
 
 * The optimum T is not determined: 9 ≤ T ≤ 14 in class (F), 8 ≤ T ≤ 14 in the full model. The upper bound is the optimum of restricted families only (sequential single-word trees with up to two ALU instructions per tree; pair blocks, comparison-only and with one ALU instruction per pair tree), and there is no evidence either way about 10–13.
 * Eight steps in the full model: paths in which a cover reads an input cell for the first time through a register-addressed LOAD are not covered. A direct enumeration of that class with the present engine was estimated at tens of CPU-hours and was not run. For such a path, split the covers of the leaf by the cell c < 4 that each such LOAD reads first. On each piece the LOAD can be replaced by LOADlit c plus the comparison `r == c` on its address register, without changing the run. The missing piece is a bound on such leaves (up to three extra equalities, stores allowed) times the number of pieces (up to four per such LOAD). This has not been done.

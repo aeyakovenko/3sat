@@ -1,6 +1,6 @@
 # How fast can a deterministic RAM decide SAT?
 
-## Status (27 November 2026)
+## Status (28 November 2026)
 
 **The question is open.** Nothing in this repository proves that explicit SAT needs more than linear time on a logarithmic-word RAM with unrestricted workspace, and nothing here proves the quadratic or cubic exclusions either. Every lower bound recorded below is for a different model, is conditional, is finite, or is of the same order as one packed scan of the input. The test for what counts as progress is fixed in [research-steering.md](research-steering.md#what-counts-as-progress-on-the-lower-bound).
 
@@ -22,7 +22,8 @@
 
 The working approach since 25 November has been to exhaust the smallest RAM on small SAT catalogs, find the exact clock, and look for a transformation to the next size under which the deficit survives. Its measured outcome:
 
-- The exact finite clocks exist and are reproducible (rows above). They do not grow at the first extension.
+- The sign-plane catalog has exact clock nine at its first extension.
+- On the 16-bit cube-cycle catalog, every correct native RAM program needs at least nine executed instructions on a satisfiable mask and on an unsatisfiable mask in the same 89-mask suite. Fourteen steps suffice on the entire catalog. The lower bound survives six one-bit extensions, including 24→25 at ten steps and 59→60 at fifteen. At 41→42, 47→48, 53→54 and 59→60 the same hard suite transfers unchanged in memory. Inserting the XOR of neighboring bits preserves SAT at every length. A uniform program decides this particular selector predicate in a constant number of steps per packed word. [Nine-step obstruction and one-bit extensions](notes/a-shared-nine-step-obstruction-and-the-next-native-width.md)
 - With unbounded code, **every** predicate on $N$ bits is decided in at most $N+\lceil N/w\rceil$ executed instructions: one load per word and one comparison per bit. So the finite census with unbounded code measures a quantity that is $O(N)$ for every language. It can at best separate a packed scan ($N/w$) from a bit scan ($N$); it cannot show superlinear time. The measured SAT clock of nine at 16 input bits is below the clock of a typical 16-bit predicate, which is at least twelve. [Asymptotic form, 25 November](notes/worst-labelling-clock-with-unbounded-program-text.md) · [Explicit bounds at the census sizes](notes/the-ceiling-of-the-unbounded-code-clock.md)
 - Concatenating independent sign-plane records does not add their clocks once a word holds several records. [Packed records](notes/which-four-word-sat-targets-finish-in-seven-steps.md)
 - A superlinear bound therefore has to limit the program text: one finite program at every length, or a budget on its size. Exhaustion over program size is complete only through five stored instructions, where no program decides DIMACS SAT at any speed; every correct solver is larger. [Five instructions](notes/five-instructions-cannot-decide-dimacs-sat.md)
