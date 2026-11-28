@@ -1,6 +1,6 @@
 # The frame game on an overwrite ladder touching C cells is worth at least C − 1
 
-Every black pebbling of the frame DAG of an overwrite-ladder run touching C cells holds at least C pebbles at some time, and C + 1 pebbles always suffice. So the frame game of the round-three truth-claim entry has value at least C − 1 on every such run, which on the round-robin ladder is ⌈T/2⌉ − 1. This settles that entry's restated conjecture for the frame game in its existential form, witnessed by ladders touching a constant fraction of T cells. For ladders touching Θ(T/log T) cells the bound is o(T), and the conjecture stays open for them. Black pebbling cannot give more, because C + 1 pebbles suffice. By Chan's theorem, read at source, the reversible pebbling price is the game value plus one; this was checked by exhaustive search on the 64 instances of the round-three table with T ≤ 9. So a bound of T − o(T) needs an argument specific to reversible pebbling. A partial bound for the node game is included. The bounds were checked during review with independent solvers. They are bounds inside one move class, not time bounds; the linear, quadratic and cubic questions remain open.
+Every black pebbling of the frame DAG of an overwrite-ladder run touching C cells holds at least C pebbles at some time, and C + 1 pebbles always suffice. So the frame game of the round-three truth-claim entry has value at least C − 1 on every such run, which on the round-robin ladder is ⌈T/2⌉ − 1. This settles that entry's restated conjecture for the frame game in its existential form, witnessed by ladders touching a constant fraction of T cells. For ladders touching o(T) cells, such as Θ(T/log T), the frame value itself is o(T), so the conjecture fails for them in the frame game ([frame-game upper bound](frame-game-upper-bound-on-overwrite-ladders.md)). Black pebbling cannot give more, because C + 1 pebbles suffice. By Chan's theorem, read at source, the reversible pebbling price is the game value plus one; this was checked by exhaustive search on the 64 instances of the round-three table with T ≤ 9. So a bound of T − o(T) needs an argument specific to reversible pebbling. A partial bound for the node game is included. The bounds were checked during review with independent solvers. They are bounds inside one move class, not time bounds; the linear, quadratic and cubic questions remain open.
 
 ## Setting
 
@@ -21,7 +21,7 @@ Every black pebbling of the frame DAG of an overwrite-ladder run touching C cell
 - A lower bound on the frame value also holds for every game whose prover strategies are frame-game strategies. By the round-three entry the interval game of the standing-opponent suite is one of them, up to one folded claim.
 
 **The restated conjecture.** The truth-claim entry of [round three](parallel-proof-attempts-of-27-november-round-three.md) left open whether truth-claim games can beat walking the state chain on the overwrite ladder. Its conjecture, restated with the cell count, reads: there are c > 0 and address sequences such that, for every T, the overwrite ladder with C(T) cells has frame-game value at least c·T, and likewise for every truth-claim game with one-step checks.
-- The conjecture needs C(T) = Ω(T/log T). On a run touching C cells, the bisection interval game of the [standing-opponent suite](../audits/standing_opponent_suite.py) costs at most (C + 1)⌈log₂ T⌉ claims, and it is a strategy in the frame game. This bound is quoted from the round-three entry and was not rechecked here.
+- In the frame game the conjecture needs liminf C(T)/T > 0: a cone-restricted bisection wins within C·log₂(T/C) + O(C) placements ([frame-game upper bound](frame-game-upper-bound-on-overwrite-ladders.md)). The earlier bound, from the bisection interval game of the [standing-opponent suite](../audits/standing_opponent_suite.py), which costs at most (C + 1)⌈log₂ T⌉ claims on a run touching C cells and is a strategy in the frame game, gave only C(T) = Ω(T/log T); it is quoted from the round-three entry and was not rechecked here.
 - Walking the state chain costs at most T − 1 + ⌈log₂ T⌉. The prover places S_1, …, S_{T−1} in order. Wherever the challenger moves, every earlier state is pebbled, so what remains is one frame chain of at most T − 1 nodes below a challenged state, and bisection settles a path of m nodes in ⌈log₂ m⌉ placements.
 
 **Black and reversible pebbling.**
@@ -33,12 +33,12 @@ Every black pebbling of the frame DAG of an overwrite-ladder run touching C cell
 - **Theorem.** Take an overwrite-ladder run touching C distinct cells. Every black pebbling of its frame DAG has at least C pebbles on the board at some time (Section 3). Hence the frame value is at least C − 1 (Lemma 1, Section 2).
   - On the round-robin ladder the value is at least max(1, ⌈T/2⌉ − 1) for every T ≥ 2, since the prover must place S_{T−1}. That is at least T/4 at every T ≥ 2, and (1/2 − o(1))·T asymptotically.
   - On ladders touching C(T) ≥ c′·T cells the value is at least (c′ − o(1))·T. This is the restated conjecture for the frame game, in its existential form.
-  - On ladders touching o(T) cells, such as Θ(T/log T), the bound C − 1 is o(T), and the conjecture stays open for them.
+  - On ladders touching o(T) cells, such as Θ(T/log T), the bound C − 1 is o(T), and the frame value itself is o(T) ([frame-game upper bound](frame-game-upper-bound-on-overwrite-ladders.md)), so the conjecture fails for them in the frame game.
   - The bound does not rest on loads of never-stored cells. Started at any time σ0, the same proof gives Black ≥ the number of distinct cells accessed after σ0 (Lemma 2′).
 - **The black-pebbling route is exhausted.** Black ≤ C + 1 on every ladder run (Section 4), so black pebbling can never show more than value ≥ C. The exact black number is C + 1 on every ladder sequence checked.
 - **The dictionary.** By Chan's Theorem 1 the reversible pebbling price is the frame value plus one (Section 5). On the round-robin ladder at T ≤ 10 the reversible numbers are about T, not T/2. A bound of T − o(T) therefore needs an argument specific to reversible pebbling, which is not given here.
 - **Node game.** On every ladder run the value of the round-three node game is at least (T − 1) − max(P* − 1, 0), where P* is the largest last-writer index of any load (Section 6). It is exactly T − 1 when all addresses are distinct, and at least ⌈T/2⌉ on the round-robin ladder.
-- So the frame value of every ladder run lies between C − 1 and the smaller of (C + 1)⌈log₂ T⌉ and T − 1 + ⌈log₂ T⌉.
+- So the frame value of every ladder run lies between C − 1 and min(f_C(T), T − 1 + ⌈log₂ T⌉), where f_C(T) ≤ C·log₂(T/C) + 2C + 2log₂C + 2 is the cone-restricted bisection bound of the [frame-game upper bound](frame-game-upper-bound-on-overwrite-ladders.md). Also f_C(T) ≤ C⌈log₂ T⌉, and f_C(T) can exceed the walk bound, for example f_9(9) = 15 > 12.
 
 ## 2. From the frame game to black pebbling
 
@@ -192,8 +192,20 @@ The commands are in the last section; each reproduces the outputs quoted here.
 ## 9. Exact obstruction and next step
 
 - **Settled.** The restated conjecture for the frame game, in its existential form. The value is at least C − 1 ≥ c·T on ladders with C(T) ≥ c′·T cells, with c = c′ − o(1). The round-robin ladder gives c = 1/2 − o(1), and value ≥ T/4 at every T ≥ 2.
-- **Open: the conjecture for ladders touching o(T) cells,** such as Θ(T/log T), where C − 1 is o(T).
-- **Open: whether the value is about T or about C** when T/log T ≪ C ≤ T/2. On the round-robin ladder at T ≤ 10 the data suggest about T, since frame value + 1 = Rev is about T while Black = C + 1. Black pebbling cannot decide it.
+- **Settled negatively for the frame game: the conjecture on ladders touching o(T) cells.**
+  - On every ladder touching C ≥ 2 cells, with T ≥ C, the prover wins the frame game within f_C(T) placements. Here f_C(1) = 0 and f_C(L) = min(C, ⌈L/2⌉ + 1) + f_C(⌈L/2⌉), and f_C(T) ≤ C·log₂(T/C) + 2C + 2·log₂C + 2.
+  - The strategy is a bisection that cuts only the ancestors of the claim currently challenged ([frame-game upper bound](frame-game-upper-bound-on-overwrite-ladders.md)).
+  - So the frame value is o(T) whenever C(T) = o(T). At C = T/log₂T it is at most C·(log₂log₂T + 2) + O(log T).
+  - With the lower bound C − 1: a ladder family has frame value at least c·T at every T ≥ 2, for some c > 0, exactly when liminf C(T)/T > 0.
+  - This bounds the frame game only. The interval game's prover strategies are frame-game strategies, so the bound does not pass to it. On round-robin ladders (a_τ = (τ − 1) mod C) the interval value is C·⌈log₂T⌉ at the sizes computed with 8C ≤ T ≤ 512, for example 288 against f_32(512) = 164. The node game is not covered either.
+- **Open: whether the frame value is Θ(C) or Θ(C·log(T/C)) when C = o(T).**
+  - It lies between C − 1 and C·log₂(T/C) + O(C).
+  - For C = 2 the exact values at T ≤ 24 are about 2·log₂T, within 2 of f_2(T) = 2⌈log₂T⌉.
+  - For C = 3 and C = 4 they are known only for T ≤ 15 and T ≤ 11.
+- **Open: the constant when C = Θ(T).** This bullet uses a corollary noted during review and not refereed.
+  - The first term of f_C(T) is at most C, and the i-th at most ⌈T/2^i⌉ + 1. So the frame value is at most C + T/2 + 2⌈log₂T⌉.
+  - For C ≤ (1/2 − ε)·T it is therefore at most (1 − ε)·T + O(log T).
+  - On the round-robin ladder with M = ⌈T/2⌉ it lies between ⌈T/2⌉ − 1 and T + O(log T). The data at T ≤ 10 suggest about T there. Black pebbling cannot decide it.
 - **Next lemma.** Rev of the frame DAG of the round-robin ladder with M = T/2 is at least T − O(log T), or at least (1/2 + ε)·T. It would need a Raz–McKenzie colourer strategy, or equivalently a direct reversible-pebbling lower bound, that uses the second round of reads; the first-round triangle already gives C.
 - **Node game.** Proposition 5 is exact on distinct addresses and gives ⌈T/2⌉ on the round-robin ladder. A potential that rewards naming states whose own last writer is early is the next thing to try.
 - **Scope.** None of this reaches the SAT bound. On runs touching a constant fraction of T cells, truth-claim games of this kind cannot shorten the run below a constant fraction of its length. Games whose moves are not atomic truth claims are untouched.
