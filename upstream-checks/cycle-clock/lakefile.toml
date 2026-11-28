@@ -1,6 +1,6 @@
 name = "finiteclock"
 version = "0.1.0"
-defaultTargets = ["QuadraticVerify", "CycleEncodingDegrees"]
+defaultTargets = ["QuadraticVerify", "CycleEncodingDegrees", "SevenImageVerify", "SevenImageCompact"]
 
 [[lean_lib]]
 name = "CycleImageClock"
@@ -16,3 +16,17 @@ name = "QuadraticVerify"
 
 [[lean_lib]]
 name = "CycleEncodingDegrees"
+
+[[lean_lib]]
+name = "SevenImageDefs"
+precompileModules = true
+
+[[lean_lib]]
+name = "SevenImageVerify"
+
+[[lean_lib]]
+name = "SevenImageCompact"
+
+[[lean_lib]]
+name = "CompleteSevenCycleClock"
+srcDir = "../../lean"
