@@ -198,7 +198,7 @@ The commands are in the last section; each reproduces the outputs quoted here.
   - So the frame value is o(T) whenever C(T) = o(T). At C = T/log₂T it is at most C·(log₂log₂T + 2) + O(log T).
   - With the lower bound C − 1: a ladder family has frame value at least c·T at every T ≥ 2, for some c > 0, exactly when liminf C(T)/T > 0.
   - This bounds the frame game only. The interval game's prover strategies are frame-game strategies, so the bound does not pass to it. On round-robin ladders (a_τ = (τ − 1) mod C) the interval value is C·⌈log₂T⌉ at the sizes computed with 8C ≤ T ≤ 512, for example 288 against f_32(512) = 164. The node game is not covered either.
-- **Open: whether the frame value is Θ(C) or Θ(C·log(T/C)) when C = o(T).**
+- **Open: whether the frame value is Θ(C) or Θ(C·log(T/C)) when C = o(T).** On 28 November a round-six note settled it for round robin: Θ(C·log(T/C)) once T ≥ 8C, while other ladders touching C cells can have V = O(C + log T) ([round-robin ladders](frame-value-on-round-robin-ladders.md)).
   - It lies between C − 1 and C·log₂(T/C) + O(C).
   - For C = 2 the exact values at T ≤ 24 are about 2·log₂T, within 2 of f_2(T) = 2⌈log₂T⌉.
   - For C = 3 and C = 4 they are known only for T ≤ 15 and T ≤ 11.
